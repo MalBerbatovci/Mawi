@@ -15,13 +15,16 @@ import java.io.InputStream;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 
+import com.megamal.framework.util.Tile;
+
 public class Assets {
     private static SoundPool soundPool;
-    public static Bitmap welcome;
+    public static Bitmap welcome, grassImage;
 
     //input stream used to read data from device's file system
     public static void load() {
         welcome = loadBitmap("welcome.png", false);
+        grassImage = loadBitmap("grass.png", false);
     }
 
     private static Bitmap loadBitmap(String filename, boolean transparency) {
