@@ -44,10 +44,6 @@ public class TileMapRenderer {
                 if (currentTile.getImage() != null)
                     g.drawImage(currentTile.getImage(), currentTile.getX(), currentTile.getY());
 
-                System.out.println("Index [" + y + "] [" + x + "] has been drawn at location x: " +
-                                    currentTile.getX() + ", y: " + currentTile.getY() + " has ID: " +
-                                    + currentTile.getID() + " \n");
-
             }
         }
 

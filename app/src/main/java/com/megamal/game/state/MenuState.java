@@ -27,12 +27,10 @@ public class MenuState extends State {
         tileRenderer = new TileMapRenderer();
         tileFactory = new TileMapFactory();
 
-        //tileRenderer.parseFile(levelString);
-
         try {
             tileFactory.parseFileIntoMap(levelString);
         } catch (IOException e ) {
-            System.err.print("Error parsing file");
+            System.err.print("Error parsing file: " + levelString);
         }
     }
 
