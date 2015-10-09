@@ -11,8 +11,10 @@ import android.view.WindowManager;
  * Created by malberbatovci on 22/09/15.
  */
 public class GameMainActivity extends Activity {
-    public static final int GAME_WIDTH = 800;
-    public static final int GAME_HEIGHT = 480;
+    public static final int GAME_WIDTH = 832;
+    public static final int GAME_HEIGHT = 512;
+    public static final int TILE_HEIGHT = 64;
+    public static final int TILE_WIDTH = 64;
     public static GameView sGame;
     public static AssetManager assets;
 

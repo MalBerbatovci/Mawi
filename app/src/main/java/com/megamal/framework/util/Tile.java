@@ -10,31 +10,48 @@ import com.megamal.mawi.GameMainActivity;
  * Created by malberbatovci on 07/10/15.
  */
 public class Tile {
-    public static final int TILE_HEIGHT = 32;
-    public static final int TILE_WIDTH = 32;
-
 
     private int ID;
-    private float x, y;
+    private int x, y;
     private boolean isObstacle;
     private Bitmap image;
     private Rect rect;
 
-    public Tile(int ID, boolean isObstacle) {
+    public Tile(int ID) {
         this.ID = ID;
-        this.isObstacle = isObstacle;
         rect = new Rect();
-
-        switch(ID) {
-            case(1):image = Assets.grassImage;
-                    break;
-        }
+        setVariables();
     }
 
-    public void setLocation(float y, float x) {
-        this.y = y * TILE_HEIGHT;
-        this.x = x * TILE_WIDTH;
-        rect.set((int)this.x, (int)this.y, (int) this.x + TILE_WIDTH, (int) this.y + TILE_HEIGHT);
+    private void setVariables() {
+        switch(ID) {
+            case(0):this.image = null;
+                    this.isObstacle = false;
+                    break;
+            case(1):this.image = Assets.grassImage;
+                    this.isObstacle = true;
+                    break;
+        }
+
+    }
+
+    //takes the index of the array in order to work out co-ordinates for the tile
+    //and also updates the rect for each tile
+    public void setLocation(int y, int x) {
+        this.y = y * GameMainActivity.TILE_HEIGHT;
+        this.x = x * GameMainActivity.TILE_WIDTH;
+        //System.out.println("y: " + this.y + "\t x: " + this.x + "\n");
+    }
+
+    public void setRect(int y, int x) {
+        rect.set(this.x, this.y, this.x + GameMainActivity.TILE_WIDTH,
+                this.y + GameMainActivity.TILE_HEIGHT);
+
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+        setVariables();
     }
 
     public int getID() {
@@ -53,11 +70,11 @@ public class Tile {
         return rect;
     }
 
-    public float getX() {
+    public int getX() {
         return x;
     }
 
-    public float getY() {
+    public int getY() {
         return y;
     }
 
