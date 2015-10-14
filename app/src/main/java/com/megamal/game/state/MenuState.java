@@ -21,6 +21,7 @@ public class MenuState extends State {
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
     private String levelString = "test.txt";
+    private int[][] map;
 
     @Override
     public void init() {
@@ -28,10 +29,12 @@ public class MenuState extends State {
         tileFactory = new TileMapFactory();
 
         try {
-            tileFactory.parseFileIntoMap(levelString);
+            map = tileFactory.parseFileIntoMap(levelString);
         } catch (IOException e ) {
             System.err.print("Error parsing file: " + levelString);
         }
+
+
     }
 
     /* private int calculateIndex(int x, int y) {
@@ -45,7 +48,7 @@ public class MenuState extends State {
 
     @Override
     public void render(Painter g) {
-        tileRenderer.renderMap(g, tileFactory.getMap());
+        tileRenderer.renderMap(g, map);
     }
 
     @Override

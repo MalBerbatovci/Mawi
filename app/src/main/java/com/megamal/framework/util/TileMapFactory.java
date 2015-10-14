@@ -30,7 +30,7 @@ public class TileMapFactory {
 
     //method to parse a text file into a 2D array map; which is used to
     //represent the level map.
-    public void parseFileIntoMap(String fileName) throws IOException {
+    public int[][] parseFileIntoMap(String fileName) throws IOException {
         dimensionsFound = false;
         int y = 0;
         int x = 0;
@@ -60,12 +60,13 @@ public class TileMapFactory {
                 }
             }
 
-            System.out.println("Array looks like: " + Arrays.deepToString(map));
             bReader.close();
 
         } catch (IOException e) {
             System.err.println("Unable to parse map from file :" + fileName);
         }
+
+        return map;
 
     }
 
