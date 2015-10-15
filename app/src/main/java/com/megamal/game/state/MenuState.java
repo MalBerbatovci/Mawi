@@ -1,5 +1,6 @@
 package com.megamal.game.state;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -24,12 +25,19 @@ public class MenuState extends State {
     private Player mawi;
     private Tile tile;
     private String levelString = "test.txt";
+
+
     private int[][] map;
+    private int tileCheckY;
+
+    private int counter = 0;
 
     @Override
     public void init() {
         tileRenderer = new TileMapRenderer();
         tileFactory = new TileMapFactory();
+
+        tile = new Tile(1);
 
         try {
             map = tileFactory.parseFileIntoMap(levelString);
@@ -37,14 +45,16 @@ public class MenuState extends State {
             System.err.print("Error parsing file: " + levelString);
         }
 
-        tile = new Tile(1);
-        tile.setLocation(6, 2);
+        for(int i = 0; i < (GameMainActivity.GAME_HEIGHT / GameMainActivity.TILE_HEIGHT); i++) {
+            tile.setID(map[i][2]);
+            if (tile.isObstacle()) {
+                return;
+            }
+        }
 
-        mawi = new Player(tile.getX() + GameMainActivity.PLAYER_WIDTH,
+        mawi = new Player((tile.getX() + GameMainActivity.PLAYER_WIDTH),
                           tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                           GameMainActivity.PLAYER_HEIGHT, GameMainActivity.PLAYER_WIDTH);
-
-
     }
 
     /* private int calculateIndex(int x, int y) {
@@ -53,12 +63,24 @@ public class MenuState extends State {
 
     @Override
     public void update(float delta) {
-        mawi.update(delta);
+
+        if(!mawi.isAlive()) {
+            //do something if end of game
+        }
+
+        else {
+            mawi.checkGrounded(map);
+            mawi.update(delta);
+        }
+
 
     }
 
     @Override
     public void render(Painter g) {
+        g.setColor(Color.rgb(208, 244, 247));
+        g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
+
         tileRenderer.renderMap(g, map);
         renderPlayer(g);
     }

@@ -25,7 +25,7 @@ public class Assets {
     public static void load() {
         welcome = loadBitmap("welcome.png", false);
         grassImage = loadBitmap("grass.png", false);
-        mawiStanding = loadBitmap("mawiStanding.png", true);
+        mawiStanding = loadBitmap("mawiStanding.png", false);
     }
 
     private static Bitmap loadBitmap(String filename, boolean transparency) {

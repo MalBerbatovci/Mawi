@@ -16,7 +16,7 @@ public class GameMainActivity extends Activity {
     public static final int TILE_HEIGHT = 64;
     public static final int TILE_WIDTH = 64;
     public static final int PLAYER_HEIGHT = 128;
-    public static final int PLAYER_WIDTH = 75;
+    public static final int PLAYER_WIDTH = 64;
 
     public static GameView sGame;
     public static AssetManager assets;
