@@ -28,9 +28,6 @@ public class MenuState extends State {
 
 
     private int[][] map;
-    private int tileCheckY;
-
-    private int counter = 0;
 
     @Override
     public void init() {
@@ -45,14 +42,19 @@ public class MenuState extends State {
             System.err.print("Error parsing file: " + levelString);
         }
 
+        /*loop:
         for(int i = 0; i < (GameMainActivity.GAME_HEIGHT / GameMainActivity.TILE_HEIGHT); i++) {
-            tile.setID(map[i][2]);
+            tile.setID(map[i][1]);
             if (tile.isObstacle()) {
-                return;
+                tile.setLocation(i, 1);
+                break loop;
             }
-        }
+        }*/
 
-        mawi = new Player((tile.getX() + GameMainActivity.PLAYER_WIDTH),
+        tile.setID(1);
+        tile.setLocation(4, 4);
+
+        mawi = new Player((tile.getX() + GameMainActivity.PLAYER_WIDTH) - 8,
                           tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                           GameMainActivity.PLAYER_HEIGHT, GameMainActivity.PLAYER_WIDTH);
     }
@@ -69,10 +71,10 @@ public class MenuState extends State {
         }
 
         else {
-            mawi.checkGrounded(map);
             mawi.update(delta);
+            mawi.checkGrounded(map);
+            mawi.checkCloseness(map);
         }
-
 
     }
 
