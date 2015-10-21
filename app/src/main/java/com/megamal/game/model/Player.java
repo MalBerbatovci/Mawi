@@ -1,8 +1,8 @@
 package com.megamal.game.model;
 
 import android.graphics.Rect;
+import android.util.Log;
 
-import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
@@ -17,9 +17,10 @@ public class Player {
     private final static int X_RECT_LEEWAY = 15;
     private final static int Y_RECT_LEEWAY = 30;
 
-    //Constant for gravity
-    private final static double ACCEL_GRAVITY = 9.8119;
-    private final static double WALKING_SPEED = 50;
+    //Constant for physics
+    private final static double ACCEL_GRAVITY = 45;
+    private final static double WALKING_SPEED = 100;
+    private final static double RUNNING_SPEED = 300;
 
     //Scan Lines co-ordinates for obstacles underneath -  must be added to mawi.X
     private final static int SCAN_A_DOWN = 15;
@@ -31,14 +32,13 @@ public class Player {
 
     //Constant to 'minus' from the y co-ordinate of mawi, in order to make her
     //step above the ground
-    private static final int ABOVE_FLOOR_CONST = 5;
+    private static final int ABOVE_FLOOR_CONST = 0;
 
     //constant for the popping Mawi away from an obstacle if too close
     private static final int CLOSENESS_TO_OBSTACLE = 5;
 
     private float x, y, previousX, previousY;
     private int width, height;
-
 
     //variables for the position of scanLines
     private double xScanLineADown, xScanLineBDown, yScanLineAAcross, yScanLineBAcross;
@@ -52,6 +52,9 @@ public class Player {
     private boolean isGrounded = true;
     private boolean isAlive = true;
     private boolean isWalking = false;
+    private boolean isRunning = false;
+    private boolean collisionWithObj = false;
+    private boolean left, right = false;
 
     //DuckRect too, when implementing
     private Rect rect;
@@ -70,17 +73,8 @@ public class Player {
         this.height = height;
 
 
-        //initialise the scanLines for checking underneath Mawi
-        xScanLineADown = x + SCAN_A_DOWN;
-        xScanLineBDown = x + SCAN_B_DOWN;
-
-        //initialise the scanLines for checking left/right of Mawi
-        yScanLineAAcross = y - SCAN_A_ACROSS;
-        yScanLineBAcross = y - SCAN_B_ACROSS;
-
-        //initialise two tiles in order to check tile(s) underneath Mawi
+        //initialise tile in order to check tile(s) underneath Mawi
         tileA = new Tile(0);
-        //tileB = new Tile(0);
 
         //setting rect smaller than the actual character, in order to give leeway during fighting
         //(better to avoid getting hit, then hit unnecessarily
@@ -89,7 +83,7 @@ public class Player {
 
     }
 
-    public void update(float delta) {
+    public void update(float delta, int[][] map) {
 
         //update Scan Lines appropriately
         xScanLineADown = x + SCAN_A_DOWN;
@@ -98,36 +92,83 @@ public class Player {
         yScanLineAAcross = y + SCAN_A_ACROSS;
         yScanLineBAcross = y + SCAN_B_ACROSS;
 
+        //variables for the x co-ordinate of the scanLines to check obstacles
+        //one to the left of mawi and one to the right
+        xStartAcross = (int) x - CLOSENESS_TO_OBSTACLE - 1;
+        xEndAcross = (int) x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_HEIGHT + 1;
+
+        checkGrounded(map);
+        checkCloseness(map);
+
+        if(hasMoved())
+            System.out.println("Previous x: " + x + ". \t Previous y:" + y);
+
         previousX = x;
         previousY = y;
 
-        //variables for the x co-ordinate of the scanLines to check obstacles
-        //one to the left of mawi and one to the right
-        xStartAcross = (int) x - CLOSENESS_TO_OBSTACLE;
-        xEndAcross = (int) x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_HEIGHT;
 
-        if (!isGrounded) {
+        if (!isGrounded)
             velY = velY + ACCEL_GRAVITY;
+        else
+            velY = 0;
+
+        if (isWalking || isRunning) {
+            if(!collisionWithObj) {
+                x += velX * delta;
+            }
         }
         else {
-            velY = 0;
+            velX = 0;
+            right = false;
+            left = false;
         }
 
-        if (isWalking) {
-            Assets.walkAnim.update(delta);
-            x += velX * delta;
+
+        if (velY != 0) {
+            y += velY * delta;
         }
 
-        //if (isWalking)
-
-        y += velY * delta;
         updateRects();
-
+        updateAnim(delta);
 
     }
 
-    private void walk() {
+    //method to update respective animation if necessary
+    public void updateAnim(float delta) {
 
+        if (velX == 0)
+            return;
+
+        //only
+       /* if (!isGrounded)
+            Assets.fallingAnim.update(delta); */
+
+        if (right) {
+            if (isWalking)
+            /****************if(collisionWithObj)
+                    Assets.walkHitAnimR.update(delta);
+                else  if (!isGrounded)
+                    Assets.fallingAnim.update(delta);
+             ****************/
+                    Assets.walkAnimR.update(delta);
+            else
+            /****************if(collisionWithObj)
+             Assets.RunHitAnimR.update(delta);
+             else ****************/
+                Assets.runAnimR.update(delta);
+        }
+        else if (left) {
+            if (isWalking)
+            /****************if(collisionWithObj)
+             Assets.walkHitAnimL.update(delta);
+             else ****************/
+                Assets.walkAnimL.update(delta);
+            else
+            /****************if(collisionWithObj)
+             Assets.runHitAnimL.update(delta);
+             else ****************/
+                Assets.runAnimL.update(delta);
+        }
     }
 
     private void updateRects() {
@@ -139,7 +180,7 @@ public class Player {
 
     //Uses two scanLines located at x + 15 & x + 49 to check what tile(s) are under mawi;
     //this is then used to establish whether mawi is grounded or not
-    public void checkGrounded(int[][] map) {
+    private void checkGrounded(int[][] map) {
 
         if (hasMoved()) {
             //get map[Y] value!
@@ -164,16 +205,32 @@ public class Player {
         }
     }
 
-    public boolean hasMoved() {
-        if(previousX == x && previousY == y)
-            return false;
-        else
-            return true;
+    //Direction = parameter to tell whether walking left or right.
+    //right = positive, left = negative (1 and -1 respectively)
+    public void walk(int direction) {
+        if (direction > 0) {
+            velX = WALKING_SPEED;
+            right = true;
+        }
+        else {
+            velX = -WALKING_SPEED;
+            left = true;
+        }
+
+        isWalking = true;
     }
 
-    public void walkRight() {
-        velX = WALKING_SPEED;
-        isWalking = true;
+    public void run(int direction) {
+        if (direction > 0) {
+            velX = RUNNING_SPEED;
+            right = true;
+        }
+        else {
+            velX = -RUNNING_SPEED;
+            left = true;
+        }
+
+        isRunning = true;
     }
 
     public void stopWalking() {
@@ -181,54 +238,90 @@ public class Player {
         isWalking = false;
     }
 
+    public void stopRunning() {
+        velX = 0;
+        isRunning = false;
+    }
+
+
+    //method to check mawi's closeness to an object, and pop out if relevant (using the scanLinesAcross)
     //can be improved once walking starts - get which way the character is facing,
     //and then only check those necessary tiles i.e to the right or the left
-    public void checkCloseness(int[][] map) {
+    private void checkCloseness(int[][] map) {
 
-        if (hasMoved()) {
-            //variables for tile co-ordinates in relevance to scanLine variables
-            int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
-            int scanAAcrossY = (int) Math.ceil(yScanLineAAcross / GameMainActivity.TILE_WIDTH);
+        collisionWithObj = false;
 
-            //set Tile ID appropriately from scanlines
-            tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+        if (isWalking || isRunning) {
 
-            //check the first scan line and the tile to the right, if obstacle; set location of tile,
-            // and set new x from this location
-            if (tileA.isObstacle()) {
-                tileA.setLocation(scanAAcrossY, scanEndAcrossX);
-                x = tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT;
-                System.out.println("Case 1!");
+            //System.out.println("has moved is true");
+            //Log.d("Player", "Sneakily entered check Closeness");
 
-                //else, check the second scan line and the tile to the right, if obstacle set new x
-            } else {
-                int scanBAcrossY = (int) Math.floor(yScanLineBAcross / GameMainActivity.TILE_HEIGHT);
-                tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
+            int scanAAcrossY = (int) Math.floor(yScanLineAAcross / GameMainActivity.TILE_WIDTH);
+            int scanBAcrossY = (int) Math.floor(yScanLineBAcross / GameMainActivity.TILE_HEIGHT);
 
+            //i.e if moving right, then check scan lines to the right
+            if (right) {
+
+                //variables for tile co-ordinates in relevance to scanLine variables
+                int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
+
+                //set Tile ID appropriately from scanlines
+                tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+                System.out.println("1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+
+                //check the first scan line and the tile to the right, if obstacle; set location of tile,
+                // and set new x from this location
                 if (tileA.isObstacle()) {
-                    tileA.setLocation(scanBAcrossY, scanEndAcrossX);
-                    x = tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT;
-                    System.out.println("Case 2!");
+                    tileA.setLocation(scanAAcrossY, scanEndAcrossX);
+                    x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
+                    System.out.println("Case 1!");
+                    collisionWithObj = true;
+                    return;
 
-
-                    //now check if there are any obstacles to the left, starting with scanLineA
+                    //else, check the second scan line and the tile to the right, if obstacle set new x
                 } else {
-                    int scanStartAcrossX = (int) Math.ceil(xStartAcross / GameMainActivity.TILE_HEIGHT);
+                    tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
+                    System.out.println("2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
+
+                    if (tileA.isObstacle()) {
+                        tileA.setLocation(scanBAcrossY, scanEndAcrossX);
+                        x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
+                        System.out.println("Case 2!");
+                        collisionWithObj = true;
+                        return;
+                    }
+                }
+            }
+
+            //now check if there are any obstacles to the left, starting with scanLineA,
+            //if on the left, then must set x to previous X instead of tile's x.
+            else if (left) {
+                    int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
                     tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
+
+                    System.out.println("3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
                         tileA.setLocation(scanAAcrossY, scanStartAcrossX);
-                        x = tileA.getX() + CLOSENESS_TO_OBSTACLE;
-                        System.out.println("Case 3!");
+                        x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+                        System.out.println("Case 3! With co-ordinate: (" + previousX + "," + previousY);
 
+                        collisionWithObj = true;
+                        return;
+
+                        //X = *--®   o     ® is needed, * is given.
+                        //    [  ]   T
                         //check obstacles to the left on scanLineB
                     } else {
                         tileA.setID(map[scanBAcrossY][scanStartAcrossX]);
+                        System.out.println("4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
 
                         if (tileA.isObstacle()) {
                             tileA.setLocation(scanBAcrossY, scanStartAcrossX);
-                            x = tileA.getX() + CLOSENESS_TO_OBSTACLE;
+                            x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
                             System.out.println("Case 4!");
+                            collisionWithObj = true;
+                            return;
                         }
 
                     }
@@ -236,7 +329,7 @@ public class Player {
                 }
             }
         }
-    }
+
     /*
     //method to get the top left X and Y of mawi when you have the tile you want her to be placed on
     public void setLocationFromTile(Tile tile) {
@@ -257,6 +350,8 @@ public class Player {
         return y;
     }
 
+    public double getVelX() { return velX; }
+
     public int getHeight() {
         return height;
     }
@@ -269,6 +364,13 @@ public class Player {
         return rect;
     }
 
+    public boolean hasMoved() {
+        if(previousX == x && previousY == y)
+            return false;
+        else
+            return true;
+    }
+
     public boolean isAlive() {
         return isAlive;
     }
@@ -276,4 +378,10 @@ public class Player {
     public boolean isWalking() {
         return isWalking;
     }
+
+    public boolean isRunning() { return isRunning; }
+
+    public boolean isLeft() { return left; }
+
+    public boolean isRight() { return right;}
 }

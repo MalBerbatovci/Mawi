@@ -19,13 +19,17 @@ import java.io.IOException;
  */
 public class MenuState extends State {
 
+    //final variables for passing to mawi.walk/run() method to determine L/R
+    private static final int RIGHT = 1;
+    private static final int LEFT = -1;
+
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
     private Player mawi;
     private Tile tile;
     private String levelString = "test.txt";
 
-    private UIButton walkRight;
+    private UIButton walkR, walkL, runR, runL;
 
     private int[][] map;
 
@@ -44,9 +48,9 @@ public class MenuState extends State {
 
         loop:
         for(int i = 0; i < (GameMainActivity.GAME_HEIGHT / GameMainActivity.TILE_HEIGHT); i++) {
-            tile.setID(map[i][1]);
+            tile.setID(map[i][2]);
             if (tile.isObstacle()) {
-                tile.setLocation(i, 1);
+                tile.setLocation(i, 2);
                 break loop;
             }
         }
@@ -59,7 +63,11 @@ public class MenuState extends State {
                           tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                           GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
-        walkRight = new UIButton(120, 450, 220, 490, Assets.walkRightButton, Assets.walkRightButtonPressed);
+        walkR = new UIButton(120, 450, 220, 490, Assets.walkButtonR, Assets.walkButtonPressedR);
+        runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
+
+        walkL = new UIButton(330, 450, 430, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
+        runL = new UIButton(435, 450, 535, 490, Assets.runButtonL, Assets.runButtonPressedL);
     }
 
     /* private int calculateIndex(int x, int y) {
@@ -74,9 +82,7 @@ public class MenuState extends State {
         }
 
         else {
-            mawi.checkGrounded(map);
-            mawi.checkCloseness(map);
-            mawi.update(delta);
+            mawi.update(delta, map);
         }
 
     }
@@ -87,13 +93,28 @@ public class MenuState extends State {
         g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
 
         tileRenderer.renderMap(g, map);
-        walkRight.render(g);
+
+        //renderButton methods
+        walkR.render(g);
+        walkL.render(g);
+        runR.render(g);
+        runL.render(g);
+
         renderPlayer(g);
     }
 
     private void renderPlayer(Painter g) {
         if (mawi.isWalking()) {
-            Assets.walkAnim.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+           if(mawi.isRight())
+               Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+            else
+               Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+
+        } else if (mawi.isRunning()) {
+            if(mawi.isRight())
+                Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+            else
+                Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
         }
         else
             g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
@@ -101,21 +122,41 @@ public class MenuState extends State {
 
     @Override
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
-        //check if walk button is pressed, this changes walkRight.isPressed to true if contained
+        //check if walk button is pressed, this changes walkR.isPressed to true if contained
         //in the buttons rect
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
-            walkRight.onTouchDown(scaledX, scaledY);
+            walkR.onTouchDown(scaledX, scaledY);
+            walkL.onTouchDown(scaledX, scaledY);
+            runR.onTouchDown(scaledX, scaledY);
+            runL.onTouchDown(scaledX, scaledY);
 
-            if(walkRight.isTouched()) {
-                mawi.walkRight();
+            if(walkR.isTouched()) {
+                mawi.walk(RIGHT);
+            } else if (runR.isTouched()) {
+                mawi.run(RIGHT);
+            } else if (walkL.isTouched()) {
+                mawi.walk(LEFT);
+            } else if (runL.isTouched()) {
+                mawi.run(LEFT);
             }
         }
 
         //v. naive way of checking.
         if (e.getAction() == MotionEvent.ACTION_UP) {
-            if(walkRight.isTouched()) {
+            if(walkR.isTouched()) {
                 mawi.stopWalking();
+                walkR.cancel();
+            } else if (walkL.isTouched()) {
+                mawi.stopWalking();
+                walkL.cancel();
+            } else if (runR.isTouched()) {
+                mawi.stopRunning();
+                runR.cancel();
+            } else if (runL.isTouched()) {
+                mawi.stopRunning();
+                runL.cancel();
             }
+
         }
 
         return true;

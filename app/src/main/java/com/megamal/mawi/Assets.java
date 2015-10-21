@@ -20,38 +20,69 @@ import com.megamal.framework.animation.Frame;
 
 public class Assets {
     private static SoundPool soundPool;
-    public static Bitmap welcome, grassImage, mawiStandingFront, mawiWalk1, mawiWalk2, mawiWalk3, mawiStandingSide,
-                         mawiRun1, mawiRun2, mawiRun3, walkRightButton, walkRightButtonPressed;
+    public static Bitmap welcome, grassImage, mawiStandingFront, mawiWalkR1, mawiWalkR2, mawiWalkR3, mawiStandingSide,
+            mawiRunR1, mawiRunR2, mawiRunR3, walkButtonR, walkButtonPressedR, runButtonR, runButtonPressedR, walkButtonL,
+            walkButtonPressedL, runButtonL, runButtonPressedL, mawiWalkL1, mawiWalkL2, mawiWalkL3, mawiRunL1, mawiRunL2,
+            mawiRunL3;
 
-    public static Animation walkAnim, runAnim;
+    public static Animation walkAnimR, walkAnimL, runAnimR, runAnimL;
 
     //input stream used to read data from device's file system
     public static void load() {
-        welcome = loadBitmap("welcome.png", false);
+        // welcome = loadBitmap("welcome.png", false);
         grassImage = loadBitmap("grass.png", false);
         mawiStandingFront = loadBitmap("mawiStandingFront.png", true);
         mawiStandingSide = loadBitmap("mawiStanding.png", true);
-        mawiWalk1 = loadBitmap("mawiWalkingAnim1.png", true);
-        mawiWalk2 = loadBitmap("mawiWalkingAnim2.png", true);
-        mawiWalk3 = loadBitmap("mawiWalkingAnim3.png", true);
-        mawiRun1 = loadBitmap("mawiRunningRightAnim1.png", true);
-        mawiRun2 = loadBitmap("mawiRunningRightAnim2.png", true);
-        mawiRun2 = loadBitmap("mawiRunningRightAnim3.png", true);
-        walkRightButton = loadBitmap("walkButtonR.png", false);
-        walkRightButtonPressed = loadBitmap("walkButtonRPressed.png", false);
+
+        mawiWalkR1 = loadBitmap("mawiWalkingAnimR1.png", true);
+        mawiWalkR2 = loadBitmap("mawiWalkingAnimR2.png", true);
+        mawiWalkR3 = loadBitmap("mawiWalkingAnimR3.png", true);
+        mawiRunR1 = loadBitmap("mawiRunningAnimR1.png", true);
+        mawiRunR2 = loadBitmap("mawiRunningAnimR2.png", true);
+        mawiRunR3 = loadBitmap("mawiRunningAnimR3.png", true);
+
+
+        mawiWalkL1 = loadBitmap("mawiWalkingAnimL1.png", true);
+        mawiWalkL2 = loadBitmap("mawiWalkingAnimL2.png", true);
+        mawiWalkL3 = loadBitmap("mawiWalkingAnimL3.png", true);
+        mawiRunL1 = loadBitmap("mawiRunningAnimL1.png", true);
+        mawiRunL2 = loadBitmap("mawiRunningAnimL2.png", true);
+        mawiRunL3 = loadBitmap("mawiRunningAnimL3.png", true);
+
+
+        walkButtonR = loadBitmap("walkButtonR.png", false);
+        walkButtonL = loadBitmap("walkButtonL.png", false);
+        walkButtonPressedR = loadBitmap("walkButtonRPressed.png", false);
+        walkButtonPressedL = loadBitmap("walkButtonLPressed.png", false);
+        runButtonR = loadBitmap("runButtonR.png", false);
+        runButtonL = loadBitmap("runButtonL.png", false);
+        runButtonPressedR = loadBitmap("runButtonRPressed.png", false);
+        runButtonPressedL = loadBitmap("runButtonLPressed.png", false);
 
 
         //create walking animation
-        Frame w1 = new Frame(mawiWalk1, 0.2f);
-        Frame w2 = new Frame(mawiWalk2, 0.2f);
-        Frame w3 = new Frame(mawiWalk3, 0.2f);
-        walkAnim = new Animation(w1, w2, w3, w2);
+        Frame wR1 = new Frame(mawiWalkR1, 0.2f);
+        Frame wR2 = new Frame(mawiWalkR2, 0.2f);
+        Frame wR3 = new Frame(mawiWalkR3, 0.2f);
+        walkAnimR = new Animation(wR1, wR2, wR3, wR2);
+
+        Frame wL1 = new Frame(mawiWalkL1, 0.2f);
+        Frame wL2 = new Frame(mawiWalkL2, 0.2f);
+        Frame wL3 = new Frame(mawiWalkL3, 0.2f);
+        walkAnimL = new Animation(wL1, wL2, wL3, wL2);
 
         //create running animation
-        Frame r1 = new Frame(mawiRun1, 0.2f);
-        Frame r2 = new Frame(mawiRun2, 0.2f);
-        Frame r3 = new Frame(mawiRun3, 0.2f);
-        runAnim = new Animation(r1, r2, r3, r2);
+        Frame rR1 = new Frame(mawiRunR1, 0.2f);
+        Frame rR2 = new Frame(mawiRunR2, 0.2f);
+        Frame rR3 = new Frame(mawiRunR3, 0.2f);
+        runAnimR = new Animation(rR1, rR2, rR3, rR2);
+
+        Frame rL1 = new Frame(mawiRunL1, 0.2f);
+        Frame rL2 = new Frame(mawiWalkL2, 0.2f);
+        Frame rL3 = new Frame(mawiWalkL3, 0.2f);
+        runAnimL = new Animation(rL1, rL2, rL3, rL2);
+
+
         
     }
 
