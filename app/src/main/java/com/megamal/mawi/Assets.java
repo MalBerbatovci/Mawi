@@ -15,17 +15,44 @@ import java.io.InputStream;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 
-import com.megamal.framework.util.Tile;
+import com.megamal.framework.animation.Animation;
+import com.megamal.framework.animation.Frame;
 
 public class Assets {
     private static SoundPool soundPool;
-    public static Bitmap welcome, grassImage, mawiStanding;
+    public static Bitmap welcome, grassImage, mawiStandingFront, mawiWalk1, mawiWalk2, mawiWalk3, mawiStandingSide,
+                         mawiRun1, mawiRun2, mawiRun3, walkRightButton, walkRightButtonPressed;
+
+    public static Animation walkAnim, runAnim;
 
     //input stream used to read data from device's file system
     public static void load() {
         welcome = loadBitmap("welcome.png", false);
         grassImage = loadBitmap("grass.png", false);
-        mawiStanding = loadBitmap("mawiStanding.png", true);
+        mawiStandingFront = loadBitmap("mawiStandingFront.png", true);
+        mawiStandingSide = loadBitmap("mawiStanding.png", true);
+        mawiWalk1 = loadBitmap("mawiWalkingAnim1.png", true);
+        mawiWalk2 = loadBitmap("mawiWalkingAnim2.png", true);
+        mawiWalk3 = loadBitmap("mawiWalkingAnim3.png", true);
+        mawiRun1 = loadBitmap("mawiRunningRightAnim1.png", true);
+        mawiRun2 = loadBitmap("mawiRunningRightAnim2.png", true);
+        mawiRun2 = loadBitmap("mawiRunningRightAnim3.png", true);
+        walkRightButton = loadBitmap("walkButtonR.png", false);
+        walkRightButtonPressed = loadBitmap("walkButtonRPressed.png", false);
+
+
+        //create walking animation
+        Frame w1 = new Frame(mawiWalk1, 0.2f);
+        Frame w2 = new Frame(mawiWalk2, 0.2f);
+        Frame w3 = new Frame(mawiWalk3, 0.2f);
+        walkAnim = new Animation(w1, w2, w3, w2);
+
+        //create running animation
+        Frame r1 = new Frame(mawiRun1, 0.2f);
+        Frame r2 = new Frame(mawiRun2, 0.2f);
+        Frame r3 = new Frame(mawiRun3, 0.2f);
+        runAnim = new Animation(r1, r2, r3, r2);
+        
     }
 
     private static Bitmap loadBitmap(String filename, boolean transparency) {
