@@ -105,10 +105,19 @@ public class MenuState extends State {
 
     private void renderPlayer(Painter g) {
         if (mawi.isWalking()) {
-           if(mawi.isRight())
-               Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-            else
-               Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+           if(mawi.isRight()) {
+               if (mawi.isCollided())
+                   Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+               else {
+                   System.out.println("mawi.isCollided is false!");
+                   Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+               }
+           } else {
+               if (mawi.isCollided())
+                   Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+               else
+                   Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+           }
 
         } else if (mawi.isRunning()) {
             if(mawi.isRight())
