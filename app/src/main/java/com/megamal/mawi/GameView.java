@@ -34,6 +34,8 @@ public class GameView extends SurfaceView implements Runnable{
 
     public GameView(Context context, int gameWidth, int gameHeight) {
         super(context);
+        setFocusable(true);
+        setFocusableInTouchMode(true);
 
         //covers the whole screen and will not need to be transparent
         gameImage = Bitmap.createBitmap(gameWidth, gameHeight, Bitmap.Config.RGB_565);

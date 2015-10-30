@@ -1,6 +1,7 @@
 package com.megamal.game.state;
 
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;
@@ -26,7 +27,7 @@ public class LoadState extends State {
     }
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
+    public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int scaledX2, int scaledY2, View v) {
         return false;
     }
 }

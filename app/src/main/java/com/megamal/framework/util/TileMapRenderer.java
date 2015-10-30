@@ -24,15 +24,15 @@ public class TileMapRenderer {
         currentTile = new Tile(0);
     }
 
-    //WHEN IMPLEMENTING CAMERA - CALCULATE WHERE TO START THE FOR LOOP FOR X AND Y
-    //AND THEN CHECK Y < (SCREEN_TILE_SIZE_Y + initialY) - SAME FOR X.
-
     //WHEN IMPLEMENTING COLLISIONS: use the scan along line technique to create smaller Tile array
     //which will hold the necessary rects for collision checking. (renderMap method continuously
     //overwrites itself so rect is no stored)
     //NB: make sure said array is of size: character_height_in_tiles * screen_tile_width.
     //create array outside of loops, set rects inside loop to check collisions
 
+
+    //WHEN IMPLEMENTING CAMERA - CALCULATE WHERE TO START THE FOR LOOP FOR X AND Y
+    //AND THEN CHECK Y < (SCREEN_TILE_SIZE_Y + initialY) - SAME FOR X.
     //method to render map
     public void renderMap(Painter g, int[][] map) {
 

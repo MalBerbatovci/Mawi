@@ -34,6 +34,16 @@ public class UIButton {
             buttonDown = false;
     }
 
+    public void onTouchDownPointer(int touchX, int touchY) {
+        if (buttonDown == true)
+            return;
+
+        if(buttonRect.contains(touchX, touchY))
+            buttonDown = true;
+        else
+            buttonDown = false;
+    }
+
     //cancel the press
     public void cancel() {
         buttonDown = false;
@@ -42,6 +52,10 @@ public class UIButton {
     //check if the button has been pressed
     public boolean isPressed(int touchX, int touchY) {
         return buttonDown && buttonRect.contains(touchX, touchY);
+    }
+
+    public boolean isContained(int touchX, int touchY) {
+        return buttonRect.contains(touchX, touchY);
     }
 
     public boolean isTouched() {

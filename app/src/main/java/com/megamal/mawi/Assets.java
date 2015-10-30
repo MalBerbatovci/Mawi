@@ -23,7 +23,8 @@ public class Assets {
     public static Bitmap welcome, grassImage, mawiStandingFront, mawiWalkR1, mawiWalkR2, mawiWalkR3, mawiStandingSide,
             mawiRunR1, mawiRunR2, mawiRunR3, walkButtonR, walkButtonPressedR, runButtonR, runButtonPressedR, walkButtonL,
             walkButtonPressedL, runButtonL, runButtonPressedL, mawiWalkL1, mawiWalkL2, mawiWalkL3, mawiRunL1, mawiRunL2,
-            mawiRunL3, mawiWalkHitR1, mawiWalkHitR2, mawiWalkHitR3, mawiWalkHitL1, mawiWalkHitL2, mawiWalkHitL3;
+            mawiRunL3, mawiWalkHitR1, mawiWalkHitR2, mawiWalkHitR3, mawiWalkHitL1, mawiWalkHitL2, mawiWalkHitL3,
+            mawiJumpingR, mawiJumpingL;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
 
@@ -33,6 +34,8 @@ public class Assets {
         grassImage = loadBitmap("grass.png", false);
         mawiStandingFront = loadBitmap("mawiStandingFront.png", true);
         mawiStandingSide = loadBitmap("mawiStanding.png", true);
+        mawiJumpingR = loadBitmap("mawiJumpingR.png", true);
+        mawiJumpingL = loadBitmap("mawiJumpingL.png", true);
 
         mawiWalkR1 = loadBitmap("mawiWalkingAnimR1.png", true);
         mawiWalkR2 = loadBitmap("mawiWalkingAnimR2.png", true);

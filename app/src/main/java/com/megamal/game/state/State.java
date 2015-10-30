@@ -1,6 +1,7 @@
 package com.megamal.game.state;
 
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.megamal.mawi.GameMainActivity;
 import com.megamal.framework.util.Painter;
@@ -20,5 +21,5 @@ public abstract class State {
 
     public abstract void render(Painter g);
 
-    public abstract boolean onTouch(MotionEvent e, int scaledX, int scaledY);
+    public abstract boolean onTouch(MotionEvent e, int scaledX, int scaledY, int scaledX2, int scaledY2, View v);
 }

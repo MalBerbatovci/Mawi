@@ -18,9 +18,10 @@ public class Player {
     private final static int Y_RECT_LEEWAY = 30;
 
     //Constant for physics
-    private final static double ACCEL_GRAVITY = 45;
+    private final static double ACCEL_GRAVITY = 2722;
     private final static double WALKING_SPEED = 100;
     private final static double RUNNING_SPEED = 300;
+    private final static double JUMPING_ACCELERATION = -1222;
 
     //Scan Lines co-ordinates for obstacles underneath -  must be added to mawi.X
     private final static int SCAN_A_DOWN = 15;
@@ -53,6 +54,7 @@ public class Player {
     private boolean isAlive = true;
     private boolean isWalking = false;
     private boolean isRunning = false;
+    private boolean isJumping = false;
     private boolean collisionWithObj = false;
     private boolean left, right = false;
 
@@ -109,7 +111,7 @@ public class Player {
 
 
         if (!isGrounded)
-            velY = velY + ACCEL_GRAVITY;
+            velY += ACCEL_GRAVITY * delta;
         else
             velY = 0;
 
@@ -178,6 +180,13 @@ public class Player {
     //this is then used to establish whether mawi is grounded or not
     private void checkGrounded(int[][] map) {
 
+        //TEMPOARY TO STOP MAWI CRASHING
+        if (y < -124 || x < 0 || x > 832) {
+            isGrounded = false;
+            return;
+        }
+
+
         if (hasMoved()) {
 
             //get map[Y] value!
@@ -200,18 +209,27 @@ public class Player {
                     System.out.println("yFloor is: " + yFloor);
                     y = (yFloor * GameMainActivity.TILE_HEIGHT) - height; //- height;
                     isGrounded = true;
+                    if (isJumping)
+                        isJumping = false;
                 }
                 //else, just walking/running along ground
-                else
+                else {
                     isGrounded = true;
+                    if (isJumping)
+                        isJumping = false;
+                }
 
             //else, if both are not obstacles, mawi is not grounded
             } else if (!tileA.isObstacle() & !tileB.isObstacle()) {
                 isGrounded = false;
 
             //else, only one scanLine has been trigged, can do something w/ this info.
-            } else
+            } else {
+                y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
                 isGrounded = true;
+                if (isJumping)
+                    isJumping = false;
+            }
         }
     }
 
@@ -221,9 +239,13 @@ public class Player {
     //and then only check those necessary tiles i.e to the right or the left
     private void checkCloseness(int[][] map) {
 
+        //TEMPORARY TO STOP MAWI CRASHING
+        if (y < 0 || x < 0 || x > 832)
+            return;
+
         collisionWithObj = false;
 
-        if (isWalking || isRunning) {
+        if (isWalking || isRunning || isJumping) {
 
             //System.out.println("has moved is true");
             //Log.d("Player", "Sneakily entered check Closeness");
@@ -276,14 +298,11 @@ public class Player {
                 if (tileA.isObstacle()) {
                     tileA.setLocation(scanAAcrossY, scanStartAcrossX);
                     x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
-                    System.out.println("Case 3! With co-ordinate: (" + previousX + "," + previousY);
+                    System.out.println("Case 3! With co-ordinate: (" + previousX + "," + previousY + ")");
 
                     collisionWithObj = true;
                     return;
 
-                    //X = *--®   o     ® is needed, * is given.
-                    //    [  ]   T
-                    //check obstacles to the left on scanLineB
                 } else {
                     tileA.setID(map[scanBAcrossY][scanStartAcrossX]);
                     System.out.println("4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
@@ -308,10 +327,12 @@ public class Player {
         if (direction > 0) {
             velX = WALKING_SPEED;
             right = true;
+            left = true;
         }
         else {
             velX = -WALKING_SPEED;
             left = true;
+            right = false;
         }
 
         isWalking = true;
@@ -321,10 +342,12 @@ public class Player {
         if (direction > 0) {
             velX = RUNNING_SPEED;
             right = true;
+            left = false;
         }
         else {
             velX = -RUNNING_SPEED;
             left = true;
+            right = false;
         }
 
         isRunning = true;
@@ -338,6 +361,17 @@ public class Player {
     public void stopRunning() {
         velX = 0;
         isRunning = false;
+    }
+
+    public void jump() {
+        if (isGrounded) {
+            //initial jump
+            y -= 10;
+            //set velY as jumping_acceleration
+            velY = JUMPING_ACCELERATION;
+            updateRects();
+            isJumping = true;
+        }
     }
 
     public float getX() {
@@ -381,6 +415,9 @@ public class Player {
 
     public boolean isRunning() { return isRunning; }
 
+    public boolean isJumping() { return isJumping; }
+
+    //if not right, then left, not sure if necessary
     public boolean isLeft() { return left; }
 
     public boolean isRight() { return right;}
