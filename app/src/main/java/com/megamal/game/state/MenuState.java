@@ -209,7 +209,8 @@ public class MenuState extends State {
         //v. naive way of checking.
         if (maskedAction == MotionEvent.ACTION_UP) {
             Log.d("MenuState", "Action_UP checked with: " + scaledX + "," + scaledY + ". \n");
-            if (walkR.isPressed(scaledX, scaledY)) {
+            //if (walkR.isPressed(scaledX, scaledY)) {
+            if(walkingRight) {
                 mawi.stopWalking();
                 walkingRight = false;
                 walkR.cancel();
@@ -219,7 +220,8 @@ public class MenuState extends State {
                     mawi.run(RIGHT);
                 else if (runningLeft)
                     mawi.run(LEFT);
-            } else if (walkL.isPressed(scaledX, scaledY)) {
+            } //else if (walkL.isPressed(scaledX, scaledY)) {
+                else if (walkingLeft) {
                 mawi.stopWalking();
                 walkingLeft = false;
                 walkL.cancel();
@@ -229,17 +231,19 @@ public class MenuState extends State {
                     mawi.run(RIGHT);
                 else if (runningLeft)
                     mawi.run(LEFT);
-            } else if (runR.isPressed(scaledX, scaledY)) {
+            } //else if (runR.isPressed(scaledX, scaledY)) {
+                else if (runningRight) {
                 mawi.stopRunning();
                 runningRight = false;
                 runR.cancel();
                 if (walkingLeft)
                     mawi.walk(LEFT);
                 else if (walkingRight)
-                    mawi.run(RIGHT);
+                    mawi.walk(RIGHT);
                 else if (runningLeft)
                     mawi.run(LEFT);
-            } else if (runL.isPressed(scaledX, scaledY)) {
+            } //else if (runL.isPressed(scaledX, scaledY)) {
+                else if (runningLeft) {
                 mawi.stopRunning();
                 runningLeft = false;
                 runL.cancel();
@@ -248,8 +252,9 @@ public class MenuState extends State {
                 else if (runningRight)
                     mawi.run(RIGHT);
                 else if (walkingRight)
-                    mawi.run(RIGHT);
-            } else if (jump.isPressed(scaledX, scaledY)) {
+                    mawi.walk(RIGHT);
+            } //else if (jump.isPressed(scaledX, scaledY)) {
+                else if (mawi.isJumping()) {
                 jump.cancel();
             }
 
@@ -292,7 +297,7 @@ public class MenuState extends State {
                 if (walkingLeft)
                     mawi.walk(LEFT);
                 else if (walkingRight)
-                    mawi.run(RIGHT);
+                    mawi.walk(RIGHT);
                 else if (runningLeft)
                     mawi.run(LEFT);
             } else if (runL.isPressed(scaledX2, scaledY2)) {
@@ -304,7 +309,9 @@ public class MenuState extends State {
                 else if (runningRight)
                     mawi.run(RIGHT);
                 else if (walkingRight)
-                    mawi.run(RIGHT);
+                    mawi.walk(RIGHT);
+            } else if (jump.isPressed(scaledX2, scaledY2)) {
+                jump.cancel();
             }
         }
 
