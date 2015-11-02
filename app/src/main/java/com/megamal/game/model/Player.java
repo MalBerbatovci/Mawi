@@ -86,7 +86,7 @@ public class Player {
 
     }
 
-    public void update(float delta, int[][] map) {
+    public void update(float delta, int[][] map, int cameraOffsetX, int cameraOffsetY) {
 
         //update Scan Lines appropriately
         xScanLineADown = x + SCAN_A_DOWN;
@@ -101,7 +101,7 @@ public class Player {
         xEndAcross = (int) x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_HEIGHT + 1;
 
         checkGrounded(map);
-        checkCloseness(map);
+        checkCloseness(map, cameraOffsetX, cameraOffsetY);
 
         if(hasMoved())
             System.out.println("Previous x: " + x + ". \t Previous y:" + y);
@@ -118,6 +118,7 @@ public class Player {
         if (isWalking || isRunning) {
             if(!collisionWithObj) {
                 x += velX * delta;
+                Log.d("Player", "velX is: " + velX + ". \n");
             }
         }
         else {
@@ -237,7 +238,7 @@ public class Player {
     //method to check mawi's closeness to an object, and pop out if relevant (using the scanLinesAcross)
     //can be improved once walking starts - get which way the character is facing,
     //and then only check those necessary tiles i.e to the right or the left
-    private void checkCloseness(int[][] map) {
+    private void checkCloseness(int[][] map, int cameraOffsetX, int cameraOffsetY) {
 
         //TEMPORARY TO STOP MAWI CRASHING
         if (y < 0 || x < 0 || x > 832)
@@ -266,7 +267,7 @@ public class Player {
                 //check the first scan line and the tile to the right, if obstacle; set location of tile,
                 // and set new x from this location
                 if (tileA.isObstacle()) {
-                    tileA.setLocation(scanAAcrossY, scanEndAcrossX);
+                    tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
                     x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
                     System.out.println("Case 1!");
                     collisionWithObj = true;
@@ -278,7 +279,7 @@ public class Player {
                     System.out.println("2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
-                        tileA.setLocation(scanBAcrossY, scanEndAcrossX);
+                        tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
                         x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
                         System.out.println("Case 2!");
                         collisionWithObj = true;
@@ -296,7 +297,7 @@ public class Player {
                 System.out.println("3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
                 if (tileA.isObstacle()) {
-                    tileA.setLocation(scanAAcrossY, scanStartAcrossX);
+                    tileA.setLocation(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
                     x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
                     System.out.println("Case 3! With co-ordinate: (" + previousX + "," + previousY + ")");
 
@@ -308,7 +309,7 @@ public class Player {
                     System.out.println("4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
-                        tileA.setLocation(scanBAcrossY, scanStartAcrossX);
+                        tileA.setLocation(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
                         x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
                         System.out.println("Case 4!");
                         collisionWithObj = true;
@@ -381,6 +382,11 @@ public class Player {
     public float getY() {
         return y;
     }
+
+    public void setX(int newX) {
+        //x = x + newX;
+    }
+
 
     public int getHeight() {
         return height;

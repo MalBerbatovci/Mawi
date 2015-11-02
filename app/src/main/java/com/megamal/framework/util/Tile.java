@@ -37,10 +37,9 @@ public class Tile {
 
     //takes the index of the array in order to work out co-ordinates for the tile
     //and also updates the rect for each tile
-    public void setLocation(int y, int x) {
-        this.y = y * GameMainActivity.TILE_HEIGHT;
-        this.x = x * GameMainActivity.TILE_WIDTH;
-        //System.out.println("y: " + this.y + "\t x: " + this.x + "\n");
+    public void setLocation(int y, int x, int cameraOffsetX, int cameraOffsetY) {
+            this.y = y * GameMainActivity.TILE_HEIGHT;
+            this.x = x * GameMainActivity.TILE_WIDTH - cameraOffsetX;
     }
 
     public void setRect(int y, int x) {

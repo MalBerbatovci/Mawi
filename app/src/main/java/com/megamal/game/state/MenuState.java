@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.megamal.framework.util.Camera;
 import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapFactory;
 import com.megamal.framework.util.TileMapRenderer;
@@ -39,11 +40,15 @@ public class MenuState extends State {
     private int[][] map;
 
     private int maskedAction, pointerActiveIndex;
+    private int cameraOffsetX, cameraOffsetY;
+    private Camera camera;
 
     @Override
     public void init() {
         tileRenderer = new TileMapRenderer();
         tileFactory = new TileMapFactory();
+        cameraOffsetX = 0;
+        cameraOffsetY = 0;
 
         tile = new Tile(1);
 
@@ -53,18 +58,15 @@ public class MenuState extends State {
             System.err.print("Error parsing file: " + levelString);
         }
 
+        //loop to find first tile to place mawi on
         loop:
-        for (int i = 0; i < (GameMainActivity.GAME_HEIGHT / GameMainActivity.TILE_HEIGHT); i++) {
+        for (int i = 2; i < (GameMainActivity.GAME_HEIGHT / GameMainActivity.TILE_HEIGHT); i++) {
             tile.setID(map[i][2]);
             if (tile.isObstacle()) {
-                tile.setLocation(i, 2);
+                tile.setLocation(i, 2, cameraOffsetX, cameraOffsetY);
                 break loop;
             }
         }
-
-        //tile.setID(1);
-        //tile.setLocation(4, 4);
-        // - 64
 
         mawi = new Player(tile.getX(), // + GameMainActivity.PLAYER_WIDTH
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
@@ -78,6 +80,9 @@ public class MenuState extends State {
         walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);
 
         jump = new UIButton(620, 450, 720, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
+
+        camera = new Camera();
+
     }
 
     /* private int calculateIndex(int x, int y) {
@@ -90,7 +95,9 @@ public class MenuState extends State {
         if (!mawi.isAlive()) {
             //do something if end of game
         } else {
-            mawi.update(delta, map);
+            mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
+            cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
+            mawi.setX(cameraOffsetX % GameMainActivity.TILE_WIDTH);
         }
 
     }
@@ -100,7 +107,7 @@ public class MenuState extends State {
         g.setColor(Color.rgb(208, 244, 247));
         g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
 
-        tileRenderer.renderMap(g, map);
+        tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY);
 
         //renderButton methods
         walkR.render(g);
