@@ -20,7 +20,7 @@ public class Player {
     //Constant for physics
     private final static double ACCEL_GRAVITY = 2722;
     private final static double WALKING_SPEED = 100;
-    private final static double RUNNING_SPEED = 300;
+    private final static double RUNNING_SPEED = 200;
     private final static double JUMPING_ACCELERATION = -1222;
 
     //Scan Lines co-ordinates for obstacles underneath -  must be added to mawi.X
@@ -38,7 +38,7 @@ public class Player {
     //constant for the popping Mawi away from an obstacle if too close
     private static final int CLOSENESS_TO_OBSTACLE = 2;
 
-    private float x, y, previousX, previousY;
+    private double x, y, previousX, previousY;
     private int width, height;
 
     //variables for the position of scanLines
@@ -118,7 +118,6 @@ public class Player {
         if (isWalking || isRunning) {
             if(!collisionWithObj) {
                 x += velX * delta;
-                Log.d("Player", "velX is: " + velX + ". \n");
             }
         }
         else {
@@ -251,7 +250,8 @@ public class Player {
             //System.out.println("has moved is true");
             //Log.d("Player", "Sneakily entered check Closeness");
 
-            int scanAAcrossY = (int) Math.floor(yScanLineAAcross / GameMainActivity.TILE_WIDTH);
+            
+            int scanAAcrossY = (int) Math.floor(yScanLineAAcross / GameMainActivity.TILE_HEIGHT);
             int scanBAcrossY = (int) Math.floor(yScanLineBAcross / GameMainActivity.TILE_HEIGHT);
 
             //i.e if moving right, then check scan lines to the right
@@ -375,16 +375,22 @@ public class Player {
         }
     }
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public void setX(int newX) {
-        //x = x + newX;
+    public void setCenterX(int cameraOffsetX, int direction, double overRun) {
+        if (direction == 1) {
+            x = x - (GameMainActivity.TILE_WIDTH / 4 + overRun);
+        } else {
+            x = x + (GameMainActivity.TILE_WIDTH / 4 - overRun);
+        }
+
+        //x = ((GameMainActivity.GAME_WIDTH / 2) - (GameMainActivity.TILE_WIDTH / 2));
     }
 
 

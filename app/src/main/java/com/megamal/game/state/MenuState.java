@@ -40,7 +40,7 @@ public class MenuState extends State {
     private int[][] map;
 
     private int maskedAction, pointerActiveIndex;
-    private int cameraOffsetX, cameraOffsetY;
+    private int cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
     @Override
@@ -96,18 +96,21 @@ public class MenuState extends State {
             //do something if end of game
         } else {
             mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
+            previousOffsetX = cameraOffsetX;
+            previousOffsetY = cameraOffsetY;
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
-            mawi.setX(cameraOffsetX % GameMainActivity.TILE_WIDTH);
         }
 
     }
 
     @Override
     public void render(Painter g) {
+
         g.setColor(Color.rgb(208, 244, 247));
         g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
 
-        tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY);
+        tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, mawi);
+
 
         //renderButton methods
         walkR.render(g);
@@ -165,7 +168,7 @@ public class MenuState extends State {
         pointerActiveIndex = MotionEventCompat.getActionIndex(e);
 
         if (maskedAction == MotionEvent.ACTION_DOWN) {
-            Log.d("MenuState", "Action Down entered");
+            //Log.d("MenuState", "Action Down entered");
             walkR.onTouchDown(scaledX, scaledY);
             walkL.onTouchDown(scaledX, scaledY);
             runR.onTouchDown(scaledX, scaledY);
@@ -188,7 +191,7 @@ public class MenuState extends State {
                 mawi.jump();
             }
         } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            Log.d("MenuState", "Action Pointer Down Called!");
+            //Log.d("MenuState", "Action Pointer Down Called!");
 
             walkR.onTouchDownPointer(scaledX2, scaledY2);
             walkL.onTouchDownPointer(scaledX2, scaledY2);
@@ -215,7 +218,7 @@ public class MenuState extends State {
 
         //v. naive way of checking.
         if (maskedAction == MotionEvent.ACTION_UP) {
-            Log.d("MenuState", "Action_UP checked with: " + scaledX + "," + scaledY + ". \n");
+            //Log.d("MenuState", "Action_UP checked with: " + scaledX + "," + scaledY + ". \n");
             //if (walkR.isPressed(scaledX, scaledY)) {
             if(walkingRight) {
                 mawi.stopWalking();
@@ -266,21 +269,21 @@ public class MenuState extends State {
             }
 
         } else if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
-            Log.d("MenuState", "Action Pointer UP checked with: " + scaledX2 + "," + scaledY2 + ". \n");
+            //Log.d("MenuState", "Action Pointer UP checked with: " + scaledX2 + "," + scaledY2 + ". \n");
 
             scaledX2 = (int) ((MotionEventCompat.getX(e, pointerActiveIndex) / v.getWidth()) *
                     GameMainActivity.GAME_WIDTH);
             scaledY2 = (int) ((MotionEventCompat.getY(e, pointerActiveIndex) / v.getHeight()) *
                     GameMainActivity.GAME_HEIGHT);
 
-            Log.d("MenuState", "New Scaled X2: " + scaledX2 + ". Scaled Y2 :" + scaledY2 + ". \n");
+            //Log.d("MenuState", "New Scaled X2: " + scaledX2 + ". Scaled Y2 :" + scaledY2 + ". \n");
 
             if (walkR.isPressed(scaledX2, scaledY2)) {
                 mawi.stopWalking();
                 walkingRight = false;
                 walkR.cancel();
-                Log.d("MenuState", "walk right cancelled in pointer Up. walkingLeft = " + walkingLeft
-                        + ".\n");
+                //Log.d("MenuState", "walk right cancelled in pointer Up. walkingLeft = " + walkingLeft
+                      //  + ".\n");
                 if (walkingLeft)
                     mawi.walk(LEFT);
                 else if (runningRight)
