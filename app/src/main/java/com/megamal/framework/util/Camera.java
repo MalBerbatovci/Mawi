@@ -75,6 +75,7 @@ public class Camera {
                         overRun = X_THRESHOLD - playerCentreX;
                     else
                         overRun = 0;
+                    Log.d("Camera", "Left after isLeft else section");
                     cameraOffsetX = cameraOffsetX - CAMERA_MOVEMENT;
                     player.setCenterX(cameraOffsetX, LEFT, overRun);
                     return cameraOffsetX;

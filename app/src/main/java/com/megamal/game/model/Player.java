@@ -89,22 +89,23 @@ public class Player {
     public void update(float delta, int[][] map, int cameraOffsetX, int cameraOffsetY) {
 
         //update Scan Lines appropriately
-        xScanLineADown = x + SCAN_A_DOWN;
-        xScanLineBDown = x + SCAN_B_DOWN;
+        xScanLineADown = x + SCAN_A_DOWN + cameraOffsetX;
+        xScanLineBDown = x + SCAN_B_DOWN + cameraOffsetX;
 
         yScanLineAAcross = y + SCAN_A_ACROSS;
         yScanLineBAcross = y + SCAN_B_ACROSS;
 
         //variables for the x co-ordinate of the scanLines to check obstacles
         //one to the left of mawi and one to the right
-        xStartAcross = (int) x - CLOSENESS_TO_OBSTACLE - 1;
-        xEndAcross = (int) x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_HEIGHT + 1;
+        xStartAcross = (int) (x - CLOSENESS_TO_OBSTACLE - 1) + cameraOffsetX;
+        xEndAcross = (int) (x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_HEIGHT + 1) + cameraOffsetX;
 
         checkGrounded(map);
         checkCloseness(map, cameraOffsetX, cameraOffsetY);
 
         if(hasMoved())
-            System.out.println("Previous x: " + x + ". \t Previous y:" + y);
+            Log.d("Location", "Previous x: " + x + ". \t Previous y:" + y);
+
 
         previousX = x;
         previousY = y;
@@ -206,7 +207,7 @@ public class Player {
                 //if mawi is not grounded at this point, she must have just contacted the
                 //ground, therefore set the initial Y of the floor to avoid 'sinking'
                 if (!isGrounded) {
-                    System.out.println("yFloor is: " + yFloor);
+                    Log.d("Collisions","yFloor is: " + yFloor);
                     y = (yFloor * GameMainActivity.TILE_HEIGHT) - height; //- height;
                     isGrounded = true;
                     if (isJumping)
@@ -250,7 +251,7 @@ public class Player {
             //System.out.println("has moved is true");
             //Log.d("Player", "Sneakily entered check Closeness");
 
-            
+
             int scanAAcrossY = (int) Math.floor(yScanLineAAcross / GameMainActivity.TILE_HEIGHT);
             int scanBAcrossY = (int) Math.floor(yScanLineBAcross / GameMainActivity.TILE_HEIGHT);
 
@@ -262,21 +263,21 @@ public class Player {
 
                 //set Tile ID appropriately from scanlines
                 tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
-                System.out.println("1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+                Log.d("Collisions","1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
 
                 //check the first scan line and the tile to the right, if obstacle; set location of tile,
                 // and set new x from this location
                 if (tileA.isObstacle()) {
                     tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
                     x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
-                    System.out.println("Case 1!");
+                    Log.d("Collisions","Case 1!");
                     collisionWithObj = true;
                     return;
 
                     //else, check the second scan line and the tile to the right, if obstacle set new x
                 } else {
                     tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
-                    System.out.println("2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
+                    Log.d("Collision","2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
                         tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
@@ -294,7 +295,7 @@ public class Player {
                 int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
                 tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
 
-                System.out.println("3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
+                Log.d("Collisions","3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
                 if (tileA.isObstacle()) {
                     tileA.setLocation(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
