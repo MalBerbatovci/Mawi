@@ -12,7 +12,7 @@ import com.megamal.mawi.GameMainActivity;
 public class Tile {
 
     private int ID;
-    private int x, y;
+    private double x, y;
     private boolean isObstacle;
     private Bitmap image;
     private Rect rect;
@@ -37,14 +37,14 @@ public class Tile {
 
     //takes the index of the array in order to work out co-ordinates for the tile
     //and also updates the rect for each tile
-    public void setLocation(int y, int x, int cameraOffsetX, int cameraOffsetY) {
+    public void setLocation(double y, double x, double cameraOffsetX, double cameraOffsetY) {
             this.y = y * GameMainActivity.TILE_HEIGHT;
-            this.x = x * GameMainActivity.TILE_WIDTH - cameraOffsetX;
+            this.x = (x * GameMainActivity.TILE_WIDTH) - cameraOffsetX;
     }
 
-    public void setRect(int y, int x) {
-        rect.set(this.x, this.y, this.x + GameMainActivity.TILE_WIDTH,
-                this.y + GameMainActivity.TILE_HEIGHT);
+    public void setRect(double y, double x) {
+        rect.set((int) this.x, (int) this.y,(int) this.x + GameMainActivity.TILE_WIDTH,
+                (int) this.y + GameMainActivity.TILE_HEIGHT);
 
     }
 
@@ -69,11 +69,11 @@ public class Tile {
         return rect;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 

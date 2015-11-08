@@ -40,7 +40,7 @@ public class MenuState extends State {
     private int[][] map;
 
     private int maskedAction, pointerActiveIndex;
-    private int cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
+    private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
     @Override

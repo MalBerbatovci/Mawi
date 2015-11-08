@@ -17,7 +17,7 @@ public class TileMapRenderer {
     Tile currentTile;
     TileMapFactory tileFactory = new TileMapFactory();
 
-    private int remainderX, RemainderY;
+    //private int remainderX, RemainderY;
     private double startingX, startingY;
 
     private int maxCameraOffsetX;
@@ -45,10 +45,10 @@ public class TileMapRenderer {
     //WHEN IMPLEMENTING CAMERA - CALCULATE WHERE TO START THE FOR LOOP FOR X AND Y
     //AND THEN CHECK Y < (SCREEN_TILE_SIZE_Y + initialY) - SAME FOR X.
     //method to render map
-    public void renderMap(Painter g, int[][] map, int cameraOffsetX, int cameraOffsetY, Player player) {
+    public void renderMap(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, Player player) {
 
         //must use remainderX!!!!!! Or must i?
-        remainderX = cameraOffsetX % GameMainActivity.TILE_WIDTH;
+        //remainderX = cameraOffsetX % GameMainActivity.TILE_WIDTH;
         maxCameraOffsetX = (map[0].length * GameMainActivity.TILE_WIDTH) - GameMainActivity.GAME_WIDTH;
 
 
@@ -60,7 +60,7 @@ public class TileMapRenderer {
                     currentTile.setID(map[y][x]);
                     currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
                     if (currentTile.getImage() != null)
-                        g.drawImage(currentTile.getImage(), currentTile.getX(), currentTile.getY());
+                        g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
 
                 }
             }
@@ -74,30 +74,11 @@ public class TileMapRenderer {
             Log.d("Camera", "2: StartingX is: " + startingX + ". Camera OffsetX is: " + cameraOffsetX + ". \n");
 
             for (int y = 0; y < SCREEN_TILE_SIZE_Y; y++) {
-                for (int x = (int) startingX; x < (SCREEN_TILE_SIZE_X + (int) startingX - 1); x++) {
+                for (int x = (int) (startingX - 1); x < (SCREEN_TILE_SIZE_X + (int) startingX); x++) {
                     currentTile.setID(map[y][x]);
                     currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
                     if (currentTile.getImage() != null)
-                        g.drawImage(currentTile.getImage(), currentTile.getX(), currentTile.getY());
-
-                    //this is the tile on the left that needs to be draw offsetted slightly
-                    if (x == startingX) {
-                            currentTile.setID(map[y][x - 1]);
-                            currentTile.setLocation(y, (x - 1), cameraOffsetX, cameraOffsetY);
-                        if(currentTile.getImage() != null) {
-                            g.drawImage(currentTile.getImage(), currentTile.getX(), //- GameMainActivity.TILE_WIDTH,
-                                    currentTile.getY());
-                        }
-
-                    //this is the tile on the right that needs to be draw offsetted slightly
-                    } else if (x == (SCREEN_TILE_SIZE_X + (int) startingX - 2)) {
-                            currentTile.setID(map[y][x + 1]);
-                            currentTile.setLocation(y, (x + 1), cameraOffsetX, cameraOffsetY);
-                        if (currentTile.getImage() != null) {
-                            g.drawImage(currentTile.getImage(), currentTile.getX(), //+ GameMainActivity.TILE_WIDTH,
-                                    currentTile.getY());
-                        }
-                    }
+                        g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
                 }
             }
         } else if (cameraOffsetX == maxCameraOffsetX) {
@@ -107,7 +88,7 @@ public class TileMapRenderer {
                     currentTile.setID(map[y][x]);
                     currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
                     if (currentTile.getImage() != null)
-                        g.drawImage(currentTile.getImage(), currentTile.getX(), currentTile.getY());
+                        g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
 
                 }
             }
