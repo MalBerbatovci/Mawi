@@ -44,7 +44,7 @@ public class Camera {
                         overRun = playerCentreX - X_THRESHOLD_RIGHT;
                     else
                         overRun = 0;
-                    Log.d("Camera","OverRun is: " + overRun + ". \n");
+                    //Log.d("Camera","OverRun is: " + overRun + ". \n");
                     cameraOffsetX = cameraOffsetX + overRun;
                     player.lockToXThreshold(X_THRESHOLD_RIGHT);
                     return cameraOffsetX;
@@ -52,7 +52,7 @@ public class Camera {
             //in this case, mawi can move the camera either to the RIGHT OR the LEFT, therefore
             //must implement deadZones
             } else if (cameraOffsetX > 0 && cameraOffsetX < maxCameraOffsetX) {
-                Log.d("Camera", "Entered cameraOffset > 0 loop");
+                //Log.d("Camera", "Entered cameraOffset > 0 loop");
 
                 //case moving to the right
                 //if(playerCentreX > DEAD_ZONE_RIGHT) {
@@ -61,7 +61,7 @@ public class Camera {
                         overRun = playerCentreX - X_THRESHOLD_RIGHT;
                     else
                         overRun = 0;
-                    Log.d("Camera","OverRun is: " + overRun + ". \n");
+                    //Log.d("Camera","OverRun is: " + overRun + ". \n");
                     cameraOffsetX = cameraOffsetX + overRun;
                     if (cameraOffsetX > maxCameraOffsetX)
                         cameraOffsetX = maxCameraOffsetX;
@@ -77,14 +77,12 @@ public class Camera {
                         overRun = X_THRESHOLD_LEFT - playerCentreX;
                     else
                         overRun = 0;
-                    Log.d("Camera", "Left after isLeft else section");
                     cameraOffsetX = cameraOffsetX - overRun;
                     if (cameraOffsetX < 0)
                         cameraOffsetX = 0;
                     player.lockToXThreshold(X_THRESHOLD_LEFT);
                     return cameraOffsetX;
                 } else {
-                    Log.d("Camera","Left just returning cameraOffsetX");
                     return cameraOffsetX;
 
                 }

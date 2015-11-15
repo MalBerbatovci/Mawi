@@ -31,6 +31,9 @@ public class Tile {
             case(1):this.image = Assets.grassImage;
                     this.isObstacle = true;
                     break;
+            case(2):this.image = Assets.earthImage;
+                    this.isObstacle = true;
+                    break;
         }
 
     }
