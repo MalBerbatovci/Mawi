@@ -18,10 +18,10 @@ public class Player {
     private final static int Y_RECT_LEEWAY = 30;
 
     //Constant for physics
-    private final static double ACCEL_GRAVITY = 2722;
+    private final static double ACCEL_GRAVITY = 1722;
     private final static double WALKING_SPEED = 100;
-    private final static double RUNNING_SPEED = 200;
-    private final static double JUMPING_ACCELERATION = -1222;
+    private final static double RUNNING_SPEED = 242;
+    private final static double JUMPING_ACCELERATION = -852;
 
     //Scan Lines co-ordinates for obstacles underneath -  must be added to mawi.X
     private final static int SCAN_A_DOWN = 15;
@@ -55,6 +55,7 @@ public class Player {
     private boolean hasMoved = true;
     private boolean collisionWithObj = false;
     private boolean left, right = false;
+    private boolean justGrounded = false;
 
     //DuckRect too, when implementing
     private Rect rect;
@@ -169,6 +170,8 @@ public class Player {
     //this is then used to establish whether mawi is grounded or not
     private void checkYMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
 
+        justGrounded = false;
+
         if (hasMoved(cameraOffsetX, cameraOffsetY) || !isGrounded) {
 
             xScanLineADown = x + SCAN_A_DOWN + cameraOffsetX;
@@ -178,14 +181,16 @@ public class Player {
             scanADown = (int) Math.floor(xScanLineADown / GameMainActivity.TILE_HEIGHT);
             scanBDown = (int) Math.floor(xScanLineBDown / GameMainActivity.TILE_HEIGHT);
 
+            //boundary conditions - these will cause an arrayIndexOutOfBounds Exception
             if (scanADown < 0 || scanADown >= map[0].length || scanBDown < 0 || scanBDown >= map[0].length)
                 return;
 
             //this means charatcer is currently jumping, first get map[Y] value then see if obstacles
-            //if obstacles then charatcer has hit head, apply gravity?
+            //if obstacles then charatcer has hit head
             if (velY < 0) {
                 yFloor = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
 
+                //boundary conditions
                 if (yFloor < 0 || yFloor >= map.length) {
                     isGrounded = false;
                     return;
@@ -194,13 +199,19 @@ public class Player {
                 tileA.setID(map[yFloor][scanADown]);
                 tileB.setID(map[yFloor][scanBDown]);
 
-                if (tileA.isObstacle() || tileB.isObstacle()) {
+                if (tileA.isObstacle()) {
+                    tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
+                    y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    isGrounded = false;
-                } else {
-                    isGrounded = false;
+                    return;
+                } else if (tileB.isObstacle()) {
+                    tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
+                    y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
+                    velY = Math.abs(velY) / 5;
+                    return;
                 }
             }
+            //else, character is not jumping so check tiles beneath
             else {
 
                 //get map[Y] value!
@@ -211,7 +222,7 @@ public class Player {
                 if (yFloor < 0 || yFloor >= map.length)
                     return;
 
-                //do something with this info about player be outside screen
+                //do something with this info about player being outside screen (indexOutOfBounds)
                 if (scanBDown >= map[0].length || scanBDown < 0 || scanADown < 0 || scanADown >= map[0].length)
                     return;
 
@@ -223,7 +234,7 @@ public class Player {
                         " checked!");
 
                 //if both are obstacles
-                if (tileA.isObstacle() & tileB.isObstacle()) {
+                if (tileA.isObstacle() && tileB.isObstacle()) {
                     Log.d("Grounded", "both tiles beneath are obstacles");
                     //if mawi is not grounded at this point, she must have just contacted the
                     //ground, therefore set the initial Y of the floor to avoid 'sinking'
@@ -231,8 +242,13 @@ public class Player {
                         Log.d("Grounded", "found floor after being ungrounded");
                         y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
                         isGrounded = true;
+                        justGrounded = true;
                         if (isJumping)
                             isJumping = false;
+
+                        allignMawiY(cameraOffsetX, cameraOffsetY);
+
+                        return;
                     }
                     //else, just walking/running along ground
                     else {
@@ -243,42 +259,50 @@ public class Player {
                             tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                             y = tileA.getY() - height;
                         }
+
+                        return;
                     }
 
                     //else, if both are not obstacles, mawi is not grounded
                 } else if (!tileA.isObstacle() & !tileB.isObstacle()) {
                     Log.d("Grounded", "both tiles beneath are not obstacles");
                     isGrounded = false;
+                    return;
 
                     //else, only one scanLine has been trigged, can do something w/ this info.
                 } else {
                     //y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
                     Log.d("Grounded", "only one tiles beneath is an obstacle");
-                    isGrounded = true;
+
+                    if (!isGrounded) {
+                        justGrounded = true;
+                        isGrounded = true;
+                    }
+
                     if (isJumping)
                         isJumping = false;
 
-                    if ((int) y % GameMainActivity.TILE_HEIGHT != 0) {
-                        if (tileA.isObstacle()) {
-                            tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
-                            y = tileA.getY() - height;
-                            Log.d("Grounded", "TileA.isObstacle - y set to: " + y);
-                        } else {
-                            tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
-                            y = tileB.getY() - height;
-                            Log.d("Grounded", "TileB.isObstacle - y set to: " + y);
-                        }
-                    }
+                    //if mawi is not perfectly alligned with tile after falling onto it, force this
+                    allignMawiY(cameraOffsetX, cameraOffsetY);
+                    return;
                 }
             }
         }
+    }
 
-        /* int footTile = (int) Math.floor((y + 128) / GameMainActivity.TILE_HEIGHT);
-        tileA.setID(map[footTile][(int)x]);
-        if (tileA.isObstacle()) {
-            tileA.setLocation(footTile, x, 0, 0);
-            y = tileA.getY();
-        } */
+    //method to put mawi's y to be perfectly above tile after just being grounded
+    private void allignMawiY(double cameraOffsetX, double cameraOffsetY) {
+        if ((int) y % GameMainActivity.TILE_HEIGHT != 0) {
+            if (tileA.isObstacle()) {
+                tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
+                y = tileA.getY() - height;
+                Log.d("Grounded", "TileA.isObstacle - y set to: " + y);
+            } else {
+                tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
+                y = tileB.getY() - height;
+                Log.d("Grounded", "TileB.isObstacle - y set to: " + y);
+            }
+        }
     }
 
 
@@ -287,7 +311,7 @@ public class Player {
     //and then only check those necessary tiles i.e to the right or the left
     private void checkXMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
 
-        if (hasMoved(cameraOffsetX, cameraOffsetY) || collisionWithObj) {
+        if (hasMoved(cameraOffsetX, cameraOffsetY) || collisionWithObj || justGrounded()) {
 
             yScanLineAAcross = y + SCAN_A_ACROSS;
             yScanLineBAcross = y + SCAN_B_ACROSS;
@@ -316,26 +340,26 @@ public class Player {
 
                 //set Tile ID appropriately from scanlines
                 tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
-                Log.d("Collisions", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+                Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
 
                 //check the first scan line and the tile to the right, if obstacle; set location of tile,
                 // and set new x from this location
                 if (tileA.isObstacle()) {
                     tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
                     x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
-                    Log.d("Collisions", "Case 1!");
+                    Log.d("CollisionsX", "Case 1!");
                     collisionWithObj = true;
                     return;
 
                     //else, check the second scan line and the tile to the right, if obstacle set new x
                 } else {
                     tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
-                    Log.d("Collision", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
+                    Log.d("CollisionsX", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
                         tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
                         x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
-                        Log.d("Collision", "Case 2!");
+                        Log.d("CollisiosnX", "Case 2!");
                         collisionWithObj = true;
                         return;
                     }
@@ -346,29 +370,30 @@ public class Player {
             //if on the left, then must set x to previous X instead of tile's x.
             else if (left) {
                 int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
-                if (scanStartAcrossX < 0 || scanStartAcrossX > map[0].length)
+
+                if (scanStartAcrossX < 0 || scanStartAcrossX >= map[0].length)
                     return;
 
                 tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
 
-                Log.d("Collisions", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
+                Log.d("CollisionsX", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
                 if (tileA.isObstacle()) {
                     tileA.setLocation(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
                     x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
-                    Log.d("Collision", "Case 3! With co-ordinate: (" + previousX + "," + previousY + ")");
+                    Log.d("CollisionsX", "Case 3! With co-ordinate: (" + previousX + "," + previousY + ")");
 
                     collisionWithObj = true;
                     return;
 
                 } else {
                     tileA.setID(map[scanBAcrossY][scanStartAcrossX]);
-                    Log.d("Collision", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
+                    Log.d("CollisionsX", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
 
                     if (tileA.isObstacle()) {
                         tileA.setLocation(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
                         x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
-                        Log.d("Collision", "Case 4! Previous x and y: " + previousX + "," + previousY +
+                        Log.d("CollisionsX", "Case 4! Previous x and y: " + previousX + "," + previousY +
                                 ". New x and y: " + x + "," + y + ". \n");
                         collisionWithObj = true;
                         return;
@@ -377,6 +402,92 @@ public class Player {
                 }
 
             }
+        }
+
+
+        //JUST A COPY AND PASTE OF CODE ^, as it was required to enter both the if and else section of the loop
+        if (justGrounded()) {
+            yScanLineAAcross = y + SCAN_A_ACROSS;
+            yScanLineBAcross = y + SCAN_B_ACROSS;
+
+            xStartAcross = (int) ((x - CLOSENESS_TO_OBSTACLE - 1) + cameraOffsetX);
+            xEndAcross = (int) ((x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH + 1) + cameraOffsetX);
+
+            collisionWithObj = false;
+
+            int scanAAcrossY = (int) Math.floor(yScanLineAAcross / GameMainActivity.TILE_HEIGHT);
+            if (scanAAcrossY < 0 || scanAAcrossY >= map.length)
+                return;
+
+            int scanBAcrossY = (int) Math.floor(yScanLineBAcross / GameMainActivity.TILE_HEIGHT);
+            if (scanBAcrossY < 0 || scanBAcrossY >= map.length)
+                return;
+
+            //variables for tile co-ordinates in relevance to scanLine variables
+            int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
+
+            if (scanEndAcrossX < 0 || scanEndAcrossX >= map[0].length)
+                return;
+
+            //set Tile ID appropriately from scanlines
+            tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+            Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+
+            //check the first scan line and the tile to the right, if obstacle; set location of tile,
+            // and set new x from this location
+            if (tileA.isObstacle()) {
+                tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
+                Log.d("CollisionsX", "Case 1!");
+                collisionWithObj = true;
+                return;
+
+                //else, check the second scan line and the tile to the right, if obstacle set new x
+            } else {
+                tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
+                Log.d("CollisionsX", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
+
+                if (tileA.isObstacle()) {
+                    tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                    x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
+                    Log.d("CollisiosnX", "Case 2!");
+                    collisionWithObj = true;
+                    return;
+                }
+            }
+
+            int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
+
+            if (scanStartAcrossX < 0 || scanStartAcrossX >= map[0].length)
+                return;
+
+            tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
+
+            Log.d("CollisionsX", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
+
+            if (tileA.isObstacle()) {
+                tileA.setLocation(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+                Log.d("CollisionsX", "Case 3! With co-ordinate: (" + previousX + "," + previousY + ")");
+
+                collisionWithObj = true;
+                return;
+
+            } else {
+                tileA.setID(map[scanBAcrossY][scanStartAcrossX]);
+                Log.d("CollisionsX", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
+
+                if (tileA.isObstacle()) {
+                    tileA.setLocation(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                    x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+                    Log.d("CollisionsX", "Case 4! Previous x and y: " + previousX + "," + previousY +
+                            ". New x and y: " + x + "," + y + ". \n");
+                    collisionWithObj = true;
+                    return;
+                }
+
+            }
+
         }
 
         collisionWithObj = false;
@@ -430,6 +541,7 @@ public class Player {
             velY = JUMPING_ACCELERATION;
             updateRects();
             isJumping = true;
+            isGrounded = false;
         }
     }
 
@@ -452,27 +564,27 @@ public class Player {
         if ((cameraOffsetX == 0 && cameraOffsetY == 0)) {
             if (previousX != x || previousY != y) {
                 hasMoved = true;
-                //Log.d("hasMoved", "is true");
+                Log.d("hasMoved", "is true");
                 return hasMoved;
             } else if (previousX == x && previousY == y) {
                 hasMoved = false;
-                //Log.d("hasMoved", "is false as previous = this");
+                Log.d("hasMoved", "is false as previous = this");
                 return hasMoved;
             }
         } else {
             if (locked) {
                 hasMoved = true;
-                //Log.d("hasMoved", "is true because locked");
+                Log.d("hasMoved", "is true because locked");
                 return hasMoved;
             }
             if (!locked)
-                if (isWalking() || isRunning() || isJumping()) {
+                if (isWalking() || isRunning() || velY != 0) {
                     hasMoved = true;
-                    //Log.d("hasMoved", "is true as unlocked but running/jumping");
+                    Log.d("hasMoved", "is true as unlocked but running/jumping");
                     return hasMoved;
                 } else {
                     hasMoved = false;
-                    //Log.d("hasMoved", "is false as unlocked and not running/jumping");
+                    Log.d("hasMoved", "is false as unlocked and not running/jumping");
                     return hasMoved;
                 }
         }
@@ -512,6 +624,8 @@ public class Player {
     public boolean isJumping() {
         return isJumping;
     }
+
+    public boolean justGrounded() { return justGrounded; }
 
     //if not right, then left, not sure if necessary
     public boolean isLeft() {

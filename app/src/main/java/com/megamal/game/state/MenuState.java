@@ -37,6 +37,7 @@ public class MenuState extends State {
     private UIButton walkR, walkL, runR, runL, jump;
 
     private boolean walkingRight = false, walkingLeft = false, runningRight = false, runningLeft = false;
+    private boolean initialRender = true;
     private int[][] map;
 
     private int maskedAction, pointerActiveIndex;
@@ -106,23 +107,38 @@ public class MenuState extends State {
     @Override
     public void render(Painter g) {
 
-        g.setColor(Color.rgb(208, 244, 247));
-        g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
+        //whole screen must be rendered
+        if(initialRender) {
+            tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
+            initialRender = false;
+        }
 
-        tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, mawi);
+        else {
+            if(previousOffsetX != cameraOffsetX) {
+                Log.d("PreviousOff", "previousX & Y: " + previousOffsetX + " & " + previousOffsetY + ". " +
+                        "CurrentX & Y: " + cameraOffsetX + " & " + cameraOffsetY);
+            }
+            tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY, mawi);
+        }
 
 
         //renderButton methods
-        walkR.render(g);
-        walkL.render(g);
-        runR.render(g);
-        runL.render(g);
-        jump.render(g);
+            walkR.render(g);
+            walkL.render(g);
+            runR.render(g);
+            runL.render(g);
+            jump.render(g);
 
         renderPlayer(g);
     }
 
     private void renderPlayer(Painter g) {
+
+        if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
+            g.setColor(Color.rgb(208, 244, 247));
+            g.fillRect((int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+        }
+
         if (mawi.isJumping()) {
             if (mawi.isRight()) {
                 g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());

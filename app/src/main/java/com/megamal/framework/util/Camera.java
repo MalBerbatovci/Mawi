@@ -21,7 +21,7 @@ public class Camera {
 
     //return
     public double updateCameraX(Player player, double cameraOffsetX, int[][] map) {
-
+        
         //calculate the x of the players center
         playerCentreX = player.getX() + (GameMainActivity.TILE_HEIGHT / 2);
 
