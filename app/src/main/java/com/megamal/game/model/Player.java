@@ -106,6 +106,12 @@ public class Player {
         if (isWalking || isRunning) {
             if (!collisionWithObj) {
                 x += velX * delta;
+
+                if (x < 0) {
+                    x = 0;
+                } else if ((x + width > GameMainActivity.GAME_WIDTH)) {
+                    x = GameMainActivity.GAME_WIDTH - width;
+                }
             }
         } else {
             velX = 0;
@@ -127,6 +133,8 @@ public class Player {
 
         updateRects();
         updateAnim(delta);
+
+        Log.d("Jumping", "Is jumping: " + isJumping + ".");
 
     }
 
@@ -188,7 +196,7 @@ public class Player {
             //this means charatcer is currently jumping, first get map[Y] value then see if obstacles
             //if obstacles then charatcer has hit head
             if (velY < 0) {
-                yFloor = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                yFloor = (int) Math.floor((y + cameraOffsetY) / GameMainActivity.TILE_HEIGHT);
 
                 //boundary conditions
                 if (yFloor < 0 || yFloor >= map.length) {
@@ -215,7 +223,7 @@ public class Player {
             else {
 
                 //get map[Y] value!
-                yFloor = (int) y + GameMainActivity.PLAYER_HEIGHT;
+                yFloor = (int) (y + GameMainActivity.PLAYER_HEIGHT + cameraOffsetY);
                 yFloor = (int) Math.floor(yFloor / GameMainActivity.TILE_HEIGHT);
 
                 //do something if character has somehow fallen to bottom of map
@@ -240,7 +248,6 @@ public class Player {
                     //ground, therefore set the initial Y of the floor to avoid 'sinking'
                     if (!isGrounded) {
                         Log.d("Grounded", "found floor after being ungrounded");
-                        y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
                         isGrounded = true;
                         justGrounded = true;
                         if (isJumping)
@@ -255,10 +262,10 @@ public class Player {
                         if (isJumping)
                             isJumping = false;
 
-                        if ((int) y % GameMainActivity.TILE_HEIGHT != 0) {
+                       /* if ((int) y % GameMainActivity.TILE_HEIGHT != 0) {
                             tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                             y = tileA.getY() - height;
-                        }
+                        } */
 
                         return;
                     }
@@ -283,7 +290,9 @@ public class Player {
                         isJumping = false;
 
                     //if mawi is not perfectly alligned with tile after falling onto it, force this
-                    allignMawiY(cameraOffsetX, cameraOffsetY);
+                    if (justGrounded) {
+                        allignMawiY(cameraOffsetX, cameraOffsetY);
+                    }
                     return;
                 }
             }
@@ -292,10 +301,10 @@ public class Player {
 
     //method to put mawi's y to be perfectly above tile after just being grounded
     private void allignMawiY(double cameraOffsetX, double cameraOffsetY) {
-        if ((int) y % GameMainActivity.TILE_HEIGHT != 0) {
+        if ((int) (y + cameraOffsetY) % GameMainActivity.TILE_HEIGHT != 0) {
             if (tileA.isObstacle()) {
                 tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
-                y = tileA.getY() - height;
+                y = (tileA.getY() - height);
                 Log.d("Grounded", "TileA.isObstacle - y set to: " + y);
             } else {
                 tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
@@ -313,8 +322,8 @@ public class Player {
 
         if (hasMoved(cameraOffsetX, cameraOffsetY) || collisionWithObj || justGrounded()) {
 
-            yScanLineAAcross = y + SCAN_A_ACROSS;
-            yScanLineBAcross = y + SCAN_B_ACROSS;
+            yScanLineAAcross = y + SCAN_A_ACROSS + cameraOffsetY;
+            yScanLineBAcross = y + SCAN_B_ACROSS + cameraOffsetY;
 
             xStartAcross = (int) ((x - CLOSENESS_TO_OBSTACLE - 1) + cameraOffsetX);
             xEndAcross = (int) ((x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH + 1) + cameraOffsetX);
@@ -338,33 +347,33 @@ public class Player {
                 if (scanEndAcrossX < 0 || scanEndAcrossX >= map[0].length)
                     return;
 
-                //set Tile ID appropriately from scanlines
-                tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
-                Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+                    //set Tile ID appropriately from scanlines
+                    tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+                    Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
 
-                //check the first scan line and the tile to the right, if obstacle; set location of tile,
-                // and set new x from this location
-                if (tileA.isObstacle()) {
-                    tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
-                    x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
-                    Log.d("CollisionsX", "Case 1!");
-                    collisionWithObj = true;
-                    return;
-
-                    //else, check the second scan line and the tile to the right, if obstacle set new x
-                } else {
-                    tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
-                    Log.d("CollisionsX", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
-
+                    //check the first scan line and the tile to the right, if obstacle; set location of tile,
+                    // and set new x from this location
                     if (tileA.isObstacle()) {
-                        tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
-                        x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
-                        Log.d("CollisiosnX", "Case 2!");
+                        tileA.setLocation(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                        x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
+                        Log.d("CollisionsX", "Case 1!");
                         collisionWithObj = true;
                         return;
+
+                        //else, check the second scan line and the tile to the right, if obstacle set new x
+                    } else {
+                        tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
+                        Log.d("CollisionsX", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
+
+                        if (tileA.isObstacle()) {
+                            tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                            x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
+                            Log.d("CollisiosnX", "Case 2!");
+                            collisionWithObj = true;
+                            return;
+                        }
                     }
                 }
-            }
 
             //now check if there are any obstacles to the left, starting with scanLineA,
             //if on the left, then must set x to previous X instead of tile's x.
@@ -404,11 +413,10 @@ public class Player {
             }
         }
 
-
         //JUST A COPY AND PASTE OF CODE ^, as it was required to enter both the if and else section of the loop
         if (justGrounded()) {
-            yScanLineAAcross = y + SCAN_A_ACROSS;
-            yScanLineBAcross = y + SCAN_B_ACROSS;
+            yScanLineAAcross = y + SCAN_A_ACROSS + cameraOffsetY;
+            yScanLineBAcross = y + SCAN_B_ACROSS + cameraOffsetY;
 
             xStartAcross = (int) ((x - CLOSENESS_TO_OBSTACLE - 1) + cameraOffsetX);
             xEndAcross = (int) ((x + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH + 1) + cameraOffsetX);
@@ -558,6 +566,12 @@ public class Player {
         locked = true;
     }
 
+    public void lockToYThreshold(int yThreshold) {
+        y = yThreshold - (height / 2);
+        Log.d("YCamera", "Locked at: " + y);
+        locked = true;
+    }
+
 
     public boolean hasMoved(double cameraOffsetX, double cameraOffsetY) {
 
@@ -603,6 +617,10 @@ public class Player {
 
     public Rect getRect() {
         return rect;
+    }
+
+    public double getVelY() {
+        return velY;
     }
 
     public boolean isAlive() {

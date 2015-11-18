@@ -41,7 +41,7 @@ public class Tile {
     //takes the index of the array in order to work out co-ordinates for the tile
     //and also updates the rect for each tile
     public void setLocation(double y, double x, double cameraOffsetX, double cameraOffsetY) {
-            this.y = y * GameMainActivity.TILE_HEIGHT;
+            this.y = (y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY;
             this.x = (x * GameMainActivity.TILE_WIDTH) - cameraOffsetX;
     }
 

@@ -46,7 +46,6 @@ public class MenuState extends State {
 
     @Override
     public void init() {
-        tileRenderer = new TileMapRenderer();
         tileFactory = new TileMapFactory();
         cameraOffsetX = 0;
         cameraOffsetY = 0;
@@ -58,6 +57,8 @@ public class MenuState extends State {
         } catch (IOException e) {
             System.err.print("Error parsing file: " + levelString);
         }
+
+        tileRenderer = new TileMapRenderer(map);
 
         //loop to find first tile to place mawi on
         loop:
@@ -82,7 +83,7 @@ public class MenuState extends State {
 
         jump = new UIButton(620, 450, 720, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
 
-        camera = new Camera();
+        camera = new Camera(map);
 
     }
 
@@ -100,6 +101,7 @@ public class MenuState extends State {
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
+            cameraOffsetY = camera.updateCameraY(mawi, cameraOffsetY, map);
         }
 
     }
