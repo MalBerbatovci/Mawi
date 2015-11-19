@@ -13,8 +13,8 @@ public class Camera {
     private final static int X_THRESHOLD_RIGHT = (GameMainActivity.GAME_WIDTH / 2) + GameMainActivity.TILE_WIDTH;
     private final static int X_THRESHOLD_LEFT = (GameMainActivity.GAME_WIDTH / 2) - GameMainActivity.TILE_WIDTH;
 
-    private final static int Y_THRESHOLD_UP = (GameMainActivity.GAME_HEIGHT / 2) - GameMainActivity.TILE_HEIGHT;
-    private final static int Y_THRESHOLD_DOWN = (GameMainActivity.GAME_HEIGHT / 2) + GameMainActivity.TILE_HEIGHT;
+    private final static int Y_THRESHOLD_UP = (GameMainActivity.GAME_HEIGHT / 2) - (int) (GameMainActivity.TILE_HEIGHT * 1.5);
+    private final static int Y_THRESHOLD_DOWN = (GameMainActivity.GAME_HEIGHT / 2) + (int) (GameMainActivity.TILE_HEIGHT * 1.5);
 
     private double playerCentreX, maxCameraOffsetX, overRun, maxCameraOffsetY, playerCentreY;
 

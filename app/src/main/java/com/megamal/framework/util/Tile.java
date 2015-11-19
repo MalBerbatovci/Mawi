@@ -11,9 +11,11 @@ import com.megamal.mawi.GameMainActivity;
  */
 public class Tile {
 
+    private static final int COIN_RECT_CONST = 10;
+
     private int ID;
     private double x, y;
-    private boolean isObstacle;
+    private boolean isObstacle, isCollectable;
     private Bitmap image;
     private Rect rect;
 
@@ -27,12 +29,19 @@ public class Tile {
         switch(ID) {
             case(0):this.image = null;
                     this.isObstacle = false;
+                    this.isCollectable = false;
                     break;
             case(1):this.image = Assets.grassImage;
                     this.isObstacle = true;
+                    this.isCollectable = false;
                     break;
             case(2):this.image = Assets.earthImage;
                     this.isObstacle = true;
+                    this.isCollectable = false;
+                    break;
+            case(3):this.image = Assets.coinImage;
+                    this.isObstacle = false;
+                    this.isCollectable = true;
                     break;
         }
 
@@ -40,14 +49,28 @@ public class Tile {
 
     //takes the index of the array in order to work out co-ordinates for the tile
     //and also updates the rect for each tile
-    public void setLocation(double y, double x, double cameraOffsetX, double cameraOffsetY) {
-            this.y = (y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY;
-            this.x = (x * GameMainActivity.TILE_WIDTH) - cameraOffsetX;
+    public void setLocation(double yIndex, double xIndex, double cameraOffsetX, double cameraOffsetY) {
+            this.y = (yIndex * GameMainActivity.TILE_HEIGHT) - cameraOffsetY;
+            this.x = (xIndex * GameMainActivity.TILE_WIDTH) - cameraOffsetX;
     }
 
-    public void setRect(double y, double x) {
-        rect.set((int) this.x, (int) this.y,(int) this.x + GameMainActivity.TILE_WIDTH,
+    public void setRect(double yIndex, double xIndex) {
+        rect.set((int) xIndex, (int) yIndex,(int) this.x + GameMainActivity.TILE_WIDTH,
                 (int) this.y + GameMainActivity.TILE_HEIGHT);
+
+    }
+
+    public void setRectCoin(double yIndex, double xIndex, double cameraOffsetX, double cameraOffsetY) {
+        /*rect.set((int) (((xIndex * GameMainActivity.TILE_WIDTH)) - cameraOffsetX),
+                 (int) (((yIndex * GameMainActivity.TILE_HEIGHT)) - cameraOffsetY),
+                 (int) (((xIndex * GameMainActivity.TILE_WIDTH) + GameMainActivity.TILE_WIDTH)  - cameraOffsetX),
+                 (int) (((yIndex * GameMainActivity.TILE_HEIGHT) + GameMainActivity.TILE_HEIGHT) - cameraOffsetY)); */
+
+        rect.set((int) (((xIndex * GameMainActivity.TILE_WIDTH)) - cameraOffsetX),
+                (int) (((yIndex * GameMainActivity.TILE_HEIGHT) + COIN_RECT_CONST) - cameraOffsetY),
+                (int) (((xIndex * GameMainActivity.TILE_WIDTH) + GameMainActivity.TILE_WIDTH)  - cameraOffsetX),
+                (int) (((yIndex * GameMainActivity.TILE_HEIGHT) + GameMainActivity.TILE_HEIGHT - COIN_RECT_CONST) - cameraOffsetY));
+
 
     }
 
@@ -67,6 +90,8 @@ public class Tile {
     public boolean isObstacle() {
         return isObstacle;
     }
+
+    public boolean isCollectable() { return isCollectable; }
 
     public Rect getRect() {
         return rect;

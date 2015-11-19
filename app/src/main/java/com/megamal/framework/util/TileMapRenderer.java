@@ -16,7 +16,6 @@ import java.io.IOException;
 //class responsible for modelling TileMap on screen
 public class TileMapRenderer {
     Tile currentTile;
-    TileMapFactory tileFactory = new TileMapFactory();
 
     //private int remainderX, RemainderY;
     private int xStart, yStart;

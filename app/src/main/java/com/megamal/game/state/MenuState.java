@@ -81,7 +81,7 @@ public class MenuState extends State {
         walkL = new UIButton(330, 450, 430, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
         walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);
 
-        jump = new UIButton(620, 450, 720, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
+        jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
 
         camera = new Camera(map);
 

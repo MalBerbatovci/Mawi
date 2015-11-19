@@ -58,7 +58,8 @@ public class Player {
     private boolean justGrounded = false;
 
     //DuckRect too, when implementing
-    private Rect rect;
+    private Rect playerRect;
+    private Rect coinRect;
 
     //variable for tiles when checking scan lines
     private Tile tileA, tileB;
@@ -80,8 +81,11 @@ public class Player {
 
         //setting rect smaller than the actual character, in order to give leeway during fighting
         //(better to avoid getting hit, then hit unnecessarily
-        rect = new Rect((int) x + X_RECT_LEEWAY, (int) y + Y_RECT_LEEWAY,
+        playerRect = new Rect((int) x + X_RECT_LEEWAY, (int) y + Y_RECT_LEEWAY,
                 (int) x + (width - X_RECT_LEEWAY), (int) y + (height - Y_RECT_LEEWAY));
+
+        //initialise coinRect
+        coinRect = new Rect();
 
     }
 
@@ -169,7 +173,7 @@ public class Player {
     }
 
     private void updateRects() {
-        rect.set((int) x + X_RECT_LEEWAY, (int) y + Y_RECT_LEEWAY,
+        playerRect.set((int) x + X_RECT_LEEWAY, (int) y + Y_RECT_LEEWAY,
                 (int) x + (width - X_RECT_LEEWAY), (int) y + (height - Y_RECT_LEEWAY));
     }
 
@@ -207,6 +211,7 @@ public class Player {
                 tileA.setID(map[yFloor][scanADown]);
                 tileB.setID(map[yFloor][scanBDown]);
 
+                //check if either is obstacle, if so set y and change velY
                 if (tileA.isObstacle()) {
                     tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                     y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
@@ -217,7 +222,25 @@ public class Player {
                     y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
                     return;
+
+                //else case where tile is a collectable, check if rects intersect, if so then change entry and add score suitably
+                } else if (tileA.isCollectable()) {
+                    tileA.setRectCoin(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
+                    coinRect = tileA.getRect();
+                    if (playerRect.intersect(coinRect)) {
+                        map[yFloor][scanADown] = 0;
+                        //increase score
+                    }
+                } else if (tileB.isCollectable()) {
+                    tileB.setRectCoin(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
+                    coinRect = tileB.getRect();
+                    if (playerRect.intersect(coinRect)) {
+                        map[yFloor][scanBDown] = 0;
+                        //increase score
+                    }
                 }
+
+                return;
             }
             //else, character is not jumping so check tiles beneath
             else {
@@ -271,13 +294,13 @@ public class Player {
                     }
 
                     //else, if both are not obstacles, mawi is not grounded
-                } else if (!tileA.isObstacle() & !tileB.isObstacle()) {
+                } else if ((!tileA.isObstacle() & !tileB.isObstacle()) && (!tileA.isCollectable() || !tileB.isCollectable())) {
                     Log.d("Grounded", "both tiles beneath are not obstacles");
                     isGrounded = false;
                     return;
 
                     //else, only one scanLine has been trigged, can do something w/ this info.
-                } else {
+                } else if (tileA.isObstacle() || tileB.isObstacle()){
                     //y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
                     Log.d("Grounded", "only one tiles beneath is an obstacle");
 
@@ -293,6 +316,31 @@ public class Player {
                     if (justGrounded) {
                         allignMawiY(cameraOffsetX, cameraOffsetY);
                     }
+                    return;
+
+                //case where one tile underneath is an collectable
+                } else if (tileA.isCollectable() || tileB.isCollectable()) {
+                    Log.d("Collectables", "tileA/B is collectable!");
+                    if (tileA.isCollectable()) {
+                        tileA.setRectCoin(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileA.getRect();
+                        if (playerRect.intersect(coinRect)) {
+                            map[yFloor][scanADown] = 0;
+                            isGrounded = false;
+                        }
+                    }
+                    else {
+                        tileB.setRectCoin(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileB.getRect();
+                        if (playerRect.intersect(coinRect)) {
+                            map[yFloor][scanBDown] = 0;
+                            isGrounded = false;
+                        }
+
+                    }
+
+                    isGrounded = false;
+
                     return;
                 }
             }
@@ -338,17 +386,22 @@ public class Player {
             if (scanBAcrossY < 0 || scanBAcrossY >= map.length)
                 return;
 
+            //variables for tile co-ordinates in relevance to scanLine variables
+            int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
+            if (scanEndAcrossX < 0 || scanEndAcrossX >= map[0].length)
+                return;
+
+
+            int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
+            if (scanStartAcrossX < 0 || scanStartAcrossX >= map[0].length)
+                return;
+
             //i.e if moving right, then check scan lines to the right
             if (right) {
 
-                //variables for tile co-ordinates in relevance to scanLine variables
-                int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
-
-                if (scanEndAcrossX < 0 || scanEndAcrossX >= map[0].length)
-                    return;
-
                     //set Tile ID appropriately from scanlines
                     tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+                    tileB.setID(map[scanBAcrossY][scanEndAcrossX]);
                     Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
 
                     //check the first scan line and the tile to the right, if obstacle; set location of tile,
@@ -361,29 +414,42 @@ public class Player {
                         return;
 
                         //else, check the second scan line and the tile to the right, if obstacle set new x
-                    } else {
-                        tileA.setID(map[scanBAcrossY][scanEndAcrossX]);
+                    } else if (tileB.isObstacle()){
                         Log.d("CollisionsX", "2: map[" + scanBAcrossY + "][" + scanEndAcrossX + "] checked");
-
-                        if (tileA.isObstacle()) {
-                            tileA.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
-                            x = (tileA.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
+                            tileB.setLocation(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                            x = (tileB.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_HEIGHT);
                             Log.d("CollisiosnX", "Case 2!");
                             collisionWithObj = true;
                             return;
+
+                    } else if (tileA.isCollectable() || tileB.isCollectable()) {
+
+                        if(tileA.isCollectable()) {
+                            tileA.setRectCoin(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                            coinRect = tileA.getRect();
+                            if (playerRect.intersect(coinRect)) {
+                                map[scanAAcrossY][scanEndAcrossX] = 0;
+                            }
                         }
+
+                        if (tileB.isCollectable()) {
+                            tileB.setRectCoin(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                            coinRect = tileB.getRect();
+                            if (playerRect.intersect(coinRect)) {
+                                map[scanBAcrossY][scanEndAcrossX] = 0;
+                            }
+                        }
+
+                        return;
                     }
                 }
 
             //now check if there are any obstacles to the left, starting with scanLineA,
             //if on the left, then must set x to previous X instead of tile's x.
             else if (left) {
-                int scanStartAcrossX = (int) Math.floor(xStartAcross / GameMainActivity.TILE_HEIGHT);
-
-                if (scanStartAcrossX < 0 || scanStartAcrossX >= map[0].length)
-                    return;
 
                 tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
+                tileB.setID(map[scanBAcrossY][scanStartAcrossX]);
 
                 Log.d("CollisionsX", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
@@ -395,21 +461,84 @@ public class Player {
                     collisionWithObj = true;
                     return;
 
-                } else {
-                    tileA.setID(map[scanBAcrossY][scanStartAcrossX]);
+                } else if (tileB.isObstacle()) {
                     Log.d("CollisionsX", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
 
-                    if (tileA.isObstacle()) {
-                        tileA.setLocation(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
-                        x = (tileA.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+                        tileB.setLocation(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                        x = (tileB.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
                         Log.d("CollisionsX", "Case 4! Previous x and y: " + previousX + "," + previousY +
                                 ". New x and y: " + x + "," + y + ". \n");
                         collisionWithObj = true;
                         return;
+
+
+                    //not Mutually exclusive, so must check both
+                } else if (tileA.isCollectable() || tileB.isCollectable()) {
+                    if (tileA.isCollectable()) {
+                        tileA.setRectCoin(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileA.getRect();
+                        if (playerRect.intersect(coinRect)) {
+                            map[scanAAcrossY][scanStartAcrossX] = 0;
+                        }
                     }
 
+                    if (tileB.isCollectable()) {
+                        tileB.setRectCoin(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileB.getRect();
+                        if(playerRect.intersect(coinRect)) {
+                            map[scanBAcrossY][scanStartAcrossX] = 0;
+                        }
+                    }
+
+                    return;
                 }
 
+            } else {
+                tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
+                tileB.setID(map[scanBAcrossY][scanEndAcrossX]);
+
+                if (tileA.isCollectable() || tileB.isCollectable()) {
+
+                    if(tileA.isCollectable()) {
+                        tileA.setRectCoin(scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileA.getRect();
+                        if (playerRect.intersect(coinRect)) {
+                            map[scanAAcrossY][scanEndAcrossX] = 0;
+                        }
+                    }
+
+                    if (tileB.isCollectable()) {
+                        tileB.setRectCoin(scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY);
+                        coinRect = tileB.getRect();
+                        if (playerRect.intersect(coinRect)) {
+                            map[scanBAcrossY][scanEndAcrossX] = 0;
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
+            tileB.setID(map[scanBAcrossY][scanStartAcrossX]);
+
+            if (tileA.isCollectable() || tileB.isCollectable()) {
+
+                if(tileA.isCollectable()) {
+                    tileA.setRectCoin(scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                    coinRect = tileA.getRect();
+                    if (playerRect.intersect(coinRect)) {
+                        map[scanAAcrossY][scanStartAcrossX] = 0;
+                    }
+                }
+
+                if (tileB.isCollectable()) {
+                    tileB.setRectCoin(scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY);
+                    coinRect = tileB.getRect();
+                    if (playerRect.intersect(coinRect)) {
+                        map[scanBAcrossY][scanStartAcrossX] = 0;
+                    }
+                }
             }
         }
 
@@ -615,8 +744,8 @@ public class Player {
         return width;
     }
 
-    public Rect getRect() {
-        return rect;
+    public Rect getplayerRect() {
+        return playerRect;
     }
 
     public double getVelY() {
