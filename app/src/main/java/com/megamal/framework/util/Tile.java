@@ -11,7 +11,7 @@ import com.megamal.mawi.GameMainActivity;
  */
 public class Tile {
 
-    private static final int COIN_RECT_CONST = 10;
+    private static final int COIN_RECT_CONST = 5;
 
     private int ID;
     private double x, y;
