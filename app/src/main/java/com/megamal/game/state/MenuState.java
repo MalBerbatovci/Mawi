@@ -12,12 +12,14 @@ import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapFactory;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
+import com.megamal.game.model.Collectable;
 import com.megamal.game.model.Player;
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;
 import com.megamal.mawi.GameMainActivity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by malberbatovci on 22/09/15.
@@ -33,6 +35,8 @@ public class MenuState extends State {
     private Player mawi;
     private Tile tile;
     private String levelString = "test.txt";
+
+    private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
 
     private UIButton walkR, walkL, runR, runL, jump;
 
@@ -97,7 +101,24 @@ public class MenuState extends State {
         if (!mawi.isAlive()) {
             //do something if end of game
         } else {
+
             mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
+
+            if (mawi.hitNewBox()) {
+                collectables.add(mawi.getMostRecentCollectable());
+            }
+
+            if(!collectables.isEmpty()) {
+                Log.d("Collectables", "Updating collectables");
+                for (int i = 0; i < collectables.size(); i++) {
+                    collectables.get(i).update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+
+                    if (!(collectables.get(i).isAlive())) {
+                        Log.d("Collectables", "isAlive = false!");
+                        collectables.remove(i);
+                    }
+                }
+            }
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
@@ -124,6 +145,11 @@ public class MenuState extends State {
         }
 
 
+        if(!collectables.isEmpty()) {
+            for (int i = 0; i < collectables.size(); i++) {
+                collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
+            }
+        }
         //renderButton methods
             walkR.render(g);
             walkL.render(g);

@@ -1,7 +1,9 @@
 package com.megamal.game.model;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
@@ -17,6 +19,7 @@ public class Collectable {
     double x, y;
     double rectX, rectY;
     double velX, velY;
+    int height, width;
     int scanLineDownXa, scanLineDownXb, scanLineDownY;
     int scanLineAcrossX, scanLineAcrossYa, scanLineAcrossYb;
 
@@ -26,18 +29,19 @@ public class Collectable {
 
     boolean isPowerUp;
     boolean isGrounded = false;
+    boolean isAlive = true;
     Rect rect;
     Bitmap image;
 
-    private final static int JUMPING_ACCELERATION = -300;
-    private final static int ACCEL_GRAVITY = 1222;
-    private final static int MOVING_VEL = 150;
+    private final static int JUMPING_ACCELERATION = -260;
+    private final static int ACCEL_GRAVITY = 122;
+    private final static int MOVING_VEL = 59;
 
     //variables to set object's co-ordinates from tile co-ordinate of objs where the object was created
-    private final static int COIN_X = 0;
-    private final static int COIN_Y = 0;
-    private final static int COIN_WIDTH = 0;
-    private final static int COIN_HEIGHT = 0;
+    private final static int COIN_X = 25;
+    private final static int COIN_Y = 25;
+    private final static int COIN_WIDTH = 64;
+    private final static int COIN_HEIGHT = 64;
 
     private final static int RECT_LEEWAY_X = 3;
     private final static int RECT_LEEWAY_Y = 3;
@@ -57,16 +61,29 @@ public class Collectable {
         tileA = new Tile(0);
         tileB = new Tile(0);
 
-        setVariables(ID, cameraOffsetX, cameraOffsetY);
+        setVariables(ID, cameraOffsetX, cameraOffsetY, x, y);
     }
 
-    private void setVariables(int ID, double cameraOffsetX, double cameraOffsetY) {
+    public void setVariables(int ID, double x, double y, double cameraOffsetX, double cameraOffsetY) {
+        this.ID = ID;
+        this.velY = JUMPING_ACCELERATION;
+        this.velX = MOVING_VEL;
+        isAlive = true;
+
+        //true x and y of object
+        this.x = x + cameraOffsetX;
+        this.y = y + cameraOffsetY;
+
         switch(ID) {
             case (1): this.image = Assets.coinImage;
-                      this.x = x + COIN_X;
-                      this.y = y + COIN_Y;
+                      this.x = (x + cameraOffsetX) + COIN_X;
+                      this.y = (y + cameraOffsetY) - COIN_Y;
+                      this.height = COIN_HEIGHT;
+                      this.width = COIN_WIDTH;
                       this.isPowerUp = false;
                       updateRect(x, y, cameraOffsetX, cameraOffsetY);
+                      Log.d("Collectables", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
+                      Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                       break;
         }
 
@@ -76,31 +93,67 @@ public class Collectable {
 
         //if (visible(x, y);
         //set to be in relation to the screen - IF VISIBLE
-        rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
-        rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
 
-        rect.set((int) rectX, (int) rectY, (int) rectX + COIN_WIDTH, (int) rectY + COIN_HEIGHT);
+        if (isVisible(cameraOffsetX, cameraOffsetY)) {
+            rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
+            rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
+
+            rect.set((int) rectX, (int) rectY, (int) rectX + width, (int) rectY + height);
+        }
+
+        else
+            return;
 
     }
 
-    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY) {
+    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
 
-        x += velX * delta;
+        if (isAlive) {
+            x += velX * delta;
 
-        if (!isGrounded) {
-            velY += ACCEL_GRAVITY * delta;
+            if (!isGrounded) {
+                velY += ACCEL_GRAVITY * delta;
+            } else {
+                velY = 0;
+            }
+
             y += velY * delta;
-        } else {
-            velY = 0;
+
+            //must be done when invisible too,
+            checkXMovement(map);
+            checkYMovement(map);
+
+            //if (visible(x, y, cameraOffsetX, cameraOffsetY);
+            updateRect(x, y, cameraOffsetX, cameraOffsetY);
+
+            //if (playerInRange()) {
+            checkCollisions(mawi);
+            // }
         }
 
-        //must be done when invisible too,
-        checkXMovement(map);
-        checkYMovement(map);
+        else
+            return;
 
-        //if (visible(x, y, cameraOffsetX, cameraOffsetY);
-        updateRect(x, y, cameraOffsetX, cameraOffsetY);
+    }
 
+    //c
+    /*private boolean playerInRange() {
+
+    }*/
+
+    private void checkCollisions(Player mawi) {
+        if ((mawi.getplayerRect()).intersect(rect)) {
+            collectableCaught(mawi);
+        }
+        else
+            return;
+
+    }
+
+    private void collectableCaught(Player mawi) {
+        mawi.performAction(ID);
+        Log.d("Collectables", "player caught collectables");
+        //isAlive = false;
     }
 
     private void checkYMovement(int[][] map) {
@@ -108,25 +161,33 @@ public class Collectable {
         //this means that the object is falling, therefore check scanline for underneath,
         //if collision then set grounded to true, and set Y to be just above the suitable tile
         if (velY > 0) {
+            Log.d("Collectables", "Case 1a");
 
-            scanLineDownY = (int) Math.floor((y + COIN_HEIGHT) / GameMainActivity.TILE_HEIGHT);
+            scanLineDownY = (int) Math.ceil((y + height) / GameMainActivity.TILE_HEIGHT);
 
-            if (scanLineDownY < 0 || scanLineDownY > map.length)
+            if (scanLineDownY < 0 || scanLineDownY > map.length) {
+                Log.d("Collectables", "isAlive false in checkY.velY > 0");
+                isAlive = false;
                 return;
+            }
 
-            scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + COIN_WIDTH) / GameMainActivity.TILE_WIDTH);
+            if (velX > 0) {
+                scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+            } else {
+                scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+            }
 
-            if (scanLineDownXa < 0 || scanLineDownXa > map[0].length)
+            if (scanLineDownXa < 0 || scanLineDownXa > map[0].length) {
+                Log.d("Collectables", "isAlive false in checkY.velY > 0");
+                isAlive = false;
                 return;
-            if (scanLineDownXb < 0 || scanLineDownXb > map[0].length)
-                return;
+            }
 
+            Log.d("CollectableBug1", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
 
             //if obstacle then deal with appropriately
-            if(tileA.isObstacle() || tileB.isObstacle()) {
+            if(tileA.isObstacle()) {
                 isGrounded = true;
                 velY = 0;
 
@@ -134,33 +195,41 @@ public class Collectable {
                 tileY = tileA.yLocationNoOffset(scanLineDownY);
 
                 //set Y to be just above tile
-                y = tileY - COIN_HEIGHT;
+                //y = tileY - height;
             }
             return;
 
 
         //this means that it is 'jumping', check scanLine above, if collision then decrease velY and set Y to suitable
         } else if (velY < 0) {
-            scanLineDownY = (int) Math.ceil(y / GameMainActivity.TILE_HEIGHT);
+            Log.d("Collectables", "Case 2a");
+            scanLineDownY = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
 
-            if (scanLineDownY < 0 || scanLineDownY > map.length)
+            if (scanLineDownY < 0 || scanLineDownY > map.length) {
+                Log.d("Collectables", "isAlive false in checkY.velY < 0");
+                isAlive = false;
                 return;
+            }
 
-            scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + COIN_WIDTH) / GameMainActivity.TILE_WIDTH);
+            if (velX > 0) {
+                scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+            } else {
+                scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+            }
 
-            if (scanLineDownXa < 0 || scanLineDownXa > map[0].length)
+            if (scanLineDownXa < 0 || scanLineDownXa > map[0].length) {
+                Log.d("Collectables", "isAlive false in checkY.velY < 0");
+                isAlive = false;
                 return;
-            if (scanLineDownXb < 0 || scanLineDownXb > map[0].length)
-                return;
+            }
 
+            Log.d("CollectableBug", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
 
             //decrease velocity and set y to be just below tile
-            if (tileA.isObstacle() || tileB.isObstacle()) {
+            if (tileA.isObstacle()) {
                 velY = Math.abs(velY) / 5;
-                tileY = tileA.yLocationNoOffset(scanLineDownY);
+                //tileY = tileA.yLocationNoOffset(scanLineDownY);
                 y = tileY + GameMainActivity.TILE_HEIGHT;
             }
             return;
@@ -168,21 +237,36 @@ public class Collectable {
         //else, this is the case where the object is moving on the ground, check beneath to see if
         //still grounded
         } else {
+            Log.d("Collectables", "Case 3a");
 
-            scanLineDownY = (int) Math.ceil((y + (COIN_HEIGHT / 2) / GameMainActivity.TILE_HEIGHT));
+            scanLineDownY = (int) Math.ceil((y + height - RECT_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+
+
+            if (scanLineDownY < 0 || scanLineDownY > map.length) {
+                Log.d("Collectables", "isAlive false in checkY.velY else");
+                isAlive = false;
+                return;
+            }
 
             if (velX > 0) {
-                scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
-                if (scanLineDownXa < 0 || scanLineDownXa > map[0].length)
+                scanLineDownXa = (int) Math.ceil(x / GameMainActivity.TILE_WIDTH);
+                if (scanLineDownXa < 0 || scanLineDownXa > map[0].length) {
+                    Log.d("Collectables", "isAlive false in checkY.velY else");
+                    isAlive = false;
                     return;
+                }
             }
             else {
-                scanLineDownXa = (int) Math.floor((x + COIN_WIDTH) / GameMainActivity.TILE_WIDTH);
-                if (scanLineDownXa < 0 || scanLineDownXa > map[0].length)
+                scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                if (scanLineDownXa < 0 || scanLineDownXa > map[0].length) {
+                    Log.d("Collectables", "isAlive false in checkY.velY else");
+                    isAlive = false;
                     return;
+                }
             }
 
 
+            Log.d("CollectableBug", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
             if (!(tileA.isObstacle())) {
                 isGrounded = false;
@@ -197,37 +281,60 @@ public class Collectable {
     private void checkXMovement(int[][] map) {
 
         if (velX > 0) {
-            scanLineAcrossX = (int) Math.floor((x + COIN_WIDTH) / GameMainActivity.TILE_WIDTH);
-            if (scanLineAcrossX < 0 || scanLineAcrossX > map[0].length)
+            Log.d("Collectables", "Case 1b");
+            scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+            if (scanLineAcrossX < 0 || scanLineAcrossX > map[0].length) {
+                Log.d("Collectables", "isAlive false in checkX.velX > 0");
+                isAlive = false;
                 return;
+            }
         }
 
         else {
+            Log.d("Collectables", "Case 2b");
             scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
-            if (scanLineAcrossX < 0 || scanLineAcrossX > map[0].length)
+            if (scanLineAcrossX < 0 || scanLineAcrossX > map[0].length) {
+                Log.d("Collectables", "isAlive false in checkX. else velX >0");
+                isAlive = false;
                 return;
+            }
         }
 
 
         if (velY != 0) {
-            scanLineAcrossYa = (int) Math.ceil((y + COIN_HEIGHT) / GameMainActivity.TILE_HEIGHT);
-            scanLineAcrossYb = (int) Math.ceil(y / GameMainActivity.TILE_HEIGHT);
+            Log.d("Collectables", "Case 3b");
 
-            if (scanLineAcrossYa < 0 || scanLineAcrossYa > map.length)
-                return;
-            if (scanLineAcrossYb < 0 || scanLineAcrossYb > map.length)
-                return;
+            if (velY < 0) {
+                scanLineAcrossYa = (int) Math.ceil((y + height) / GameMainActivity.TILE_HEIGHT);
+            }
 
-            tileA.setID(map[scanLineAcrossX][scanLineAcrossYa]);
-            tileB.setID(map[scanLineAcrossX][scanLineAcrossYb]);
+            else if (velY > 0) {
+                scanLineAcrossYb = (int) Math.ceil(y / GameMainActivity.TILE_HEIGHT);
+            }
+
+            if (scanLineAcrossYa < 0 || scanLineAcrossYa > map.length) {
+                Log.d("Collectables", "isAlive false in checkX.velY != 0");
+                isAlive = false;
+                return;
+            }
+            if (scanLineAcrossYb < 0 || scanLineAcrossYb > map.length) {
+                Log.d("Collectables", "isAlive false in checkX.velY != 0");
+                isAlive = false;
+                return;
+            }
+
+            Log.d("CollectableBug", "index [" + scanLineAcrossYa + "][" + scanLineAcrossX + "] checked.");
+
+            tileA.setID(map[scanLineAcrossYa][scanLineAcrossX]);
+            tileB.setID(map[scanLineAcrossYb][scanLineAcrossX]);
 
             if (tileA.isObstacle() || tileB.isObstacle()) {
-                tileA.xLocationNoOffset(scanLineAcrossX);
+                tileX = tileA.xLocationNoOffset(scanLineAcrossX);
 
                 if (velX > 0) {
-                    x = tileA.getX() - COIN_WIDTH;
+                    //x = tileX - width;
                 } else {
-                    x = tileA.getX() - GameMainActivity.TILE_HEIGHT;
+                    //x = tileX - GameMainActivity.TILE_HEIGHT;
                 }
 
                 velX = -(velX);
@@ -236,19 +343,26 @@ public class Collectable {
 
         //else stationary on Y, so only check one y scanLine
         } else {
+            Log.d("Collectables", "Case 4b");
 
-            scanLineAcrossYa = (int) Math.ceil(y / GameMainActivity.TILE_HEIGHT);
-            if (scanLineAcrossYa < 0 || scanLineAcrossYa > map.length)
+            scanLineAcrossYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+
+            if (scanLineAcrossYa < 0 || scanLineAcrossYa > map.length) {
+                Log.d("Collectables", "isAlive false in checkX.else velY != 0");
+                isAlive = false;
                 return;
+            }
 
-            tileA.setID(map[scanLineAcrossX][scanLineAcrossYa]);
+            tileA.setID(map[scanLineAcrossYa][scanLineAcrossX]);
+
+            Log.d("CollectableBug", "index [" + scanLineAcrossYa + "][" + scanLineAcrossX + "] checked.");
 
             if (tileA.isObstacle()) {
-                tileA.xLocationNoOffset(scanLineAcrossX);
+                tileX = tileA.xLocationNoOffset(scanLineAcrossX);
                 if (velX > 0) {
-                    x = tileA.getX() - COIN_WIDTH;
+                   // x = tileX - width;
                 } else {
-                    x = tileA.getX() - GameMainActivity.TILE_HEIGHT;
+                  //  x = tileX - GameMainActivity.TILE_HEIGHT;
                 }
 
                 velX = -(velX);
@@ -260,8 +374,8 @@ public class Collectable {
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
 
         //check if x with cameraOffset is within limits, if so player is visible, else collectable is not
-        if (((x - cameraOffsetX > 0) && (x - cameraOffsetX < GameMainActivity.GAME_WIDTH)) ||
-                ((y - cameraOffsetY > 0) && (y - cameraOffsetY < GameMainActivity.GAME_WIDTH))) {
+        if ((((x - cameraOffsetX) > 0) && ((x - cameraOffsetX) < GameMainActivity.GAME_WIDTH)) &&
+                (((y - cameraOffsetY) > 0) && ((y - cameraOffsetY) < GameMainActivity.GAME_WIDTH))) {
 
             return true;
         }
@@ -272,5 +386,17 @@ public class Collectable {
 
     public void render(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
+        if(isVisible(cameraOffsetX,cameraOffsetY) && isAlive) {
+            g.setColor(Color.rgb(208, 244, 247));
+            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+
+            g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+        } else
+            return;
+
+    }
+
+    public boolean isAlive() {
+        return isAlive;
     }
 }
