@@ -48,10 +48,17 @@ public class Tile {
     }
 
     //takes the index of the array in order to work out co-ordinates for the tile
-    //and also updates the rect for each tile
-    public void setLocation(double yIndex, double xIndex, double cameraOffsetX, double cameraOffsetY) {
+    //in order to render onScreen & use tile info onScreen
+    public void setLocation(int yIndex, int xIndex, double cameraOffsetX, double cameraOffsetY) {
             this.y = (yIndex * GameMainActivity.TILE_HEIGHT) - cameraOffsetY;
             this.x = (xIndex * GameMainActivity.TILE_WIDTH) - cameraOffsetX;
+    }
+
+    public int xLocationNoOffset(int xIndex) {
+        return (xIndex * GameMainActivity.TILE_WIDTH);
+    }
+    public int yLocationNoOffset(int yIndex) {
+        return (yIndex * GameMainActivity.TILE_WIDTH);
     }
 
     public void setRect(double yIndex, double xIndex) {

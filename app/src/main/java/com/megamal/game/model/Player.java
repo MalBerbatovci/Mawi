@@ -110,6 +110,7 @@ public class Player {
             previousY = y;
         }
 
+        //if mawi is not in collision with an Object & is walking/running then update x appropriately
         if (isWalking || isRunning) {
             if (!collisionWithObj) {
                 x += velX * delta;
