@@ -20,7 +20,7 @@ import com.megamal.framework.animation.Frame;
 
 public class Assets {
     private static SoundPool soundPool;
-    public static Bitmap grassImage, earthImage, coinImage, mawiStandingFront, mawiWalkR1, mawiWalkR2, mawiWalkR3, mawiStandingSide,
+    public static Bitmap grassImage, earthImage, coinImage, coinBigImage, mawiStandingFront, mawiWalkR1, mawiWalkR2, mawiWalkR3, mawiStandingSide,
             mawiRunR1, mawiRunR2, mawiRunR3, walkButtonR, walkButtonPressedR, runButtonR, runButtonPressedR, walkButtonL,
             walkButtonPressedL, runButtonL, runButtonPressedL, mawiWalkL1, mawiWalkL2, mawiWalkL3, mawiRunL1, mawiRunL2,
             mawiRunL3, mawiWalkHitR1, mawiWalkHitR2, mawiWalkHitR3, mawiWalkHitL1, mawiWalkHitL2, mawiWalkHitL3,
@@ -33,6 +33,7 @@ public class Assets {
         grassImage = loadBitmap("grass.png", false);
         earthImage = loadBitmap("earth.png", false);
         coinImage = loadBitmap("coin.png", false);
+        coinBigImage = loadBitmap("coinBig.png", false);
         mawiStandingFront = loadBitmap("mawiStandingFront.png", true);
         mawiStandingSide = loadBitmap("mawiStanding.png", true);
         mawiJumpingR = loadBitmap("mawiJumpingR.png", true);
