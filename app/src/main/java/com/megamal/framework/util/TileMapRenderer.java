@@ -150,4 +150,64 @@ public class TileMapRenderer {
 
         }
     }
+
+    public void renderMapCollectable(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, double positionX,
+                              double positionY, boolean backGroundFill) {
+
+        //ONLY NEEDS TO BE CALLED WHEN COLLECTABLE FALLING really
+
+        /*g.setColor(Color.rgb(208, 244, 247));
+        g.fillRect((int) (positionX - cameraOffsetX), (int) (positionY - cameraOffsetY),
+                GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);*/
+
+        xStart = (int) Math.ceil(positionX / GameMainActivity.TILE_WIDTH) - 1;
+        Log.d("RenderingCollectable", "xStart is: " + xStart + ".\n");
+
+        yStart = (int) Math.ceil(positionY / GameMainActivity.TILE_WIDTH) - 1;
+        Log.d("RenderingCollectable", "yStart is: " + yStart + ".\n");
+
+        for (int y = yStart; y < (yStart + 2); y++) {
+            for (int x = xStart; x < (xStart + 2); x++) {
+                if (y >= 0 && x >= 0 && y <= map.length && x <= map[0].length) {
+
+                    currentTile.setID(map[y][x]);
+                    if (currentTile.getImage() == null) {
+                        if(backGroundFill) {
+                        g.setColor(Color.rgb(208, 244, 247));
+                        g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                        }
+                    } else {
+                        currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
+                        g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                    }
+                }
+
+            }
+        }
+        /*if (cameraOffsetX == previousX && cameraOffsetY == previousY && mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
+
+            //now refresh suitable area of screen
+            g.setColor(Color.rgb(208, 244, 247));
+            g.fillRect((xStartScreen * GameMainActivity.TILE_WIDTH), (yStartScreen * GameMainActivity.TILE_HEIGHT),
+                    GameMainActivity.TILE_WIDTH * 4, GameMainActivity.TILE_HEIGHT * 5);
+
+            Log.d("YRendering", "yStart: " + yStart + ". xStart: " + xStart);
+
+            //now render suitable tiles in place
+            for (int y = (yStart - 1); y < yStart + 6; y++) {
+                for (int x = (xStart - 1); x < xStart + 5; x++) {
+
+                    if (y >= 0 && x >= 0 && x < map[0].length && y < map.length) {
+                        currentTile.setID(map[y][x]);
+                        if (currentTile.getImage() != null) {
+                            currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
+                            g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                        }
+                    }
+                }
+            }
+            return;*/
+
+    }
 }

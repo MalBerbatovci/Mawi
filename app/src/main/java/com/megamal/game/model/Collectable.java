@@ -30,12 +30,13 @@ public class Collectable {
     boolean isPowerUp;
     boolean isGrounded = false;
     boolean isAlive = true;
+    //boolean isVisible = true;
     Rect rect;
     Bitmap image;
 
-    private final static int JUMPING_ACCELERATION = -122;
+    private final static int JUMPING_ACCELERATION = -152;
     private final static int ACCEL_GRAVITY = 282;
-    private final static int MOVING_VEL = 59;
+    private final static int MOVING_VEL = 92;
 
     //variables to set object's co-ordinates from tile co-ordinate of objs where the object was created
     private final static int COIN_WIDTH = 64;
@@ -43,6 +44,9 @@ public class Collectable {
 
     private final static int RECT_LEEWAY_X = 3;
     private final static int RECT_LEEWAY_Y = 3;
+
+    private final static int SCAN_LEEWAY_Y = 10;
+    private final static int SCAN_LEEWAY_X = 10;
 
 
     //check ID before, if -1 then do not call this
@@ -59,7 +63,7 @@ public class Collectable {
         tileA = new Tile(0);
         tileB = new Tile(0);
 
-        setVariables(ID, cameraOffsetX, cameraOffsetY, x, y);
+        setVariables(ID, x, y, cameraOffsetX, cameraOffsetY);
     }
 
     public void setVariables(int ID, double x, double y, double cameraOffsetX, double cameraOffsetY) {
@@ -152,7 +156,7 @@ public class Collectable {
     private void collectableCaught(Player mawi) {
         mawi.performAction(ID);
         Log.d("Collectables", "player caught collectables");
-        //isAlive = false;
+        isAlive = false;
     }
 
     private void checkYMovement(int[][] map) {
@@ -308,8 +312,8 @@ public class Collectable {
             }
         }
 
-        scanLineAcrossYa = (int) Math.floor((y + height - RECT_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
-        scanLineAcrossYb = (int) Math.floor((y + RECT_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+        scanLineAcrossYa = (int) Math.floor((y + height - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+        scanLineAcrossYb = (int) Math.floor((y + SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
 
         if (scanLineAcrossYa < 0 || scanLineAcrossYa >= map.length) {
             Log.d("Collectables", "isAlive false in checkX.velY != 0");
@@ -341,24 +345,42 @@ public class Collectable {
         return;
     }
 
+    //method to check is coin is on screen and render sufficiently
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
 
-        //check if x with cameraOffset is within limits, if so player is visible, else collectable is not
-        if ((((x - cameraOffsetX) > 0) && ((x - cameraOffsetX) < GameMainActivity.GAME_WIDTH)) &&
-                (((y - cameraOffsetY) > 0) && ((y - cameraOffsetY) < GameMainActivity.GAME_WIDTH))) {
+        if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
+                ((x - cameraOffsetX > 0) && (x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)){
 
-            return true;
+            if((((y + height) - cameraOffsetY) > 0 && (y + height <= GameMainActivity.GAME_HEIGHT)) ||
+                    ((y - cameraOffsetY > 0) && (y - cameraOffsetY <= GameMainActivity.GAME_HEIGHT))) {
+
+                    Log.d("RenderingCol", "Rendering!");
+                    return true;
+            }
         }
-        else
-            return false;
-    }
 
+        else {
+            Log.d("RenderingCol", "Not rendering!");
+            return false;
+        }
+
+        Log.d("RenderingCol", "Not rendering by force!");
+        return false;
+
+    }
 
     public void render(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         if(isVisible(cameraOffsetX,cameraOffsetY) && isAlive) {
-            g.setColor(Color.rgb(208, 244, 247));
-            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+
+            if (velY <= 0) {
+                g.setColor(Color.rgb(208, 244, 247));
+                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+            }
+            else {
+                g.setColor(Color.rgb(208, 244, 247));
+                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width, height);
+            }
 
             g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
         } else
@@ -366,7 +388,26 @@ public class Collectable {
 
     }
 
+    public void removeImage(Painter g, double cameraOffsetX, double cameraOffsetY) {
+        g.setColor(Color.rgb(208, 244, 247));
+        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width, height);
+    }
+
     public boolean isAlive() {
         return isAlive;
+    }
+
+    public boolean isMovingY() {
+        return (velY != 0);
+    }
+
+    public double getX() {
+        Log.d("RenderingCollectable", "x is: " + x + ".\n");
+        return x;
+    }
+
+    public double getY() {
+        Log.d("RenderingCollectable", "y is: " + y + ".\n");
+        return y;
     }
 }

@@ -84,7 +84,7 @@ public class Player {
         //initialise tile in order to check tile(s) underneath Mawi
         tileA = new Tile(0);
         tileB = new Tile(0);
-        collectable = new Collectable(1, 0, 0, 0, 0);
+        //collectable = new Collectable(1, 0, 0, 0, 0);
 
         //setting rect smaller than the actual character, in order to give leeway during fighting
         //(better to avoid getting hit, then hit unnecessarily
@@ -230,7 +230,7 @@ public class Player {
                     tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                     y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    collectable.setVariables(1, tileA.getX(), tileA.getY(), cameraOffsetX, cameraOffsetY);
+                    collectable = new Collectable(1, tileA.getX(), tileA.getY(), cameraOffsetX, cameraOffsetY);
                     hitNewBox = true;
                     Log.d("Collectables", "collectable made!");
                     return;
@@ -238,7 +238,7 @@ public class Player {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                     y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    collectable.setVariables(1, tileB.getX(), tileB.getY(), cameraOffsetX, cameraOffsetY);
+                    collectable = new Collectable(1, tileB.getX(), tileB.getY(), cameraOffsetX, cameraOffsetY);
                     hitNewBox = true;
                     return;
 
@@ -467,7 +467,7 @@ public class Player {
 
                     xCoinCollision(tileA, scanAAcrossY, scanStartAcrossX, tileB, scanBAcrossY, scanStartAcrossX,
                             cameraOffsetX, cameraOffsetY, map);
-                    return;
+                    //return;
                 }
 
             //else, case when moving but not left or right i.e justGrounded
