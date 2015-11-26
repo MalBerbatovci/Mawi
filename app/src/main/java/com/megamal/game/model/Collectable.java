@@ -178,12 +178,20 @@ public class Collectable {
             scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
+                if(scanLineAcrossX >= map[0].length) {
+                    velX = -(velX);
+                    return;
+                }
                 Log.d("Collectables", "isAlive false in checkY.velY > 0");
                 isAlive = false;
                 return;
             }
 
             if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
+                if(scanLineAcrossX >= map[0].length) {
+                    velX = -(velX);
+                    return;
+                }
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
                 isAlive = false;
                 return;
@@ -263,6 +271,10 @@ public class Collectable {
             if (velX > 0) {
                 scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
+                    if(scanLineAcrossX >= map[0].length) {
+                        velX = -(velX);
+                        return;
+                    }
                     Log.d("Collectables", "isAlive false in checkY.velY else");
                     isAlive = false;
                     return;
@@ -296,6 +308,10 @@ public class Collectable {
             Log.d("Collectables", "Case 1b");
             scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
+                if(scanLineAcrossX >= map[0].length) {
+                    velX = -(velX);
+                    return;
+                }
                 Log.d("Collectables", "isAlive false in checkX.velX > 0");
                 isAlive = false;
                 return;
@@ -305,6 +321,7 @@ public class Collectable {
         else {
             Log.d("Collectables", "Case 2b");
             scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkX. else velX >0");
                 isAlive = false;

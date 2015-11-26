@@ -37,6 +37,8 @@ public class Player {
     private static final int LEFT = -1;
     private static final int RIGHT = 1;
 
+    private static final int USED_BOX = 7;
+
     private double x, y, previousX, previousY;
     private int width, height;
 
@@ -224,23 +226,50 @@ public class Player {
                 tileB.setID(map[yFloor][scanBDown]);
 
                 //check if either is obstacle, if so set y and change velY
-                if (tileA.isObstacle()) {
+                if (tileA.isObstacle() && !tileA.hasCollectable()) {
 
                     //yJumpingObstacle(tileA, )
                     tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                     y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    collectable = new Collectable(1, tileA.getX(), tileA.getY(), cameraOffsetX, cameraOffsetY);
+                    Log.d("BoxCollision", "tileA is obstacle but not collectable");
+
+                //if tile has a collectable, inverse velocity y and create collectable item,
+                //change the ID for the map to reflect that the collectable has been removed
+                } else if (tileA.hasCollectable()) {
+
+                    tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
+                    y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
+                    velY = Math.abs(velY) / 5;
+
+                    collectable = new Collectable(tileA.getCollectableID(), tileA.getX(), tileA.getY(), cameraOffsetX, cameraOffsetY);
                     hitNewBox = true;
+
+                    map[yFloor][scanADown] = USED_BOX;
+
                     Log.d("Collectables", "collectable made!");
                     return;
-                } else if (tileB.isObstacle()) {
+                }
+
+                if (tileB.isObstacle() && !tileB.hasCollectable()) {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                     y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    collectable = new Collectable(1, tileB.getX(), tileB.getY(), cameraOffsetX, cameraOffsetY);
+                    Log.d("BoxCollision", "tileB is obstacle but not collectable");
+
+                } else if (tileB.hasCollectable()) {
+                    tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
+                    y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
+                    velY = Math.abs(velY) / 5;
+
+                    collectable = new Collectable(tileB.getCollectableID(), tileB.getX(), tileB.getY(), cameraOffsetX, cameraOffsetY);
                     hitNewBox = true;
+
+                    map[yFloor][scanBDown] = USED_BOX;
+
+                    Log.d("Collectables", "collectable made!");
                     return;
+
 
                 //else case where tile is a collectable, check if rects intersect, if so then change entry and add score suitably
                 } else if (tileA.isCollectable()) {

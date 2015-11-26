@@ -144,7 +144,7 @@ public class MenuState extends State {
             for (int i = 0; i < collectables.size(); i++) {
 
 
-                if (collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY) && collectables.get(i).isAlive()) {
+                if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                     collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
                     tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
                             collectables.get(i).getY(), false);
@@ -152,19 +152,24 @@ public class MenuState extends State {
 
                 if (!(collectables.get(i).isAlive())) {
                     Log.d("Collectables", "isAlive = false!");
-                    //collectables.get(i).removeImage(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                            collectables.get(i).getY(), true);
+
+                    if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
+                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
+                                collectables.get(i).getY(), true);
+                    }
+
                     collectables.remove(i);
                 }
             }
         }
+
+
         //renderButton methods
-            walkR.render(g);
-            walkL.render(g);
-            runR.render(g);
-            runL.render(g);
-            jump.render(g);
+        walkR.render(g);
+        walkL.render(g);
+        runR.render(g);
+        runL.render(g);
+        jump.render(g);
 
         renderPlayer(g);
     }

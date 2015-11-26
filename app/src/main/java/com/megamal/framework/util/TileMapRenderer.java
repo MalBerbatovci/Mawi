@@ -37,6 +37,7 @@ public class TileMapRenderer {
     }
 
 
+
     //method to render map
     public void renderMap(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY,
                           double previousX, double previousY, Player mawi) {
@@ -168,7 +169,7 @@ public class TileMapRenderer {
 
         for (int y = yStart; y < (yStart + 2); y++) {
             for (int x = xStart; x < (xStart + 2); x++) {
-                if (y >= 0 && x >= 0 && y <= map.length && x <= map[0].length) {
+                if (y >= 0 && x >= 0 && y < map.length && x < map[0].length) {
 
                     currentTile.setID(map[y][x]);
                     if (currentTile.getImage() == null) {
