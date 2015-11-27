@@ -139,29 +139,7 @@ public class MenuState extends State {
             tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY, mawi);
         }
 
-
-        if(!collectables.isEmpty()) {
-            for (int i = 0; i < collectables.size(); i++) {
-
-
-                if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
-                    collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                            collectables.get(i).getY(), false);
-                }
-
-                if (!(collectables.get(i).isAlive())) {
-                    Log.d("Collectables", "isAlive = false!");
-
-                    if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
-                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                                collectables.get(i).getY(), true);
-                    }
-
-                    collectables.remove(i);
-                }
-            }
-        }
+        renderCollectables(g);
 
 
         //renderButton methods
@@ -172,6 +150,38 @@ public class MenuState extends State {
         jump.render(g);
 
         renderPlayer(g);
+    }
+
+    private void renderCollectables(Painter g) {
+        if(!collectables.isEmpty()) {
+
+
+            for (int i = 0; i < collectables.size(); i++) {
+                if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
+                    collectables.get(i).clearAreaAroundCoin(g, cameraOffsetX, cameraOffsetY);
+                }
+            }
+
+            for (int i = 0; i < collectables.size(); i++) {
+
+                if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
+
+                    collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
+                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
+                            collectables.get(i).getY(), false);
+                }
+
+                if (!(collectables.get(i).isAlive())) {
+                    Log.d("Collectables", "isAlive = false!");
+                    if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
+                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
+                                collectables.get(i).getY(), true);
+                    }
+                    collectables.remove(i);
+                }
+            }
+        }
+
     }
 
     private void renderPlayer(Painter g) {
