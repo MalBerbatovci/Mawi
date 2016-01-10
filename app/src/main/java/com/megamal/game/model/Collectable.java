@@ -15,24 +15,24 @@ import com.megamal.mawi.GameMainActivity;
  */
 public class Collectable {
 
-    int ID;
-    double x, y;
-    double rectX, rectY;
-    double velX, velY;
-    int height, width;
-    int scanLineDownXa, scanLineDownXb, scanLineDownY;
-    int scanLineAcrossX, scanLineAcrossYa, scanLineAcrossYb;
+    private int ID;
+    private double x, y;
+    private double rectX, rectY;
+    private double velX, velY;
+    private int height, width;
+    private int scanLineDownXa, scanLineDownXb, scanLineDownY;
+    private int scanLineAcrossX, scanLineAcrossYa, scanLineAcrossYb;
 
-    Tile tileA, tileB;
-    int tileY, tileX;
+    private Tile tileA, tileB;
+    private int tileY, tileX;
 
 
-    boolean isPowerUp;
-    boolean isGrounded = false;
-    boolean isAlive = true;
+    private boolean isPowerUp;
+    private boolean isGrounded = false;
+    private boolean isAlive = true;
     //boolean isVisible = true;
-    Rect rect;
-    Bitmap image;
+    private Rect rect;
+    private Bitmap image;
 
     private final static int JUMPING_ACCELERATION = -152;
     private final static int ACCEL_GRAVITY = 282;
@@ -345,7 +345,7 @@ public class Collectable {
         return;
     }
 
-    //method to check is coin is on screen and render sufficiently
+    //method to check is coin is on screen and render appropriately
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
 
         if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
