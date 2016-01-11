@@ -723,6 +723,8 @@ public class Player {
         return isJumping;
     }
 
+    public boolean isGrounded() { return isGrounded; }
+
     public boolean justGrounded() { return justGrounded; }
 
     //if not right, then left, not sure if necessary

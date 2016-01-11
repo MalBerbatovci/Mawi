@@ -87,11 +87,11 @@ public class TileMapRenderer {
         } else if (cameraOffsetX != previousX || cameraOffsetY != previousY) {
             renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
 
-            //else player has just entered cameraOffsetX, needs whole screen rendered
+            //Else, mawi hasn't moved
         } else if (cameraOffsetX == previousX && cameraOffsetY == previousY && !mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
-            if (mawi.justGrounded()) {
+            /*if (mawi.justGrounded()) {
                 renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
-            }
+            }*/
             return;
 
         }

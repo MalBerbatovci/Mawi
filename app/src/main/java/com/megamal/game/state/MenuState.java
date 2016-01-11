@@ -114,6 +114,7 @@ public class MenuState extends State {
                     collectables.get(i).update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
                 }
             }
+
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
