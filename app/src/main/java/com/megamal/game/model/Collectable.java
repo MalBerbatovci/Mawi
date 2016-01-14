@@ -85,7 +85,7 @@ public class Collectable {
                       this.width = COIN_WIDTH;
                       this.isPowerUp = false;
                       updateRect(x, y, cameraOffsetX, cameraOffsetY);
-                      Log.d("Collectables", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
+                      Log.d("Enemy", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
                       Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                       break;
         }
@@ -411,5 +411,9 @@ public class Collectable {
     public double getY() {
         Log.d("RenderingCollectable", "y is: " + y + ".\n");
         return y;
+    }
+
+    public boolean isFalling() {
+        return (velY < 0);
     }
 }

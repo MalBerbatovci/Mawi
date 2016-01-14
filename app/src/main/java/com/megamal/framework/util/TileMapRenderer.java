@@ -46,7 +46,7 @@ public class TileMapRenderer {
 
         //in this case, only an area of 1 tile around mawi needs to be rendered
         if (cameraOffsetX == previousX && cameraOffsetY == previousY && mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
-            Log.d("Render", "Rendering case when cameraOffset stayed same but movement detected");
+            //Log.d("Render", "Rendering case when cameraOffset stayed same but movement detected");
 
 
             //get the starting map index for X
@@ -66,7 +66,7 @@ public class TileMapRenderer {
             g.fillRect((xStartScreen * GameMainActivity.TILE_WIDTH), (yStartScreen * GameMainActivity.TILE_HEIGHT),
                     GameMainActivity.TILE_WIDTH * 4, GameMainActivity.TILE_HEIGHT * 5);
 
-            Log.d("YRendering", "yStart: " + yStart + ". xStart: " + xStart);
+            //Log.d("YRendering", "yStart: " + yStart + ". xStart: " + xStart);
 
             //now render suitable tiles in place
             for (int y = (yStart - 1); y < yStart + 6; y++) {
@@ -135,7 +135,7 @@ public class TileMapRenderer {
             startingY = Math.ceil(cameraOffsetY / GameMainActivity.TILE_HEIGHT);
 
             //Log.d("Camera", "1: remainderX is: " + remainderX + ". \n");
-            Log.d("Camera", "2: StartingY is: " + startingY + ". Camera OffsetY is: " + cameraOffsetY + ". \n");
+           // Log.d("Camera", "2: StartingY is: " + startingY + ". Camera OffsetY is: " + cameraOffsetY + ". \n");
 
             for (int y = (int) (startingY - 1); y < (SCREEN_TILE_SIZE_Y + (int) startingY); y++) {
                 for (int x = (int) (startingX - 1); x < (SCREEN_TILE_SIZE_X + (int) startingX); x++) {
@@ -153,7 +153,7 @@ public class TileMapRenderer {
     }
 
     public void renderMapCollectable(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, double positionX,
-                              double positionY, boolean backGroundFill) {
+                              double positionY, boolean backGroundFill, boolean falling) {
 
         //ONLY NEEDS TO BE CALLED WHEN COLLECTABLE FALLING really
 
@@ -161,31 +161,70 @@ public class TileMapRenderer {
         g.fillRect((int) (positionX - cameraOffsetX), (int) (positionY - cameraOffsetY),
                 GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);*/
 
-        xStart = (int) Math.ceil(positionX / GameMainActivity.TILE_WIDTH) - 1;
-        Log.d("RenderingCollectable", "xStart is: " + xStart + ".\n");
+        if (falling) {
 
-        yStart = (int) Math.ceil(positionY / GameMainActivity.TILE_WIDTH) - 1;
-        Log.d("RenderingCollectable", "yStart is: " + yStart + ".\n");
+            Log.d("Falling", "Is falling");
+            xStart = (int) Math.ceil(positionX / GameMainActivity.TILE_WIDTH) + 1;
+            yStart = (int) Math.ceil(positionY / GameMainActivity.TILE_WIDTH) + 1;
 
-        for (int y = yStart; y < (yStart + 2); y++) {
-            for (int x = xStart; x < (xStart + 2); x++) {
-                if (y >= 0 && x >= 0 && y < map.length && x < map[0].length) {
+            for (int y = (yStart - 3); y < yStart; y++) {
+                for (int x = (xStart - 3); x < xStart; x++) {
+                    if (y >= 0 && x >= 0 && y < map.length && x < map[0].length) {
 
-                    currentTile.setID(map[y][x]);
-                    if (currentTile.getImage() == null) {
-                        if(backGroundFill) {
-                        g.setColor(Color.rgb(208, 244, 247));
-                        g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
-                                GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                        currentTile.setID(map[y][x]);
+                        if (currentTile.getImage() == null) {
+                            if(backGroundFill) {
+                                g.setColor(Color.rgb(208, 244, 247));
+                                g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                        GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            }
+                        } else {
+                            //g.setColor(Color.rgb(2,2,2));
+                            //g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                   // GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
+                             g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
                         }
-                    } else {
-                        currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
-                        g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
                     }
-                }
 
+                }
             }
         }
+
+        else {
+
+            Log.d("Falling", "Is not falling");
+
+            xStart = (int) Math.floor(positionX / GameMainActivity.TILE_WIDTH) - 1;
+            Log.d("RenderingEnemy", "xStart is: " + xStart + ".\n");
+
+            yStart = (int) Math.floor(positionY / GameMainActivity.TILE_WIDTH) - 1;
+            Log.d("RenderingEnemy", "yStart is: " + yStart + ".\n");
+
+            for (int y = yStart; y < (yStart + 2); y++) {
+                for (int x = xStart; x < (xStart + 3); x++) {
+                    if (y >= 0 && x >= 0 && y < map.length && x < map[0].length) {
+
+                        currentTile.setID(map[y][x]);
+                        if (currentTile.getImage() == null) {
+                            if (backGroundFill) {
+                                g.setColor(Color.rgb(208, 244, 247));
+                                g.fillRect(((int) ((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                        GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            }
+                        } else {
+                           // g.setColor(Color.rgb(2, 2, 2));
+                           // g.fillRect(((int) ((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                           //         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
+                             g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                        }
+                    }
+
+                }
+            }
+        }
+
         /*if (cameraOffsetX == previousX && cameraOffsetY == previousY && mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
 
             //now refresh suitable area of screen

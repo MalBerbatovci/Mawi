@@ -2,8 +2,10 @@ package com.megamal.game.model;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.megamal.framework.util.Painter;
+import com.megamal.mawi.GameMainActivity;
 
 /**
  * Created by malberbatovci on 10/01/16.
@@ -14,18 +16,29 @@ public abstract class Enemy {
 
     public final int VISIBLE_THRESHOLD_X = 500;
     public final int VISIBLE_THRESHOLD_Y = 500;
-    public final int RECT_LEEWAY_X = 4;
-    public final int RECT_LEEWAY_Y = 4;
+    public final int RECT_LEEWAY_X = 2;
+    public final int RECT_LEEWAY_Y = 2;
 
     //not completely fixed yet
-    public boolean isVisible(double cameraOffsetX, double cameraOffsetY, double x, double y) {
-        if ((Math.abs(x - cameraOffsetX) > VISIBLE_THRESHOLD_X) ||
-                Math.abs(y - cameraOffsetY) > VISIBLE_THRESHOLD_Y) {
-            return false;
+    public boolean isVisible(double cameraOffsetX, double cameraOffsetY, double x, double y, int width, int height) {
+        /*if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
+                ((x - cameraOffsetX > 0) && (x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)){
+
+            if((((y + height) - cameraOffsetY) > 0 && (y + height <= GameMainActivity.GAME_HEIGHT)) ||
+                    ((y - cameraOffsetY > 0) && (y - cameraOffsetY <= GameMainActivity.GAME_HEIGHT))) {
+
+                Log.d("RenderingCol", "Rendering!");
+                return true;
+            }
         }
 
-        else
-            return true;
+        else {
+            Log.d("RenderingEnemy", "Not rendering!");
+            return false;
+        } */
+
+       // Log.d("RenderingEnemy", "rendering by force!");
+        return true;
     }
 
 
@@ -35,10 +48,21 @@ public abstract class Enemy {
 
     protected abstract void updateAnim(float delta);
 
-    public abstract void checkCollisions(Player mawi);
+    public abstract void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY);
 
-    public abstract void render(Painter g, Bitmap image);
+    public abstract void render(Painter g, double cameraOffsetX, double cameraOffsetY);
+
+    public abstract double getX();
+
+    public abstract boolean isFalling();
+
+    public abstract double getY();
 
     public abstract void activate();
+
+    public abstract boolean isAlive();
+
+    public abstract void death();
+
 
 }

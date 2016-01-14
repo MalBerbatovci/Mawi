@@ -13,6 +13,9 @@ import com.megamal.framework.util.TileMapFactory;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.game.model.Collectable;
+import com.megamal.game.model.Enemy;
+import com.megamal.game.model.Hedgehog;
+import com.megamal.game.model.Mover;
 import com.megamal.game.model.Player;
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;
@@ -33,6 +36,7 @@ public class MenuState extends State {
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
     private Player mawi;
+    private Mover hedge;
     private Tile tile;
     private String levelString = "test.txt";
 
@@ -78,6 +82,8 @@ public class MenuState extends State {
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
+        hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -109,11 +115,13 @@ public class MenuState extends State {
             }
 
             if(!collectables.isEmpty()) {
-                Log.d("Collectables", "Updating collectables");
+                //Log.d("Collectables", "Updating collectables");
                 for (int i = 0; i < collectables.size(); i++) {
                     collectables.get(i).update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
                 }
             }
+
+            hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
 
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
@@ -134,13 +142,14 @@ public class MenuState extends State {
 
         else {
             if(previousOffsetX != cameraOffsetX) {
-                Log.d("PreviousOff", "previousX & Y: " + previousOffsetX + " & " + previousOffsetY + ". " +
-                        "CurrentX & Y: " + cameraOffsetX + " & " + cameraOffsetY);
+                //Log.d("PreviousOff", "previousX & Y: " + previousOffsetX + " & " + previousOffsetY + ". " +
+                //        "CurrentX & Y: " + cameraOffsetX + " & " + cameraOffsetY);
             }
             tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY, mawi);
         }
 
         renderCollectables(g);
+        renderEnemies(g);
 
 
         //renderButton methods
@@ -169,20 +178,31 @@ public class MenuState extends State {
 
                     collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
                     tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                            collectables.get(i).getY(), false);
+                            collectables.get(i).getY(), false, collectables.get(i).isFalling());
                 }
 
                 if (!(collectables.get(i).isAlive())) {
-                    Log.d("Collectables", "isAlive = false!");
+                   // Log.d("Collectables", "isAlive = false!");
                     if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                         tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                                collectables.get(i).getY(), true);
+                                collectables.get(i).getY(), true, collectables.get(i).isFalling());
                     }
                     collectables.remove(i);
                 }
             }
         }
 
+    }
+
+    private void renderEnemies(Painter g) {
+        //if (hedge.isAlive()) {
+        hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+        hedge.render(g, cameraOffsetX, cameraOffsetY);
+            Log.d("Enemy", "Rendered");
+            tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, hedge.getX(),
+                                            hedge.getY(), false, hedge.isFalling());
+
+       // }
     }
 
     private void renderPlayer(Painter g) {

@@ -1,6 +1,7 @@
 package com.megamal.game.model;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -29,10 +30,10 @@ public class Hedgehog extends Mover {
     private int width, height;
     private int velX, velY;
     private boolean isAlive = true;
-    private boolean isActive = false;
+    private boolean isActive = true;
     private boolean isGrounded = false;
 
-    public void Hedgehog(double x, double y, double cameraOffsetX, double cameraOffsetY) {
+    public Hedgehog(double x, double y, double cameraOffsetX, double cameraOffsetY) {
 
         //will be given in 'true' form, must add on cameraOffsetX and cameraOffsetY to render correctly
         this.x = x;
@@ -44,14 +45,14 @@ public class Hedgehog extends Mover {
 
         updateRects(cameraOffsetX, cameraOffsetY);
 
-        this.width = 64;
-        this.height = 64;
+        this.width = GameMainActivity.TILE_WIDTH;
+        this.height = GameMainActivity.TILE_HEIGHT;
 
         //change to respective image
         this.image = Assets.coinImage;
 
-        velX = 10;
-        velY = 10;
+        velX = 100;
+        velY = 100;
 
     }
 
@@ -74,7 +75,7 @@ public class Hedgehog extends Mover {
                 checkYMovement(map);
 
                 updateRects(cameraOffsetX, cameraOffsetY);
-                checkCollisions(mawi);
+                checkCollisions(mawi, cameraOffsetX, cameraOffsetY);
 
             }
 
@@ -83,20 +84,18 @@ public class Hedgehog extends Mover {
     }
 
     public void updateRects(double cameraOffsetX, double cameraOffsetY) {
-        {
 
-            if (isVisible(cameraOffsetX, cameraOffsetY, x, y)) {
-                rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
-                rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
+        //Check playerX against enemy x
+        if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
+            rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
+            rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
 
-                rect.set((int) rectX, (int) rectY, (int) rectX + (width + RECT_LEEWAY_X),
-                        (int) rectY + (height + RECT_LEEWAY_Y));
-            }
-
-            else
-                return;
-
+            rect.set((int) rectX, (int) rectY, (int) rectX + (width + RECT_LEEWAY_X),
+                    (int) rectY + (height + RECT_LEEWAY_Y));
         }
+
+        else
+            return;
 
     }
 
@@ -110,7 +109,7 @@ public class Hedgehog extends Mover {
 
         //means object is falling
         if (velY > 0) {
-            Log.d("Collectables", "Case 1a");
+            Log.d("Enemy", "Case 1a");
 
             scanLineDownY = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
 
@@ -196,7 +195,7 @@ public class Hedgehog extends Mover {
             //still grounded
         } else {
             Log.d("Enemy", "Case 3a");
-            scanLineDownY = (int) Math.floor((y + height - RECT_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+            scanLineDownY = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
                 Log.d("Enemy", "scanLineDownY out of range, isAlive = false");
@@ -225,6 +224,7 @@ public class Hedgehog extends Mover {
             Log.d("Enemy", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
             if (!(tileA.isObstacle())) {
+                Log.d("EnemyGrounded", "isGrounded made false, tile at : " + scanLineDownY + ", " + scanLineDownXa);
                 isGrounded = false;
             }
 
@@ -241,20 +241,20 @@ public class Hedgehog extends Mover {
         int tileX;
 
         if (velX > 0) {
-            Log.d("Collectables", "Case 1b");
+            Log.d("Enemy", "Case 1b");
             scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
-                Log.d("Collectables", "isAlive false in checkX.velX > 0");
+                Log.d("Enemy", "isAlive false in checkX.velX > 0");
                 isAlive = false;
                 return;
             }
         }
 
         else {
-            Log.d("Collectables", "Case 2b");
+            Log.d("Enemy", "Case 2b");
             scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
-                Log.d("Collectables", "isAlive false in checkX. else velX >0");
+                Log.d("Enemy", "isAlive false in checkX. else velX >0");
                 isAlive = false;
                 return;
             }
@@ -264,12 +264,12 @@ public class Hedgehog extends Mover {
         scanLineAcrossYb = (int) Math.floor((y + SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
 
         if (scanLineAcrossYa < 0 || scanLineAcrossYa >= map.length) {
-            Log.d("Collectables", "isAlive false in checkX.velY != 0");
+            Log.d("Enemy", "isAlive false in checkX.velY != 0");
             isAlive = false;
             return;
         }
         if (scanLineAcrossYb < 0 || scanLineAcrossYb >= map.length) {
-            Log.d("Collectables", "isAlive false in checkX.velY != 0");
+            Log.d("Enemy", "isAlive false in checkX.velY != 0");
             isAlive = false;
             return;
         }
@@ -308,27 +308,47 @@ public class Hedgehog extends Mover {
     }
 
     @Override
-    public void render(Painter g, Bitmap image) {
+    public void render(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
+        //if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height) && isActive() && isAlive) {
+                g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+                Log.d("EnemyRendering", "image drawn at : " + (x - cameraOffsetX) + ", " + (y - cameraOffsetY));
+        //    } else
+                return;
+
+    }
+    public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
+        if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height) && isAlive && isActive()) {
+            if (velY <= 0) {
+                g.setColor(Color.rgb(208, 244, 247));
+                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+            } else {
+                g.setColor(Color.rgb(208, 244, 247));
+                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width, height);
+            }
+        }
     }
 
     @Override
-    public void checkCollisions(Player mawi) {
+    public void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY) {
         //Should only be done when within visible range!
+        if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
+            //Just a check, should be fine though
+            if (isAlive) {
 
-        //Just a check, should be fine though
-        if (isAlive) {
-
-            if ((mawi.getplayerRect()).intersect(rect)) {
-                if (mawi.isGrounded()) {
-                    //This means mawi is effected
-                    //mawi.enemyHit();
-                } else {
-                    //this means that the enemy was killed, flip image maybe and let fall off map - once off, will need to be defeated
-                    //death();
-                }
-            } else
-                return;
+                if ((mawi.getplayerRect()).intersect(rect)) {
+                    if (mawi.isGrounded()) {
+                        Log.d("EnemyCollision", "Mawi hit");
+                        //This means mawi is effected
+                        //mawi.enemyHit();
+                    } else {
+                        Log.d("EnemyCollision", "Enemy hit");
+                        //this means that the enemy was killed, flip image maybe and let fall off map - once off, will need to be defeated
+                        //death();
+                    }
+                } else
+                    return;
+            }
         }
 
     }
@@ -345,6 +365,10 @@ public class Hedgehog extends Mover {
 
     }
 
+    public boolean isFalling() {
+        return !isGrounded;
+    }
+
     public void activate() {
         isActive = true;
     }
@@ -352,4 +376,12 @@ public class Hedgehog extends Mover {
     public boolean isActive() {
         return isActive;
     }
+
+    public boolean isAlive() { return isAlive; }
+
+    public double getX() { return x; }
+
+    public double getY() { return y; }
+
+
 }

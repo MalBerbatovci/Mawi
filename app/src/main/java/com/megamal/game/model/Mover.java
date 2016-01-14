@@ -24,4 +24,8 @@ public abstract class Mover extends Enemy {
     //enemy has moved off-screen/into an obstacle in the X direction and updates variables accordingly
     protected abstract void checkXMovement(int[][] map);
 
+    public abstract void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY);
+
+
+
 }

@@ -136,19 +136,19 @@ public class Player {
 
         if (velY != 0) {
             y += velY * delta;
-            Log.d("Jumping", "velY: " + velY + ". Y: " + y + ". \n");
+            //Log.d("Jumping", "velY: " + velY + ". Y: " + y + ". \n");
         }
 
         if (locked)
             locked = false;
 
         if (hasMoved(cameraOffsetX, cameraOffsetY))
-            Log.d("Location", "Previous x: " + previousX + ". Previous y:" + previousY + ".\t x = " + x + ". y = " + y + ".\n");
+            //Log.d("Location", "Previous x: " + previousX + ". Previous y:" + previousY + ".\t x = " + x + ". y = " + y + ".\n");
 
         updateRects();
         updateAnim(delta);
 
-        Log.d("Jumping", "Is jumping: " + isJumping + ".");
+        //Log.d("Jumping", "Is jumping: " + isJumping + ".");
 
     }
 
@@ -232,7 +232,7 @@ public class Player {
                     tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                     y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    Log.d("BoxCollision", "tileA is obstacle but not collectable");
+                    //Log.d("BoxCollision", "tileA is obstacle but not collectable");
 
                 //if tile has a collectable, inverse velocity y and create collectable item,
                 //change the ID for the map to reflect that the collectable has been removed
@@ -247,7 +247,7 @@ public class Player {
 
                     map[yFloor][scanADown] = USED_BOX;
 
-                    Log.d("Collectables", "collectable made!");
+                    //Log.d("Collectables", "collectable made!");
                     return;
                 }
 
@@ -255,7 +255,7 @@ public class Player {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                     y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    Log.d("BoxCollision", "tileB is obstacle but not collectable");
+                    //Log.d("BoxCollision", "tileB is obstacle but not collectable");
 
                 } else if (tileB.hasCollectable()) {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
@@ -267,7 +267,7 @@ public class Player {
 
                     map[yFloor][scanBDown] = USED_BOX;
 
-                    Log.d("Collectables", "collectable made!");
+                    //Log.d("Collectables", "collectable made!");
                     return;
 
 
@@ -303,16 +303,16 @@ public class Player {
                 tileA.setID(map[yFloor][scanADown]);
                 tileB.setID(map[yFloor][scanBDown]);
 
-                Log.d("Grounded", "map[" + yFloor + "][" + scanADown + "]" + "and map[" + yFloor + "][" + scanADown + "]" +
-                        " checked!");
+                //Log.d("Grounded", "map[" + yFloor + "][" + scanADown + "]" + "and map[" + yFloor + "][" + scanADown + "]" +
+                     //   " checked!");
 
                 //if both are obstacles
                 if (tileA.isObstacle() && tileB.isObstacle()) {
-                    Log.d("Grounded", "both tiles beneath are obstacles");
+                    //Log.d("Grounded", "both tiles beneath are obstacles");
                     //if mawi is not grounded at this point, she must have just contacted the
                     //ground, therefore set the initial Y of the floor to avoid 'sinking'
                     if (!isGrounded) {
-                        Log.d("Grounded", "found floor after being ungrounded");
+                        //Log.d("Grounded", "found floor after being ungrounded");
                         isGrounded = true;
                         justGrounded = true;
                         if (isJumping)
@@ -337,17 +337,18 @@ public class Player {
 
                     //else, if both are not obstacles, mawi is not grounded
                 } else if ((!tileA.isObstacle() & !tileB.isObstacle()) && (!tileA.isCollectable() || !tileB.isCollectable())) {
-                    Log.d("Grounded", "both tiles beneath are not obstacles");
+                    //Log.d("Grounded", "both tiles beneath are not obstacles");
                     isGrounded = false;
                     return;
 
                     //else, only one scanLine has been trigged, can do something w/ this info.
                 } else if (tileA.isObstacle() || tileB.isObstacle()){
                     //y = (yFloor * GameMainActivity.TILE_HEIGHT) - height;
-                    Log.d("Grounded", "only one tiles beneath is an obstacle");
+                    //Log.d("Grounded", "only one tiles beneath is an obstacle");
 
                     if (!isGrounded) {
                         justGrounded = true;
+                        allignMawiY(cameraOffsetX, cameraOffsetY);
                         isGrounded = true;
                     }
 
@@ -362,7 +363,7 @@ public class Player {
 
                 //case where one tile underneath is an collectable
                 } else if (tileA.isCollectable() || tileB.isCollectable()) {
-                    Log.d("Collectables", "tileA/B is collectable!");
+                    //Log.d("Collectables", "tileA/B is collectable!");
 
                     if (tileA.isCollectable()) {
                         yCoinCollision(tileA, yFloor, scanADown, cameraOffsetX, cameraOffsetY, map, true);
@@ -394,16 +395,17 @@ public class Player {
     }
 
     //method to put mawi's y to be perfectly above tile after just being grounded
+    //Render tiles below to avoid overlay
     private void allignMawiY(double cameraOffsetX, double cameraOffsetY) {
         if ((int) (y + cameraOffsetY) % GameMainActivity.TILE_HEIGHT != 0) {
             if (tileA.isObstacle()) {
                 tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                 y = (tileA.getY() - height);
-                Log.d("Grounded", "TileA.isObstacle - y set to: " + y);
+                //Log.d("Grounded", "TileA.isObstacle - y set to: " + y);
             } else {
                 tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                 y = tileB.getY() - height;
-                Log.d("Grounded", "TileB.isObstacle - y set to: " + y);
+                //Log.d("Grounded", "TileB.isObstacle - y set to: " + y);
             }
         }
     }
@@ -448,19 +450,19 @@ public class Player {
                     //set Tile ID appropriately from scanlines
                     tileA.setID(map[scanAAcrossY][scanEndAcrossX]);
                     tileB.setID(map[scanBAcrossY][scanEndAcrossX]);
-                    Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
+                    //Log.d("CollisionsX", "1: map[" + scanAAcrossY + "][" + scanEndAcrossX + "] checked");
 
                     //check the first scan line and the tile to the right, if obstacle; set location of tile,
                     // and set new x from this location
                     if (tileA.isObstacle()) {
                         xObstacleCollision(tileA, scanAAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY, RIGHT);
-                        Log.d("CollisionsX", "Case 1!");
+                        //Log.d("CollisionsX", "Case 1!");
                         return;
 
                         //else, check the second scan line and the tile to the right, if obstacle set new x
                     } else if (tileB.isObstacle()){
                         xObstacleCollision(tileB, scanBAcrossY, scanEndAcrossX, cameraOffsetX, cameraOffsetY, RIGHT);
-                        Log.d("CollisionsX", "Case 2!");
+                        //Log.d("CollisionsX", "Case 2!");
                         return;
 
                     } else if (tileA.isCollectable() || tileB.isCollectable()) {
@@ -479,14 +481,14 @@ public class Player {
                 tileA.setID(map[scanAAcrossY][scanStartAcrossX]);
                 tileB.setID(map[scanBAcrossY][scanStartAcrossX]);
 
-                Log.d("CollisionsX", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
+                //Log.d("CollisionsX", "3: map[" + scanAAcrossY + "][" + scanStartAcrossX + "] checked");
 
                 if (tileA.isObstacle()) {
                     xObstacleCollision(tileA, scanAAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY, LEFT);
                     return;
 
                 } else if (tileB.isObstacle()) {
-                    Log.d("CollisionsX", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
+                    //Log.d("CollisionsX", "4: map[" + scanBAcrossY + "][" + scanStartAcrossX + "] checked");
                     xObstacleCollision(tileB, scanBAcrossY, scanStartAcrossX, cameraOffsetX, cameraOffsetY, LEFT);
                     return;
 
@@ -644,7 +646,7 @@ public class Player {
 
     public void lockToYThreshold(int yThreshold) {
         y = yThreshold - (height / 2);
-        Log.d("YCamera", "Locked at: " + y);
+        //Log.d("YCamera", "Locked at: " + y);
         locked = true;
     }
 
@@ -654,27 +656,27 @@ public class Player {
         if ((cameraOffsetX == 0 && cameraOffsetY == 0)) {
             if (previousX != x || previousY != y) {
                 hasMoved = true;
-                Log.d("hasMoved", "is true");
+                //Log.d("hasMoved", "is true");
                 return hasMoved;
             } else if (previousX == x && previousY == y) {
                 hasMoved = false;
-                Log.d("hasMoved", "is false as previous = this");
+                //Log.d("hasMoved", "is false as previous = this");
                 return hasMoved;
             }
         } else {
             if (locked) {
                 hasMoved = true;
-                Log.d("hasMoved", "is true because locked");
+                //Log.d("hasMoved", "is true because locked");
                 return hasMoved;
             }
             if (!locked)
                 if (isWalking() || isRunning() || velY != 0) {
                     hasMoved = true;
-                    Log.d("hasMoved", "is true as unlocked but running/jumping");
+                    //Log.d("hasMoved", "is true as unlocked but running/jumping");
                     return hasMoved;
                 } else {
                     hasMoved = false;
-                    Log.d("hasMoved", "is false as unlocked and not running/jumping");
+                    //Log.d("hasMoved", "is false as unlocked and not running/jumping");
                     return hasMoved;
                 }
         }
@@ -738,7 +740,7 @@ public class Player {
 
     public void performAction(int ID) {
         switch(ID) {
-            case(1): Log.d("Collectable","coin registered as caught");
+            case(1): //Log.d("Collectable","coin registered as caught");
                      break;
         }
     }
