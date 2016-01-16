@@ -121,7 +121,9 @@ public class MenuState extends State {
                 }
             }
 
-            hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+            if(hedge != null) {
+                hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+            }
 
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
@@ -148,8 +150,8 @@ public class MenuState extends State {
             tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY, mawi);
         }
 
-        renderCollectables(g);
         renderEnemies(g);
+        renderCollectables(g);
 
 
         //renderButton methods
@@ -160,6 +162,8 @@ public class MenuState extends State {
         jump.render(g);
 
         renderPlayer(g);
+
+
     }
 
     private void renderCollectables(Painter g) {
@@ -195,12 +199,30 @@ public class MenuState extends State {
     }
 
     private void renderEnemies(Painter g) {
-        //if (hedge.isAlive()) {
-        hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
-        hedge.render(g, cameraOffsetX, cameraOffsetY);
-            Log.d("Enemy", "Rendered");
-            tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, hedge.getX(),
-                                            hedge.getY(), false, hedge.isFalling());
+
+        //MAKING COLLECTABLES NOT RENDER
+        if (hedge != null) {
+
+            //if (hedge.isAlive()) {
+            if (!hedge.isDying() && hedge.isActive()) {
+                hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                hedge.render(g, cameraOffsetX, cameraOffsetY);
+                Log.d("Enemy", "Rendered");
+
+                //if(hedge.isDying())
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, hedge.getX(),
+                        hedge.getY(), false, hedge.isFalling());
+
+
+            } else if (hedge.isDying() && hedge.isActive() && !hedge.isDead()) {
+                tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
+                hedge.render(g, cameraOffsetX, cameraOffsetY);
+            }
+
+            if (hedge.safeToRemove()) {
+                hedge = null;
+            }
+        }
 
        // }
     }

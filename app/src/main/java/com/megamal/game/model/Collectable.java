@@ -357,15 +357,16 @@ public class Collectable {
                     Log.d("RenderingCol", "Rendering!");
                     return true;
             }
+
+            else {
+                return false;
+            }
         }
 
         else {
             Log.d("RenderingCol", "Not rendering!");
             return false;
         }
-
-        Log.d("RenderingCol", "Not rendering by force!");
-        return false;
 
     }
 

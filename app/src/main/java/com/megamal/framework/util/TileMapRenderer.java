@@ -87,14 +87,48 @@ public class TileMapRenderer {
         } else if (cameraOffsetX != previousX || cameraOffsetY != previousY) {
             renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
 
-            //Else, mawi hasn't moved
+            //Else, mawi has moved but hasnt changed offset (within deadzone)
         } else if (cameraOffsetX == previousX && cameraOffsetY == previousY && !mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
-            /*if (mawi.justGrounded()) {
-                renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
-            }*/
+            if (mawi.justGrounded()) {
+                renderUnderMawi(g, map, cameraOffsetX, cameraOffsetY, mawi);
+                //renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
+            }
             return;
 
         }
+    }
+
+    //Method to fix any discontinuties when mawi is just grounded - Looks at the four tiles under mawi,
+    //and renders them respectively
+    private void renderUnderMawi(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
+
+
+        xStart = (int) Math.ceil((mawi.getX() + cameraOffsetX) / GameMainActivity.TILE_WIDTH);
+        xStart = xStart - 1;
+
+        yStart = (int) Math.ceil((mawi.getY() + mawi.getHeight() + cameraOffsetY) / GameMainActivity.TILE_HEIGHT);
+
+        for(int i = 0; i < 4; i++) {
+            Log.d("UnderMawi", "Rendering under Mawi at map[" + yStart + "][" + (xStart + i) + "]");
+            if (yStart >= 0 && (xStart + i) >= 0 && (xStart + i) < map[0].length && yStart < map.length) {
+                currentTile.setID(map[yStart][xStart + i]);
+
+                if(currentTile.getImage() != null) {
+                    currentTile.setLocation(yStart, (xStart + i), cameraOffsetX, cameraOffsetY);
+                    g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                }
+
+                else {
+                    g.setColor(Color.rgb(208, 244, 247));
+                    currentTile.setLocation(yStart, (xStart + i), cameraOffsetX, cameraOffsetY);
+                    g.fillRect((int) currentTile.getX(), (int) currentTile.getY(), GameMainActivity.TILE_WIDTH,
+                            GameMainActivity.TILE_HEIGHT);
+                }
+            }
+
+        }
+
+
     }
 
     public void renderWholeMap(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY) {
@@ -163,7 +197,7 @@ public class TileMapRenderer {
 
         if (falling) {
 
-            Log.d("Falling", "Is falling");
+            //Log.d("Falling", "Is falling");
             xStart = (int) Math.ceil(positionX / GameMainActivity.TILE_WIDTH) + 1;
             yStart = (int) Math.ceil(positionY / GameMainActivity.TILE_WIDTH) + 1;
 
@@ -193,13 +227,13 @@ public class TileMapRenderer {
 
         else {
 
-            Log.d("Falling", "Is not falling");
+           // Log.d("Falling", "Is not falling");
 
             xStart = (int) Math.floor(positionX / GameMainActivity.TILE_WIDTH) - 1;
-            Log.d("RenderingEnemy", "xStart is: " + xStart + ".\n");
+           /// Log.d("RenderingEnemy", "xStart is: " + xStart + ".\n");
 
             yStart = (int) Math.floor(positionY / GameMainActivity.TILE_WIDTH) - 1;
-            Log.d("RenderingEnemy", "yStart is: " + yStart + ".\n");
+          //  Log.d("RenderingEnemy", "yStart is: " + yStart + ".\n");
 
             for (int y = yStart; y < (yStart + 2); y++) {
                 for (int x = xStart; x < (xStart + 3); x++) {

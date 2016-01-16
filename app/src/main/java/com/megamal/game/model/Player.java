@@ -470,7 +470,7 @@ public class Player {
                         xCoinCollision(tileA, scanAAcrossY, scanEndAcrossX, tileB, scanBAcrossY, scanEndAcrossX,
                                 cameraOffsetX, cameraOffsetY, map);
 
-                        return;
+                        //return;
                     }
                 }
 
@@ -577,6 +577,11 @@ public class Player {
             }
         }
 
+    }
+
+    public void hitEnemy() {
+        velY = JUMPING_ACCELERATION;
+        isGrounded = false;
     }
 
     //Direction = parameter to tell whether walking left or right.

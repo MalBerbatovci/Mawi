@@ -19,26 +19,33 @@ public abstract class Enemy {
     public final int RECT_LEEWAY_X = 2;
     public final int RECT_LEEWAY_Y = 2;
 
+
     //not completely fixed yet
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY, double x, double y, int width, int height) {
-        /*if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
+        if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
                 ((x - cameraOffsetX > 0) && (x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)){
 
-            if((((y + height) - cameraOffsetY) > 0 && (y + height <= GameMainActivity.GAME_HEIGHT)) ||
+            //Log.d("EnemyVisiblity", "passed X");
+
+            if((((y + height) - cameraOffsetY) > 0 && ((y + height) - cameraOffsetY <= GameMainActivity.GAME_HEIGHT)) ||
                     ((y - cameraOffsetY > 0) && (y - cameraOffsetY <= GameMainActivity.GAME_HEIGHT))) {
 
-                Log.d("RenderingCol", "Rendering!");
+                //Log.d("EnemyVisibility", "passed Y");
+
+                //Log.d("RenderingCol", "Rendering!");
                 return true;
+            } else {
+                return false;
             }
         }
 
         else {
-            Log.d("RenderingEnemy", "Not rendering!");
+            //Log.d("RenderingEnemy", "Not rendering!");
             return false;
-        } */
+        }
 
        // Log.d("RenderingEnemy", "rendering by force!");
-        return true;
+
     }
 
 
@@ -62,7 +69,15 @@ public abstract class Enemy {
 
     public abstract boolean isAlive();
 
+    public abstract boolean safeToRemove();
+
+    public abstract boolean isDying();
+
     public abstract void death();
+
+    public abstract boolean isActive();
+
+    public abstract boolean isDead();
 
 
 }

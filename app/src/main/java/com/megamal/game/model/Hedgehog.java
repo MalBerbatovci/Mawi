@@ -17,7 +17,7 @@ public class Hedgehog extends Mover {
 
     private static final int SCAN_LEEWAY_Y = 10;
     private final static int ACCEL_GRAVITY = 282;
-    private final static int DEATH_VELOCITY = -120;
+    private final static int DEATH_VELOCITY = -222;
 
     private Tile tileA;
     private Tile tileB;
@@ -32,6 +32,10 @@ public class Hedgehog extends Mover {
     private boolean isAlive = true;
     private boolean isActive = true;
     private boolean isGrounded = false;
+    private boolean isDying = false;
+    private boolean isDead = false;
+
+    // if(isDying && !isActive) -> safe to remove
 
     public Hedgehog(double x, double y, double cameraOffsetX, double cameraOffsetY) {
 
@@ -56,8 +60,12 @@ public class Hedgehog extends Mover {
 
     }
 
+    //Called on each iteraiton of the game loop, updates x and y given velX and velY, and also
+    //checks the movement that the enemy will do, dealing with suitabl collisons in the suitable
+    //methods
     @Override
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
+
         if (!isActive) {
             //do what
         }
@@ -79,14 +87,32 @@ public class Hedgehog extends Mover {
 
             }
 
+            if (isDying) {
+                velY += ACCEL_GRAVITY * delta;
+                y += velY * delta;
+
+                Log.d("EnemyVisiblity", "Y is: " + y + ". Camera offset is: " + cameraOffsetY);
+
+                //Log.d("EnemyVisibility", "STILL VISIBLE");
+
+                if (!isVisible(cameraOffsetX,cameraOffsetY,x,y,width,height)) {
+                    Log.d("EnemyVisibility", "NOT VISIBLE");
+                    isDead = true;
+                    isDying = false;
+                    isActive = false;
+                }
+            }
+
         }
 
     }
+
 
     public void updateRects(double cameraOffsetX, double cameraOffsetY) {
 
         //Check playerX against enemy x
         if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
+
             rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
             rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
 
@@ -94,8 +120,10 @@ public class Hedgehog extends Mover {
                     (int) rectY + (height + RECT_LEEWAY_Y));
         }
 
-        else
+        else {
+            Log.d("Visibility", "Not visible");
             return;
+        }
 
     }
 
@@ -343,6 +371,8 @@ public class Hedgehog extends Mover {
                         //mawi.enemyHit();
                     } else {
                         Log.d("EnemyCollision", "Enemy hit");
+                        mawi.hitEnemy();
+                        death();
                         //this means that the enemy was killed, flip image maybe and let fall off map - once off, will need to be defeated
                         //death();
                     }
@@ -356,9 +386,12 @@ public class Hedgehog extends Mover {
     public void death() {
         image = Assets.coinImage;
 
-        //set IsGrounded to false, as isAlive being false means that usual tile checking won't happen
+        //set IsGrounded to false, as isAlive being false means that usual tile checking won't happen therefore
+        //can fall through the ground
         isGrounded = false;
         isAlive = false;
+
+        isDying = true;
 
         velY = DEATH_VELOCITY;
         velX = 0;
@@ -367,6 +400,10 @@ public class Hedgehog extends Mover {
 
     public boolean isFalling() {
         return !isGrounded;
+    }
+
+    public boolean isDying() {
+        return isDying;
     }
 
     public void activate() {
@@ -382,6 +419,19 @@ public class Hedgehog extends Mover {
     public double getX() { return x; }
 
     public double getY() { return y; }
+
+    public boolean safeToRemove() {
+        if(!isActive() && isDead) {
+            return true;
+        }
+
+        else
+            return false;
+    }
+
+    public boolean isDead() {
+        return isDead;
+    }
 
 
 }
