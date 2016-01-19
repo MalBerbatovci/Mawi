@@ -34,6 +34,8 @@ public abstract class Enemy {
 
                 //Log.d("RenderingCol", "Rendering!");
                 return true;
+
+
             } else {
                 return false;
             }

@@ -1,8 +1,10 @@
 package com.megamal.game.model;
 
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
@@ -690,6 +692,11 @@ public class Player {
         return hasMoved;
     }
 
+    public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
+        g.setColor(Color.rgb(208, 244, 247));
+        g.fillRect((int) x, (int) y, width, height);
+    }
+
     public int getHeight() {
         return height;
     }
@@ -749,4 +756,5 @@ public class Player {
                      break;
         }
     }
+
 }

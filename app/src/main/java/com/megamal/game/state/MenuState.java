@@ -17,6 +17,7 @@ import com.megamal.game.model.Enemy;
 import com.megamal.game.model.Hedgehog;
 import com.megamal.game.model.Mover;
 import com.megamal.game.model.Player;
+import com.megamal.game.model.Projectile;
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;
 import com.megamal.mawi.GameMainActivity;
@@ -37,6 +38,7 @@ public class MenuState extends State {
     private TileMapFactory tileFactory;
     private Player mawi;
     private Mover hedge;
+    private Projectile testProjectile;
     private Tile tile;
     private String levelString = "test.txt";
 
@@ -84,6 +86,7 @@ public class MenuState extends State {
 
         hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
 
+        testProjectile = new Projectile(128.0, 128.0, true, 1, cameraOffsetX, cameraOffsetY);
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -125,6 +128,8 @@ public class MenuState extends State {
                 hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
             }
 
+            testProjectile.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
@@ -150,7 +155,11 @@ public class MenuState extends State {
             tileRenderer.renderMap(g, map, cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY, mawi);
         }
 
+
+        clearAreas(g);
+
         renderEnemies(g);
+        renderProjectiles(g);
         renderCollectables(g);
 
 
@@ -166,16 +175,41 @@ public class MenuState extends State {
 
     }
 
-    private void renderCollectables(Painter g) {
-        if(!collectables.isEmpty()) {
+    private void clearAreas(Painter g) {
 
-
+        //clear collectables area first
+        if (!collectables.isEmpty()) {
             for (int i = 0; i < collectables.size(); i++) {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                     collectables.get(i).clearAreaAroundCoin(g, cameraOffsetX, cameraOffsetY);
                 }
             }
+        }
 
+        if (hedge != null) {
+            if (!hedge.isDying() && hedge.isActive()) {
+                hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+            }
+        }
+
+        if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
+            mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+        }
+
+        testProjectile.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+
+
+    }
+
+    private void renderProjectiles(Painter g) {
+        testProjectile.render(g, cameraOffsetX, cameraOffsetY);
+        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, testProjectile.getX(),
+                                            testProjectile.getY(), false, testProjectile.isFalling());
+
+    }
+
+    private void renderCollectables(Painter g) {
+        if(!collectables.isEmpty()) {
             for (int i = 0; i < collectables.size(); i++) {
 
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
@@ -200,12 +234,10 @@ public class MenuState extends State {
 
     private void renderEnemies(Painter g) {
 
-        //MAKING COLLECTABLES NOT RENDER
         if (hedge != null) {
 
             //if (hedge.isAlive()) {
             if (!hedge.isDying() && hedge.isActive()) {
-                hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
                 hedge.render(g, cameraOffsetX, cameraOffsetY);
                 Log.d("Enemy", "Rendered");
 
@@ -228,12 +260,6 @@ public class MenuState extends State {
     }
 
     private void renderPlayer(Painter g) {
-
-        if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
-            g.setColor(Color.rgb(208, 244, 247));
-            g.fillRect((int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-        }
-
         if (mawi.isJumping()) {
             if (mawi.isRight()) {
                 g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
