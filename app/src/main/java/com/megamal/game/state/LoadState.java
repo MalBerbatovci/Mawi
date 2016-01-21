@@ -16,7 +16,7 @@ public class LoadState extends State {
     }
 
     @Override
-    public void update(float delta) {
+    public void update(float delta, Painter g) {
         setCurrentState(new MenuState());
 
     }

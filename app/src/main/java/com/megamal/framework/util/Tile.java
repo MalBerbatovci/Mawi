@@ -1,6 +1,7 @@
 package com.megamal.framework.util;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
 
 import com.megamal.mawi.Assets;
@@ -105,6 +106,7 @@ public class Tile {
     public int xLocationNoOffset(int xIndex) {
         return (xIndex * GameMainActivity.TILE_WIDTH);
     }
+
     public int yLocationNoOffset(int yIndex) {
         return (yIndex * GameMainActivity.TILE_WIDTH);
     }
@@ -120,6 +122,15 @@ public class Tile {
                 (int) (((yIndex * GameMainActivity.TILE_HEIGHT) + COIN_RECT_CONST) - cameraOffsetY),
                 (int) (((xIndex * GameMainActivity.TILE_WIDTH) + GameMainActivity.TILE_WIDTH)  - cameraOffsetX),
                 (int) (((yIndex * GameMainActivity.TILE_HEIGHT) + GameMainActivity.TILE_HEIGHT - COIN_RECT_CONST) - cameraOffsetY));
+
+
+    }
+
+    public void fillTile(Painter g, double cameraOffsetX, double cameraOffsetY, int yIndex, int xIndex) {
+        setLocation(yIndex, xIndex, cameraOffsetX, cameraOffsetY);
+        g.setColor(Color.rgb(2, 24, 211));
+        g.fillRect((int) x, (int) y, GameMainActivity.TILE_WIDTH,
+                GameMainActivity.TILE_HEIGHT);
 
 
     }

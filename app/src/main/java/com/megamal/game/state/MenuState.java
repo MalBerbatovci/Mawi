@@ -86,7 +86,7 @@ public class MenuState extends State {
 
         hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
 
-        testProjectile = new Projectile(128.0, 128.0, true, 1, cameraOffsetX, cameraOffsetY);
+        testProjectile = new Projectile(400.0, 200.0, true, 1, cameraOffsetX, cameraOffsetY);
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -105,7 +105,7 @@ public class MenuState extends State {
     } */
 
     @Override
-    public void update(float delta) {
+    public void update(float delta, Painter g) {
 
         if (!mawi.isAlive()) {
             //do something if end of game
@@ -128,7 +128,7 @@ public class MenuState extends State {
                 hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
             }
 
-            testProjectile.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+            testProjectile.update(delta, map, cameraOffsetX, cameraOffsetY, mawi, g);
 
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;

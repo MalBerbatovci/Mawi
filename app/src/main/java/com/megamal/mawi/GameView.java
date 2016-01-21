@@ -130,7 +130,7 @@ public class GameView extends SurfaceView implements Runnable{
 
         //by passing delta to update, each update method will have access
         //to the time taken since previous iteration of update
-        currentState.update(delta / 1000f); //divide by 1000 to give seconds
+        currentState.update(delta / 1000f, graphics); //divide by 1000 to give seconds
         currentState.render(graphics);
         renderGameImage();
     }

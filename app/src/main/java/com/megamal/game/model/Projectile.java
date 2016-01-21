@@ -17,10 +17,12 @@ public class Projectile {
 
     private final static int WIDTH = 32;
     private final static int HEIGHT = 32;
-    private final static int SCAN_LEEWAY_Y = 20;
-    private final static int SCAN_LEEWAY_X = 20;
-    private final static int RECT_LEEWAY_X = 2;
-    private final static int RECT_LEEWAY_Y = 2;
+    private final static int SCAN_LEEWAY_Y = 2;
+    private final static int SCAN_LEEWAY_X = 2;
+    private final static int RECT_LEEWAY_X = 20;
+    private final static int RECT_LEEWAY_Y = 20;
+    private final static int RECT_LEEWAY_X_UPDATE = 2;
+    private final static int RECT_LEEWAY_Y_UPDATE = 2;
     private final static int VISIBILITY_THRESHOLD = 500;
 
     private final static int VEL_X = 120;
@@ -88,16 +90,16 @@ public class Projectile {
     }
 
     private void updateRects(double cameraOffsetX, double cameraOffsetY) {
-        rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
-        rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
+        rectX = (x + RECT_LEEWAY_X_UPDATE - cameraOffsetX);
+        rectY = (y + RECT_LEEWAY_Y_UPDATE - cameraOffsetY);
 
-        rect.set((int) rectX, (int) rectY, (int) rectX + (width + RECT_LEEWAY_X),
-                (int) rectY + (height + RECT_LEEWAY_Y));
+        rect.set((int) rectX, (int) rectY, (int) rectX + (width + RECT_LEEWAY_X_UPDATE),
+                (int) rectY + (height + RECT_LEEWAY_Y_UPDATE));
 
     }
 
 
-    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
+    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi, Painter g) {
 
         if(!isActive) {
 
@@ -106,12 +108,12 @@ public class Projectile {
         else {
 
             x += velX * delta;
+            checkXMovement(map, g, cameraOffsetX, cameraOffsetY);
+
 
             velY += ACCEL_GRAVITY * delta;
             y += velY * delta;
-
-            checkXMovement(map);
-            checkYMovement(map);
+            checkYMovement(map, g, cameraOffsetX, cameraOffsetY);
 
             updateRects(cameraOffsetX, cameraOffsetY);
 
@@ -143,10 +145,10 @@ public class Projectile {
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
         if (velY <= 0) {
             g.setColor(Color.rgb(208, 244, 247));
-            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width + SCAN_LEEWAY_X, height + SCAN_LEEWAY_Y);
+            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
         } else {
             g.setColor(Color.rgb(208, 244, 247));
-            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width + SCAN_LEEWAY_X, height + SCAN_LEEWAY_Y);
+            g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - RECT_LEEWAY_Y, width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
         }
 
 
@@ -159,7 +161,7 @@ public class Projectile {
 
     }
 
-    private void checkYMovement(int[][] map) {
+    private void checkYMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         //in this case falling, so check suitable entries in map. If hit floor make bounce
         if(velY > 0) {
@@ -167,7 +169,7 @@ public class Projectile {
 
             if(closenessToTile > 55) {
 
-                scanLineYb = (int) Math.ceil((y + height) / GameMainActivity.TILE_HEIGHT);
+                scanLineYb = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
 
                 if (scanLineYb < 0 || scanLineYb >= map.length) {
                     return;
@@ -175,11 +177,11 @@ public class Projectile {
 
 
                 if (velX < 0) {
-                    scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                    scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
                 }
 
                 else {
-                    scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                    scanLineXa = (int) Math.floor((x + width + SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
                 }
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
@@ -194,12 +196,18 @@ public class Projectile {
 
 
                 tileA.setID(map[scanLineYb][scanLineXa]);
+                tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXa);
+
                 //tileB.setID(map[scanLineYb][scanLineXb]);
 
-                if(tileA.isObstacle() || tileB.isObstacle()) {
+                if(tileA.isObstacle()) {
                     Log.d("Projectiles", "Is falling, Y movement");
+
+                    Log.d("ProjectilesCollision", "FALLING: Co-ordinates: " + (int) x + ", " + (int) y + ".");
+                    Log.d("ProjectilesCollision", "Checked map[" + scanLineYb + "][" + scanLineXa + ".");
                     //velY = -(velY);
                     velY = BOUNCING_VEL;
+                    y -= 5;
                 }
             }
 
@@ -210,18 +218,18 @@ public class Projectile {
             closenessToTile = y % GameMainActivity.TILE_HEIGHT;
 
             if(closenessToTile < 10 ) {
-                scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                scanLineYa = (int) Math.ceil((y - SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
                     return;
                 }
 
                 if (velX < 0) {
-                    scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                    scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
                 }
 
                 else {
-                    scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                    scanLineXa = (int) Math.floor((x + width + SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
                 }
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
@@ -236,11 +244,17 @@ public class Projectile {
 
                 tileA.setID(map[scanLineYa][scanLineXa]);
                 //tileB.setID(map[scanLineYa][scanLineXa]);
+                tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
+
+
 
                 if (tileA.isObstacle()/* || tileB.isObstacle()*/) {
                     Log.d("Projectiles", "Is rising, Y movement");
+                    Log.d("ProjectilesCollision", "RISING: Co-ordinates: " + (int) x + ", " + (int) y + ".");
+                    Log.d("ProjectilesCollision", "Checked map[" + scanLineYa + "][" + scanLineXa + ".");
                     //velY = -(velY);
-                    velY = BOUNCING_VEL;
+                    velY = -BOUNCING_VEL;
+                    y += 5;
 
                 }
             }
@@ -248,7 +262,7 @@ public class Projectile {
 
     }
 
-    private void checkXMovement(int[][] map) {
+    private void checkXMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         //moving right, so check suitable entries into map
         if (velX > 0) {
@@ -259,7 +273,7 @@ public class Projectile {
             if (closenessToTile > 55) {
                 //Log.d("Projectiles", "Close enough");
 
-                scanLineXb = (int) Math.ceil((x + width) / GameMainActivity.TILE_WIDTH);
+                scanLineXb = (int) Math.floor((x + width + SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
                 if (scanLineXb < 0 || scanLineXb >= map[0].length) {
                     Log.d("Projectiles", "Exited swift, scanLine = " + scanLineXb);
@@ -268,11 +282,11 @@ public class Projectile {
 
                 //travelling upwards
                 if (velY < 0) {
-                    scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    scanLineYa = (int) Math.floor((y - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
                 }
 
                 else {
-                    scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    scanLineYa = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
                 }
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
@@ -289,12 +303,18 @@ public class Projectile {
 
                 tileA.setID(map[scanLineYa][scanLineXb]);
                 Log.d("Projectiles", "Map[" + scanLineYa + "][" + scanLineXb + "]");
+                tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXb);
                 //tileB.setID(map[scanLineYb][scanLineXb]);
+
+
 
 
                 if(tileA.isObstacle() /*|| tileB.isObstacle()*/) {
                     Log.d("Projectiles", "Is Right, X movement");
+                    Log.d("ProjectilesCollision", "RIGHT: Co-ordinates: " + (int) x + ", " + (int) y + ".");
+                    Log.d("ProjectilesCollision", "Checked map[" + scanLineYa + "][" + scanLineXb + "].");
                     velX = -(velX);
+                    x -= 5;
                 }
 
             }
@@ -306,18 +326,18 @@ public class Projectile {
 
             if (closenessToTile < 10) {
 
-                scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
                     return;
                 }
 
                 if (velY < 0) {
-                    scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    scanLineYa = (int) Math.floor((y - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
                 }
 
                 else {
-                    scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    scanLineYa = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
                 }
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
@@ -333,11 +353,17 @@ public class Projectile {
                 tileA.setID(map[scanLineYa][scanLineXa]);
 
                 Log.d("Projectiles", "Map[" + scanLineYa + "][" + scanLineXa + "]");
+                tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
+
+
                 //tileB.setID(map[scanLineYb][scanLineXb]);
 
                 if(tileA.isObstacle() /* || tileB.isObstacle()*/) {
+                    Log.d("ProjectilesCollision", "LEFT: Co-ordinates: " + (int) x + ", " + (int) y + ".");
+                    Log.d("ProjectilesCollision", "Checked map[" + scanLineYa + "][" + scanLineXa + ".");
                     Log.d("Projectiles", "Is Left, X movement");
                     velX = -(velX);
+                    x += 5;
                 }
 
 

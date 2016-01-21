@@ -17,7 +17,7 @@ public abstract class State {
 
     public abstract void init();
 
-    public abstract void update(float delta);
+    public abstract void update(float delta, Painter g);
 
     public abstract void render(Painter g);
 
