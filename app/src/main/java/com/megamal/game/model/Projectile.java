@@ -183,7 +183,7 @@ public class Projectile {
 
             if(closenessToTile >= 60) {
 
-                scanLineYb = (int) Math.ceil((y + height) / GameMainActivity.TILE_HEIGHT);
+                scanLineYb = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
 
                 if (scanLineYb < 0 || scanLineYb >= map.length) {
                     return;
@@ -201,6 +201,14 @@ public class Projectile {
                         twoTiles = true;
                     }
 
+                    //else, very close and acceptable to view two tiles (must make them different
+                    //that is why leeway is subtracted)
+                    else if(x % GameMainActivity.TILE_WIDTH <= 2) {
+                        scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+                        scanLineXb = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                        twoTiles = true;
+                    }
+
                     //else, projectile is more than halfway into one tile, so only one tile is
                     //necessary
                     else {
@@ -211,13 +219,23 @@ public class Projectile {
                 //else, moving right
                 else {
 
-                    if(x % GameMainActivity.TILE_WIDTH >= 56) {
+                    if((x + width) % GameMainActivity.TILE_WIDTH <= 8) {
                         scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
                         scanLineXb = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
                         twoTiles = true;
                     }
 
-                    scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                    //else, very close and acceptable to view two tiles (must make them different
+                    //that is why leeway is added)
+                    else if((x + width) % GameMainActivity.TILE_WIDTH >= 62) {
+                        scanLineXa = (int) Math.floor((x + width + SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+                        scanLineXb = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                        twoTiles = true;
+                    }
+
+                    else {
+                        scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                    }
                 }
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
@@ -268,7 +286,7 @@ public class Projectile {
             if(closenessToTile <= 4) {
 
                 //scan_leeway_y must be bigger than 4
-                scanLineYa = (int) Math.floor(y - SCAN_LEEWAY_Y/ GameMainActivity.TILE_HEIGHT);
+                scanLineYa = (int) Math.floor((y - SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
                     return;
@@ -285,20 +303,41 @@ public class Projectile {
                         twoTiles = true;
 
                     }
-                    scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+
+                    //else, very close and acceptable to view two tiles (must make them different
+                    //that is why leeway is subtracted)
+                    else if (x % GameMainActivity.TILE_WIDTH <= 2) {
+                        scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+                        scanLineXb = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                        twoTiles = true;
+                    }
+
+                    else {
+                        scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                    }
                 }
 
                 //moving right
                 else {
 
                     //inbetween two tiles (by at most 8 pixel)
-                    if((x % GameMainActivity.TILE_WIDTH >= 56)) {
+                    if((x + width) % GameMainActivity.TILE_WIDTH <= 8) {
                         scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
                         scanLineXb = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
                         twoTiles = true;
                     }
 
-                    scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                    //else, very close and acceptable to view two tiles (must make them different
+                    //that is why leeway is added)
+                    else if ((x + width) % GameMainActivity.TILE_WIDTH >= 62) {
+                        scanLineXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                        scanLineXb = (int) Math.floor((x + width + SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+                        twoTiles = true;
+                    }
+
+                    else {
+                        scanLineXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                    }
                 }
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
@@ -326,9 +365,11 @@ public class Projectile {
                 //tileB.setID(map[scanLineYa][scanLineXa]);
                 tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
 
-
+                Log.d("RisingProj", "RISING - checking col!");
 
                 if (tileA.isObstacle() || (twoTiles && tileB.isObstacle())) {
+
+                    Log.d("RisingProj", "RISING! - is col");
                     Log.d("Projectiles", "Is rising, Y movement");
                     Log.d("ProjectilesCollision", "RISING: Co-ordinates: " + (int) x + ", " + (int) y + ".");
                     Log.d("ProjectilesCollision", "Checked map[" + scanLineYa + "][" + scanLineXa + ".");
@@ -337,6 +378,7 @@ public class Projectile {
                     y += 2;
 
                 }
+                Log.d("RisingProj", "RISING! - is not col");
             }
         }
 
@@ -373,13 +415,21 @@ public class Projectile {
                         twoTiles = true;
                     }
 
-                    scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    else if (y % GameMainActivity.TILE_HEIGHT <= 2) {
+                        scanLineYa = (int) Math.floor((y - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+                        scanLineYb = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                        twoTiles = true;
+                    }
+
+                    else {
+                        scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    }
                 }
 
                 //travelling down
                 else {
 
-                    if(y % GameMainActivity.TILE_HEIGHT >= 56) {
+                    if((y + height) % GameMainActivity.TILE_HEIGHT <= 8) {
                         scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
                         scanLineYb = (int) Math.floor(y + height / GameMainActivity.TILE_HEIGHT);
 
@@ -387,7 +437,17 @@ public class Projectile {
 
                     }
 
-                    scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    else if((y + height) % GameMainActivity.TILE_HEIGHT >= 62) {
+                        scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                        scanLineYb = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+
+                        twoTiles = true;
+
+                    }
+
+                    else {
+                        scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    }
                 }
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
@@ -455,20 +515,37 @@ public class Projectile {
                         twoTiles = true;
                     }
 
-                    scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    else if (y % GameMainActivity.TILE_HEIGHT <= 2) {
+                        scanLineYa = (int) Math.floor((y - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+                        scanLineYb = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+
+                        twoTiles = true;
+                    }
+
+                    else {
+                        scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    }
                 }
 
                 //else if rising
                 else {
 
-                    if(y % GameMainActivity.TILE_HEIGHT >= 56) {
+                    if((y + height) % GameMainActivity.TILE_HEIGHT <= 8) {
                         scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
                         scanLineYb = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
 
                         twoTiles = true;
                     }
 
-                    scanLineYa = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+                    else if ((y + height) % GameMainActivity.TILE_HEIGHT >= 62) {
+                        scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                        scanLineYb = (int) Math.floor((y + height + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+
+                        twoTiles = true;
+                    }
+                    else {
+                        scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    }
                 }
 
                 if (scanLineYa < 0 || scanLineYa >= map.length) {
@@ -493,7 +570,7 @@ public class Projectile {
 
 
                 if(twoTiles) {
-                    tileB.setID(map[scanLineYb][scanLineXb]);
+                    tileB.setID(map[scanLineYb][scanLineXa]);
                     tileB.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXb);
                 }
 
