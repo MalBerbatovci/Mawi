@@ -129,7 +129,7 @@ public class Camera {
 
                 //else case where player has not yet crossed the threshold
                 else if (playerCentreY < Y_THRESHOLD_DOWN) {
-                    Log.d("YCamera", "not passed threshold on offsetY = 0");
+                    //Log.d("YCamera", "not passed threshold on offsetY = 0");
                     return 0;
 
                 } else if (playerCentreY >= Y_THRESHOLD_DOWN) {
@@ -138,7 +138,7 @@ public class Camera {
                     else
                         overRun = 0;
 
-                    Log.d("YCamera", "player passed threshold on offsetY = 0 w/ overRun: " + overRun);
+                   // Log.d("YCamera", "player passed threshold on offsetY = 0 w/ overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY + overRun;
                     player.lockToYThreshold(Y_THRESHOLD_DOWN);
                     Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
@@ -155,13 +155,13 @@ public class Camera {
                     else
                         overRun = 0;
 
-                    Log.d("YCamera", "player passed DOWN threshold on offsetY >0 with overRun: " + overRun);
+                   // Log.d("YCamera", "player passed DOWN threshold on offsetY >0 with overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY + overRun;
                     if (cameraOffsetY > maxCameraOffsetY)
                         cameraOffsetY = maxCameraOffsetY;
 
                     player.lockToYThreshold(Y_THRESHOLD_DOWN);
-                    Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                   // Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
 
@@ -172,19 +172,19 @@ public class Camera {
                     else
                         overRun = 0;
 
-                    Log.d("YCamera", "player passed UP threshold on offsetY >0 with overRun: " + overRun);
+                    //Log.d("YCamera", "player passed UP threshold on offsetY >0 with overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY - overRun;
                     if (cameraOffsetY < 0)
                         cameraOffsetY = 0;
 
                     player.lockToYThreshold(Y_THRESHOLD_UP);
-                    Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                    //Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
 
                 //else, do nothing
                 else {
-                    Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                    //Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
             }
@@ -201,11 +201,11 @@ public class Camera {
                     else
                         overRun = 0;
 
-                    Log.d("YCamera", "player passed UP threshold on offsetY = max with overRun: " + overRun);
+                   // Log.d("YCamera", "player passed UP threshold on offsetY = max with overRun: " + overRun);
 
                     cameraOffsetY = cameraOffsetY - overRun;
                     player.lockToYThreshold(Y_THRESHOLD_UP);
-                    Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                   // Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
             }

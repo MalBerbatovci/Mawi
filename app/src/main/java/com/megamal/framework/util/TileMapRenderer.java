@@ -109,7 +109,7 @@ public class TileMapRenderer {
         yStart = (int) Math.ceil((mawi.getY() + mawi.getHeight() + cameraOffsetY) / GameMainActivity.TILE_HEIGHT);
 
         for(int i = 0; i < 4; i++) {
-            Log.d("UnderMawi", "Rendering under Mawi at map[" + yStart + "][" + (xStart + i) + "]");
+            //Log.d("UnderMawi", "Rendering under Mawi at map[" + yStart + "][" + (xStart + i) + "]");
             if (yStart >= 0 && (xStart + i) >= 0 && (xStart + i) < map[0].length && yStart < map.length) {
                 currentTile.setID(map[yStart][xStart + i]);
 

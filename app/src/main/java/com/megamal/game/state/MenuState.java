@@ -33,6 +33,7 @@ public class MenuState extends State {
     //final variables for passing to mawi.walk/run() method to determine L/R
     private static final int RIGHT = 1;
     private static final int LEFT = -1;
+    private static final int TOUCH_THRESHOLD = 5;
 
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
@@ -84,15 +85,15 @@ public class MenuState extends State {
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
-        hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+       // hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
 
         testProjectile = new Projectile(400.0, 200.0, true, 1, cameraOffsetX, cameraOffsetY);
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        walkL = new UIButton(330, 450, 430, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
-        walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);
+        /*walkL = new UIButton(330, 450, 430, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
+        walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);*/
 
         jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
 
@@ -164,8 +165,8 @@ public class MenuState extends State {
 
 
         //renderButton methods
-        walkR.render(g);
-        walkL.render(g);
+/*        walkR.render(g);
+        walkL.render(g); */
         runR.render(g);
         runL.render(g);
         jump.render(g);
@@ -196,15 +197,26 @@ public class MenuState extends State {
             mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
         }
 
-        testProjectile.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+        if(testProjectile.isVisible(cameraOffsetX,cameraOffsetY)) {
+            testProjectile.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+        }
 
 
     }
 
     private void renderProjectiles(Painter g) {
-        testProjectile.render(g, cameraOffsetX, cameraOffsetY);
-        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, testProjectile.getX(),
-                                            testProjectile.getY(), false, testProjectile.isFalling());
+
+        if(testProjectile.isVisible(cameraOffsetX,cameraOffsetY))
+        {
+            testProjectile.render(g, cameraOffsetX, cameraOffsetY);
+            tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, testProjectile.getX(),
+                    testProjectile.getY(), false, testProjectile.isFalling());
+           // Log.d("ProjVisibility", "IS VISIBLE");
+        }
+
+        else {
+            //Log.d("ProjVisibility", "NOT VISIBLE");
+        }
 
     }
 
@@ -239,7 +251,7 @@ public class MenuState extends State {
             //if (hedge.isAlive()) {
             if (!hedge.isDying() && hedge.isActive()) {
                 hedge.render(g, cameraOffsetX, cameraOffsetY);
-                Log.d("Enemy", "Rendered");
+                //Log.d("Enemy", "Rendered");
 
                 //if(hedge.isDying())
                 tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, hedge.getX(),
@@ -302,32 +314,160 @@ public class MenuState extends State {
 
         maskedAction = MotionEventCompat.getActionMasked(e);
 
-        pointerActiveIndex = MotionEventCompat.getActionIndex(e);
+
+        int pointerIndex = (maskedAction & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
+                    MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+
+
+        int pointerID = e.getPointerId(pointerIndex);
 
         if (maskedAction == MotionEvent.ACTION_DOWN) {
-            //Log.d("MenuState", "Action Down entered");
-            walkR.onTouchDown(scaledX, scaledY);
-            walkL.onTouchDown(scaledX, scaledY);
+
             runR.onTouchDown(scaledX, scaledY);
             runL.onTouchDown(scaledX, scaledY);
             jump.onTouchDown(scaledX, scaledY);
 
-            if (walkR.isTouched()) {
-                mawi.walk(RIGHT);
-                walkingRight = true;
-            } else if (runR.isTouched()) {
+            if (runR.isTouched()) {
+
+                if(runningLeft) {
+                    runningLeft = false;
+                    runL.cancel();
+                }
+
                 mawi.run(RIGHT);
                 runningRight = true;
-            } else if (walkL.isTouched()) {
-                mawi.walk(LEFT);
-                walkingLeft = true;
-            } else if (runL.isTouched()) {
+
+            }else if (runL.isTouched()) {
+
+                if(runningRight) {
+                    runningRight = false;
+                    runR.cancel();
+                }
                 mawi.run(LEFT);
                 runningLeft = true;
             } else if (jump.isTouched()) {
                 mawi.jump();
             }
+
+        } else if (maskedAction == MotionEvent.ACTION_MOVE) {
+
+            if(e.getHistorySize() != 0)
+            {
+
+                try {
+
+                    for (int i = 0; i < e.getPointerCount(); i++) {
+
+                        pointerID = e.getPointerId(i);
+
+                        int previousX = (int) ((e.getHistoricalX(pointerID, 0) / v.getWidth()) * GameMainActivity.GAME_WIDTH);
+                        int previousY = (int) ((e.getHistoricalY(pointerID, 0) / v.getHeight()) * GameMainActivity.GAME_HEIGHT);
+                        int xToUse = (int) ((e.getX(i) / v.getWidth()) * GameMainActivity.GAME_WIDTH);
+                        int yToUse = (int) ((e.getY(i) / v.getHeight()) * GameMainActivity.GAME_HEIGHT);
+
+
+                        if (e.getPointerCount() > 1) {
+                            Log.d("MultiTouch", "PointerID: " + pointerID);
+                            Log.d("MultiTouch", "PointerIndex: " + i);
+                            Log.d("MultiTouch", "Pointer Co's: " + xToUse + "," + yToUse);
+                        }
+
+
+
+                        if (runR.isContained(previousX, previousY) && !runR.isContained(xToUse, yToUse)) {
+                            runR.cancel();
+                            runningRight = false;
+                            mawi.stopRunning();
+
+                            //Log.d("MultiTouch", "RUNR was contained");
+
+                       /* if (runningLeft) {
+                            mawi.run(LEFT);
+                        } */
+                        } else if (runL.isContained(previousX, previousY) && !runL.isContained(xToUse, yToUse)) {
+                            runL.cancel();
+                            runningLeft = false;
+                            mawi.stopRunning();
+
+                            //Log.d("MultiTouch", "RUNL was contained");
+                       /* if (runningRight) {
+                            mawi.run(RIGHT);
+                        }*/
+                        } else if (jump.isContained(previousX, previousY) && !jump.isContained(xToUse, yToUse)) {
+                            jump.cancel();
+
+                        } else {
+
+                            // Log.d("MultiTouch", "Nothing was contained");
+                        }
+
+                        runR.onTouchDown(xToUse, yToUse);
+                        runL.onTouchDown(xToUse, yToUse);
+                        jump.onTouchDown(xToUse, yToUse);
+
+                        if (runR.isTouched() && !runningRight) {
+
+                            mawi.run(RIGHT);
+                            runningRight = true;
+
+                        } else if (runL.isTouched() && !runningLeft) {
+
+                            mawi.run(LEFT);
+                            runningLeft = true;
+
+                        } else if (jump.isTouched() && ((Math.abs(previousX - xToUse) > TOUCH_THRESHOLD) ||
+                                (Math.abs(previousY - yToUse) > TOUCH_THRESHOLD))) {
+
+                            mawi.jump();
+                        }
+
+                    }
+                }catch (Exception E) {
+                    Log.d("MultiTouch", "EXCEPTION CAUGHT");
+                    E.printStackTrace();
+                }
+
+            }
+
         } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
+            if(e.getPointerCount() >= 2) {
+
+
+                for(int i = 1; i < e.getPointerCount(); i++) {
+                    Log.d("MultiTouch", "i: " + i + " == pointerID: " + e.getPointerId(i));
+                }
+                Log.d("MultiTouch", "Pointer 2");
+                runR.onTouchDownPointer(scaledX2, scaledY2);
+                runL.onTouchDownPointer(scaledX2, scaledY2);
+                jump.onTouchDownPointer(scaledX2, scaledY2);
+
+                //if run is touched with second pointer, and runRight is not currently pressed
+                if(runR.isTouched() && !runningRight) {
+                    runningRight = true;
+
+                    mawi.run(RIGHT);
+                }
+
+                //deal with up in pointer turn
+                else if (runL.isTouched() && !runningLeft) {
+                    runningLeft = true;
+
+                    mawi.run(LEFT);
+                }
+
+                else if (jump.isTouched()) {
+                    mawi.jump();
+                }
+
+            }
+
+            else {
+
+            }
+
+        }
+
+      /*  } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
             //Log.d("MenuState", "Action Pointer Down Called!");
 
             walkR.onTouchDownPointer(scaledX2, scaledY2);
@@ -350,56 +490,26 @@ public class MenuState extends State {
                 runningLeft = true;
             } else if (jump.isPressed(scaledX2, scaledY2)) {
                 mawi.jump();
-            }
-        }
+            } */
 
         //v. naive way of checking.
-        if (maskedAction == MotionEvent.ACTION_UP) {
-            //Log.d("MenuState", "Action_UP checked with: " + scaledX + "," + scaledY + ". \n");
-            //if (walkR.isPressed(scaledX, scaledY)) {
-            if(walkingRight) {
-                mawi.stopWalking();
-                walkingRight = false;
-                walkR.cancel();
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (runningRight)
-                    mawi.run(RIGHT);
-                else if (runningLeft)
-                    mawi.run(LEFT);
-            } //else if (walkL.isPressed(scaledX, scaledY)) {
-                else if (walkingLeft) {
-                mawi.stopWalking();
-                walkingLeft = false;
-                walkL.cancel();
-                if (walkingRight)
-                    mawi.walk(RIGHT);
-                else if (runningRight)
-                    mawi.run(RIGHT);
-                else if (runningLeft)
-                    mawi.run(LEFT);
-            } //else if (runR.isPressed(scaledX, scaledY)) {
-                else if (runningRight) {
+        else if (maskedAction == MotionEvent.ACTION_UP) {
+           if (runningRight) {
                 mawi.stopRunning();
                 runningRight = false;
                 runR.cancel();
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (walkingRight)
-                    mawi.walk(RIGHT);
-                else if (runningLeft)
+                if (runningLeft) {
                     mawi.run(LEFT);
+                }
             } //else if (runL.isPressed(scaledX, scaledY)) {
                 else if (runningLeft) {
                 mawi.stopRunning();
                 runningLeft = false;
                 runL.cancel();
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (runningRight)
+
+                if (runningRight) {
                     mawi.run(RIGHT);
-                else if (walkingRight)
-                    mawi.walk(RIGHT);
+                }
             } //else if (jump.isPressed(scaledX, scaledY)) {
                 else if (mawi.isJumping()) {
                 jump.cancel();
@@ -413,50 +523,23 @@ public class MenuState extends State {
             scaledY2 = (int) ((MotionEventCompat.getY(e, pointerActiveIndex) / v.getHeight()) *
                     GameMainActivity.GAME_HEIGHT);
 
-            //Log.d("MenuState", "New Scaled X2: " + scaledX2 + ". Scaled Y2 :" + scaledY2 + ". \n");
-
-            if (walkR.isPressed(scaledX2, scaledY2)) {
-                mawi.stopWalking();
-                walkingRight = false;
-                walkR.cancel();
-                //Log.d("MenuState", "walk right cancelled in pointer Up. walkingLeft = " + walkingLeft
-                      //  + ".\n");
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (runningRight)
-                    mawi.run(RIGHT);
-                else if (runningLeft)
-                    mawi.run(LEFT);
-            } else if (walkL.isPressed(scaledX2, scaledY2)) {
-                mawi.stopWalking();
-                walkingLeft = false;
-                walkL.cancel();
-                if (walkingRight)
-                    mawi.walk(RIGHT);
-                else if (runningRight)
-                    mawi.run(RIGHT);
-                else if (runningLeft)
-                    mawi.run(LEFT);
-            } else if (runR.isPressed(scaledX2, scaledY2)) {
+             if (runR.isPressed(scaledX2, scaledY2)) {
                 mawi.stopRunning();
                 runningRight = false;
                 runR.cancel();
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (walkingRight)
-                    mawi.walk(RIGHT);
-                else if (runningLeft)
+
+                if (runningLeft) {
                     mawi.run(LEFT);
+                }
+
             } else if (runL.isPressed(scaledX2, scaledY2)) {
                 mawi.stopRunning();
                 runningLeft = false;
                 runL.cancel();
-                if (walkingLeft)
-                    mawi.walk(LEFT);
-                else if (runningRight)
+                if (runningRight) {
                     mawi.run(RIGHT);
-                else if (walkingRight)
-                    mawi.walk(RIGHT);
+                }
+
             } else if (jump.isPressed(scaledX2, scaledY2)) {
                 jump.cancel();
             }

@@ -30,5 +30,14 @@ public class GameMainActivity extends Activity {
         setContentView(sGame);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+       // setContentView(sGame);
+
+
+    }
 }
 
