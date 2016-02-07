@@ -156,37 +156,39 @@ public class Projectile {
 
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
-        g.setColor(Color.rgb(208, 244, 247));
+        if(isVisible) {
+            g.setColor(Color.rgb(208, 244, 247));
 
-        //rising
-        if(velY < 0) {
+            //rising
+            if (velY < 0) {
 
-            //moving right
-            if(velX > 0) {
-                g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY),
-                        width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                //moving right
+                if (velX > 0) {
+                    g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY),
+                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                }
+
+                //moving left
+                else {
+                    g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
+                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                }
             }
 
-            //moving left
-            else {
-                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
-                        width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
-            }
-        }
+            //falling
+            else if (velY > 0) {
 
-        //falling
-        else if (velY > 0) {
+                //moving right
+                if (velX > 0) {
+                    g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
+                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                }
 
-            //moving right
-            if (velX > 0) {
-                g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
-                        width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
-            }
-
-            //moving left
-            else {
-                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
-                        width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                //moving left
+                else {
+                    g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
+                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                }
             }
         }
     }

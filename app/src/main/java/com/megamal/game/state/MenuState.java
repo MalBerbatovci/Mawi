@@ -237,6 +237,8 @@ public class MenuState extends State {
                         tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
                                 collectables.get(i).getY(), true, collectables.get(i).isFalling());
                     }
+
+                    collectables.get(i).removeImage(g, cameraOffsetX, cameraOffsetY);
                     collectables.remove(i);
                 }
             }
@@ -314,6 +316,7 @@ public class MenuState extends State {
 
         if(moveAction) {
                 if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
+                    Log.d("MultiTouch", "Button moved on!");
                     runningRight = true;
                     mawi.run(RIGHT);
                     return true;

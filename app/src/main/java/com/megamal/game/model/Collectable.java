@@ -388,14 +388,16 @@ public class Collectable {
                 g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
             } else {
                 g.setColor(Color.rgb(208, 244, 247));
-                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width, height);
+                g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y,
+                        width, height + SCAN_LEEWAY_Y);
             }
         }
     }
 
     public void removeImage(Painter g, double cameraOffsetX, double cameraOffsetY) {
         g.setColor(Color.rgb(208, 244, 247));
-        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width, height);
+        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width,
+                (height + SCAN_LEEWAY_Y));
     }
 
     public boolean isAlive() {

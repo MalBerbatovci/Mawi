@@ -100,7 +100,7 @@ public class UIButton {
 
         //button already occupied
         if(this.pointerID != -1 && buttonDown) {
-            Log.d("MultiTouch", "Button not available");
+
             return false;
         }
 
@@ -109,13 +109,13 @@ public class UIButton {
             if(this.pointerID != pointerID && isContained(touchX, touchY)) {
                 this.pointerID = pointerID;
                 this.buttonDown = true;
+                return true;
 
             }
             else {
                 return false;
             }
         }
-        return false;
     }
 
     public boolean compareID(int pointerID) {
