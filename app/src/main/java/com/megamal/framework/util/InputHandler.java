@@ -15,10 +15,10 @@ import com.megamal.game.state.State;
 public class InputHandler implements OnTouchListener {
 
     private State currentState;
-    private int scaledX1 = 0;
-    private int scaledY1 = 0;
-    private int scaledX2, scaledY2, scaledX3, scaledY3;
-    private int previousX1, previousX2, previousY1, previousY2, previousX3, previousY3;
+    private int scaledX;
+    private int scaledY;
+    private static final int MAX_POINTERS = 3;
+    private boolean moveAction = false;
 
     public void setCurrentState(State currentState){
         this.currentState = currentState;
@@ -27,51 +27,72 @@ public class InputHandler implements OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
-        scaledX1 = (int) ((event.getX() / v.getWidth()) *
+
+        //atm, currently when moving and pointers are down,
+        //index is only corresponding to the first pointer, therefore
+        //need to loop through and get necessary
+
+        int pointerCount = event.getPointerCount();
+        int index = getIndex(event);
+
+        //ID DOESNT CHANGE THROUGHOUT DURATION, THEREFORE CAN BE USED IN BUTTON LOGISTICS
+        int ID = event.getPointerId(index);
+
+        scaledX = (int) ((event.getX(index) / v.getWidth()) *
                 GameMainActivity.GAME_WIDTH);
-        scaledY1 = (int) ((event.getY() / v.getHeight()) *
+        scaledY = (int) ((event.getY(index) / v.getHeight()) *
                 GameMainActivity.GAME_HEIGHT);
 
-        //Log.d("MenuState", "Scaled X1: " + scaledX1 + ". Scaled Y1:" + scaledY1 + ". \n");
 
-        if (event.getPointerCount() == 1) {
-            scaledX2 = -1;
-            scaledY2 = -1;
-            scaledX3 = -1;
-            scaledY3 = -1;
-            //Log.d("InputHandler", "Pointer count 1");
+        if(MotionEventCompat.getActionMasked(event) != MotionEvent.ACTION_MOVE) {
 
-           // Log.d("MultiTouch", "ScaledX1 is " + scaledX1);
-            return currentState.onTouch(event, scaledX1, scaledY1, scaledX2, scaledY2, v);
-        } else if (event.getPointerCount() == 2) {
+            moveAction = false;
+            return currentState.onTouch(event, scaledX, scaledY, ID, moveAction);
+        }
 
-            //Log.d("InputHandler", "Pointer count 2");
+        else {
 
-            //in the case of 1 becoming 0, this does not work
-            scaledX2 = (int) ((event.getX(1) / v.getWidth()) *
-                    GameMainActivity.GAME_WIDTH);
-            scaledY2 = (int) ((event.getY(1) / v.getHeight()) *
-                    GameMainActivity.GAME_HEIGHT);
+            boolean moveFlagCheck = false;
+            moveAction = true;
 
-            scaledX3 = -1;
-            scaledY3 = -1;
+           for(index = 0; index < pointerCount && index <= MAX_POINTERS; index++) {
+               ID = event.getPointerId(index);
 
-            //Log.d("MenuState","Scaled X2: " + scaledX2 + ". Scaled Y2 :" + scaledY2 + ". \n");
-            return currentState.onTouch(event, scaledX1, scaledY1, scaledX2, scaledY2, v);
+               Log.d("MultiTouch", "Pointer ID: " + ID);
 
-        } else {
-            scaledX2 = (int) ((event.getX(1) / v.getWidth()) *
-                    GameMainActivity.GAME_WIDTH);
-            scaledY2 = (int) ((event.getY(1) / v.getHeight()) *
-                    GameMainActivity.GAME_HEIGHT);
+               scaledX = (int) ((event.getX(index) / v.getWidth()) *
+                       GameMainActivity.GAME_WIDTH);
+               scaledY = (int) ((event.getY(index) / v.getHeight()) *
+                       GameMainActivity.GAME_HEIGHT);
 
-            scaledX3 = (int) ((event.getX(2) / v.getWidth()) *
-                    GameMainActivity.GAME_WIDTH);
-            scaledY3 = (int) ((event.getY(2) / v.getHeight()) *
-                    GameMainActivity.GAME_HEIGHT);
+               //only needs to do move really, add move flag into method
+               moveFlagCheck = currentState.onTouch(event, scaledX, scaledY, ID, moveAction);
 
-            return currentState.onTouch(event, scaledX1, scaledY1, scaledX2, scaledY2, v);
+               if(!moveFlagCheck) {
+                   Log.d("MultiTouch", "NOT HANDLED!");
+                   return false;
+               }
+
+           }
 
         }
+
+        return true;
+
     }
+
+    private int getIndex(MotionEvent event) {
+        int index = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+
+        return index;
+    }
+
+    private int scaleX(int x, int viewWidth) {
+        return ((x / viewWidth) * GameMainActivity.GAME_WIDTH);
+    }
+
+    private int scaleY(int y, int viewHeight) {
+        return ((y / viewHeight) * GameMainActivity.GAME_HEIGHT);
+    }
+
 }

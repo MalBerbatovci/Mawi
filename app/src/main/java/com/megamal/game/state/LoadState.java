@@ -27,7 +27,7 @@ public class LoadState extends State {
     }
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int scaledX2, int scaledY2, View v) {
+    public boolean onTouch(MotionEvent e,int scaledX, int scaledY, int ID, boolean moveAction) {
         return false;
     }
 }

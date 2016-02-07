@@ -308,246 +308,171 @@ public class MenuState extends State {
 
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int scaledX2, int scaledY2, View v) {
+    public boolean onTouch(MotionEvent e,int scaledX, int scaledY, int ID, boolean moveAction) {
         //check if walk button is pressed, this changes walkR.isPressed to true if contained
         //in the buttons rect
 
-        maskedAction = MotionEventCompat.getActionMasked(e);
-
-
-        int pointerIndex = (maskedAction & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
-                    MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-
-
-        int pointerID = e.getPointerId(pointerIndex);
-
-        if (maskedAction == MotionEvent.ACTION_DOWN) {
-
-            runR.onTouchDown(scaledX, scaledY);
-            runL.onTouchDown(scaledX, scaledY);
-            jump.onTouchDown(scaledX, scaledY);
-
-            if (runR.isTouched()) {
-
-                if(runningLeft) {
-                    runningLeft = false;
-                    runL.cancel();
-                }
-
-                mawi.run(RIGHT);
-                runningRight = true;
-
-            }else if (runL.isTouched()) {
-
-                if(runningRight) {
-                    runningRight = false;
-                    runR.cancel();
-                }
-                mawi.run(LEFT);
-                runningLeft = true;
-            } else if (jump.isTouched()) {
-                mawi.jump();
-            }
-
-        } else if (maskedAction == MotionEvent.ACTION_MOVE) {
-
-            if(e.getHistorySize() != 0)
-            {
-
-                try {
-
-                    for (int i = 0; i < e.getPointerCount(); i++) {
-
-                        pointerID = e.getPointerId(i);
-
-                        int previousX = (int) ((e.getHistoricalX(pointerID, 0) / v.getWidth()) * GameMainActivity.GAME_WIDTH);
-                        int previousY = (int) ((e.getHistoricalY(pointerID, 0) / v.getHeight()) * GameMainActivity.GAME_HEIGHT);
-                        int xToUse = (int) ((e.getX(i) / v.getWidth()) * GameMainActivity.GAME_WIDTH);
-                        int yToUse = (int) ((e.getY(i) / v.getHeight()) * GameMainActivity.GAME_HEIGHT);
-
-
-                        if (e.getPointerCount() > 1) {
-                            Log.d("MultiTouch", "PointerID: " + pointerID);
-                            Log.d("MultiTouch", "PointerIndex: " + i);
-                            Log.d("MultiTouch", "Pointer Co's: " + xToUse + "," + yToUse);
-                        }
-
-
-
-                        if (runR.isContained(previousX, previousY) && !runR.isContained(xToUse, yToUse)) {
-                            runR.cancel();
-                            runningRight = false;
-                            mawi.stopRunning();
-
-                            //Log.d("MultiTouch", "RUNR was contained");
-
-                       /* if (runningLeft) {
-                            mawi.run(LEFT);
-                        } */
-                        } else if (runL.isContained(previousX, previousY) && !runL.isContained(xToUse, yToUse)) {
-                            runL.cancel();
-                            runningLeft = false;
-                            mawi.stopRunning();
-
-                            //Log.d("MultiTouch", "RUNL was contained");
-                       /* if (runningRight) {
-                            mawi.run(RIGHT);
-                        }*/
-                        } else if (jump.isContained(previousX, previousY) && !jump.isContained(xToUse, yToUse)) {
-                            jump.cancel();
-
-                        } else {
-
-                            // Log.d("MultiTouch", "Nothing was contained");
-                        }
-
-                        runR.onTouchDown(xToUse, yToUse);
-                        runL.onTouchDown(xToUse, yToUse);
-                        jump.onTouchDown(xToUse, yToUse);
-
-                        if (runR.isTouched() && !runningRight) {
-
-                            mawi.run(RIGHT);
-                            runningRight = true;
-
-                        } else if (runL.isTouched() && !runningLeft) {
-
-                            mawi.run(LEFT);
-                            runningLeft = true;
-
-                        } else if (jump.isTouched() && ((Math.abs(previousX - xToUse) > TOUCH_THRESHOLD) ||
-                                (Math.abs(previousY - yToUse) > TOUCH_THRESHOLD))) {
-
-                            mawi.jump();
-                        }
-
-                    }
-                }catch (Exception E) {
-                    Log.d("MultiTouch", "EXCEPTION CAUGHT");
-                    E.printStackTrace();
-                }
-
-            }
-
-        } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            if(e.getPointerCount() >= 2) {
-
-
-                for(int i = 1; i < e.getPointerCount(); i++) {
-                    Log.d("MultiTouch", "i: " + i + " == pointerID: " + e.getPointerId(i));
-                }
-                Log.d("MultiTouch", "Pointer 2");
-                runR.onTouchDownPointer(scaledX2, scaledY2);
-                runL.onTouchDownPointer(scaledX2, scaledY2);
-                jump.onTouchDownPointer(scaledX2, scaledY2);
-
-                //if run is touched with second pointer, and runRight is not currently pressed
-                if(runR.isTouched() && !runningRight) {
+        if(moveAction) {
+                if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
                     runningRight = true;
-
                     mawi.run(RIGHT);
-                }
+                    return true;
+                } else if (runR.buttonMovedOut(scaledX, scaledY, ID)) {
+                    runningRight = false;
 
-                //deal with up in pointer turn
-                else if (runL.isTouched() && !runningLeft) {
+                    if (runningLeft) {
+                        mawi.run(LEFT);
+                    } else {
+                        mawi.stopRunning();
+                    }
+
+                    return true;
+                } else if (runL.buttonMovedOn(scaledX, scaledY, ID)) {
                     runningLeft = true;
-
                     mawi.run(LEFT);
-                }
+                    return true;
 
-                else if (jump.isTouched()) {
+                } else if (runL.buttonMovedOut(scaledX, scaledY, ID)) {
+                    runningLeft = false;
+
+                    if (runningRight) {
+                        mawi.run(RIGHT);
+                    } else {
+                        mawi.stopRunning();
+                    }
+
+                    return true;
+                } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
                     mawi.jump();
+                    return true;
+                } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
+                    return true;
+                } else {
+                    return true;
                 }
-
-            }
-
-            else {
-
-            }
-
         }
 
-      /*  } else if (maskedAction == MotionEvent.ACTION_POINTER_DOWN) {
-            //Log.d("MenuState", "Action Pointer Down Called!");
+        else {
 
-            walkR.onTouchDownPointer(scaledX2, scaledY2);
-            walkL.onTouchDownPointer(scaledX2, scaledY2);
-            runR.onTouchDownPointer(scaledX2, scaledY2);
-            runL.onTouchDownPointer(scaledX2, scaledY2);
-            jump.onTouchDownPointer(scaledX2, scaledY2);
+            //the particular index
+            maskedAction = MotionEventCompat.getActionMasked(e);
 
-            if (walkR.isPressed(scaledX2, scaledY2)) {
-                mawi.walk(RIGHT);
-                walkingRight = true;
-            } else if (runR.isPressed(scaledX2, scaledY2)) {
-                mawi.run(RIGHT);
-                runningRight = true;
-            } else if (walkL.isPressed(scaledX2, scaledY2)) {
-                mawi.walk(LEFT);
-                walkingLeft = true;
-            } else if (runL.isPressed(scaledX2, scaledY2)) {
-                mawi.run(LEFT);
-                runningLeft = true;
-            } else if (jump.isPressed(scaledX2, scaledY2)) {
-                mawi.jump();
-            } */
+            switch (maskedAction) {
 
-        //v. naive way of checking.
-        else if (maskedAction == MotionEvent.ACTION_UP) {
-           if (runningRight) {
-                mawi.stopRunning();
-                runningRight = false;
-                runR.cancel();
-                if (runningLeft) {
-                    mawi.run(LEFT);
-                }
-            } //else if (runL.isPressed(scaledX, scaledY)) {
-                else if (runningLeft) {
-                mawi.stopRunning();
-                runningLeft = false;
-                runL.cancel();
+                case MotionEvent.ACTION_DOWN: {
 
-                if (runningRight) {
-                    mawi.run(RIGHT);
-                }
-            } //else if (jump.isPressed(scaledX, scaledY)) {
-                else if (mawi.isJumping()) {
-                jump.cancel();
-            }
+                    //if any buttons are pressed, then update boolean and make player perform action
+                    //do not check if opposite action (i.e running left when pressing running right)
+                    //is checked, as this will be suitable checked in the action_up / action_moved
+                    //case to then make the player resume any previous movement
+                    if (runR.onTouchDown(scaledX, scaledY, ID)) {
+                        runningRight = true;
+                        mawi.run(RIGHT);
+                        return true;
+                    } else if (runL.onTouchDown(scaledX, scaledY, ID)) {
+                        runningLeft = true;
+                        mawi.run(LEFT);
+                        return true;
+                    } else if (jump.onTouchDown(scaledX, scaledY, ID)) {
+                        mawi.jump();
+                        return true;
+                    }
 
-        } else if (maskedAction == MotionEvent.ACTION_POINTER_UP) {
-            //Log.d("MenuState", "Action Pointer UP checked with: " + scaledX2 + "," + scaledY2 + ". \n");
-
-            scaledX2 = (int) ((MotionEventCompat.getX(e, pointerActiveIndex) / v.getWidth()) *
-                    GameMainActivity.GAME_WIDTH);
-            scaledY2 = (int) ((MotionEventCompat.getY(e, pointerActiveIndex) / v.getHeight()) *
-                    GameMainActivity.GAME_HEIGHT);
-
-             if (runR.isPressed(scaledX2, scaledY2)) {
-                mawi.stopRunning();
-                runningRight = false;
-                runR.cancel();
-
-                if (runningLeft) {
-                    mawi.run(LEFT);
+                    //else, not of interest, event handled - return true
+                    else {
+                        return true;
+                    }
                 }
 
-            } else if (runL.isPressed(scaledX2, scaledY2)) {
-                mawi.stopRunning();
-                runningLeft = false;
-                runL.cancel();
-                if (runningRight) {
-                    mawi.run(RIGHT);
+                case MotionEvent.ACTION_POINTER_DOWN: {
+                    if (runR.onTouchDown(scaledX, scaledY, ID)) {
+                        runningRight = true;
+                        mawi.run(RIGHT);
+                        return true;
+                    } else if (runL.onTouchDown(scaledX, scaledY, ID)) {
+                        runningLeft = true;
+                        mawi.run(LEFT);
+                        return true;
+                    } else if (jump.onTouchDown(scaledX, scaledY, ID)) {
+                        mawi.jump();
+                        return true;
+                    }
+
+                    //else, not of interest, event handled - return true
+                    else {
+                        return true;
+                    }
                 }
 
-            } else if (jump.isPressed(scaledX2, scaledY2)) {
-                jump.cancel();
+                case MotionEvent.ACTION_UP: {
+
+                    //check if action up was performed on runR (i.e was previous pressed on this),
+                    //if so cancel action and see if opposite was being performed and resume that
+                    if (runR.onTouchUp(scaledX, scaledY, ID)) {
+                        runningRight = false;
+
+                        if (runningLeft) {
+                            mawi.run(LEFT);
+                        } else {
+                            mawi.stopRunning();
+                        }
+
+                        return true;
+                    } else if (runL.onTouchUp(scaledX, scaledY, ID)) {
+                        runningLeft = false;
+
+                        if (runningRight) {
+                            mawi.run(RIGHT);
+                        } else {
+                            mawi.stopRunning();
+                        }
+
+                        return true;
+                    } else if (jump.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+                    else {
+                        return true;
+                    }
+                }
+
+                case MotionEvent.ACTION_POINTER_UP: {
+                    //check if action up was performed on runR (i.e was previous pressed on this),
+                    //if so cancel action and see if opposite was being performed and resume that
+                    if (runR.onTouchUp(scaledX, scaledY, ID)) {
+                        runningRight = false;
+
+                        if (runningLeft) {
+                            mawi.run(LEFT);
+                        } else {
+                            mawi.stopRunning();
+                        }
+
+                        return true;
+                    } else if (runL.onTouchUp(scaledX, scaledY, ID)) {
+                        runningLeft = false;
+
+                        if (runningRight) {
+                            mawi.run(RIGHT);
+                        } else {
+                            mawi.stopRunning();
+                        }
+
+                        return true;
+                    } else if (jump.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+                    else {
+                        return true;
+                    }
+                }
             }
         }
 
-        return true;
+        return false;
     }
-
 
     /*@Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
