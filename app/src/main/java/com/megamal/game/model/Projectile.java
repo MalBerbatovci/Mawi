@@ -32,6 +32,11 @@ public class Projectile {
     private final static int ACCEL_GRAVITY = 250;
     private final static int BOUNCING_VEL = -150;
 
+    private final static int MAX_TIME = 20000;
+
+    private final static int LEFT = -1;
+    private final static int RIGHT = 1;
+
     private Rect rect;
     private Bitmap image;
     private Tile tileA, tileB;
@@ -44,13 +49,15 @@ public class Projectile {
     private double closenessToTile;
 
     private double rectX, rectY;
+    private int activationTime;
 
     private boolean isVisible = false;
     private boolean isActive = false;
     private boolean isPlayers;
     private boolean safeToRemove = false;
 
-    public Projectile(double x, double y, boolean isPlayers, int ID, double cameraOffsetX, double cameraOffsetY) {
+    public Projectile(double x, double y, boolean isPlayers, int ID, double cameraOffsetX,
+                      double cameraOffsetY, int direction) {
         this.x = x;
         this.y = y;
         this.isPlayers = isPlayers;
@@ -63,7 +70,20 @@ public class Projectile {
 
         width = WIDTH;
         height = HEIGHT;
-        velX = VEL_X;
+
+        if(direction == LEFT) {
+            velX = -(VEL_X);
+        }
+
+        else if (direction == RIGHT) {
+            velX = VEL_X;
+        }
+
+        else {
+            velX = VEL_X;
+        }
+
+
         velY = VEL_Y;
 
         switch(ID) {
@@ -73,22 +93,44 @@ public class Projectile {
 
         isVisible = true;
         isActive = true;
+
+        activationTime = (int) (System.currentTimeMillis() / 1000000L);
     }
 
-    public void reset(double x, double y, double cameraOffsetX, double cameraOffsetY, boolean isPlayers, int ID) {
+    public void reset(double x, double y, boolean isPlayers, int ID, double cameraOffsetX,
+                      double cameraOffsetY, int direction) {
         this.x = x;
         this.y = y;
         this.isPlayers = isPlayers;
 
         updateRects(cameraOffsetX, cameraOffsetY);
 
+        if(direction == LEFT) {
+            velX = -(VEL_X);
+        }
+
+        else if (direction == RIGHT) {
+            velX = VEL_X;
+        }
+
+        else {
+            velX = VEL_X;
+        }
+
+
+        velY = VEL_Y;
+
+
         switch(ID) {
             case(1): this.image = Assets.coinImage;
                 break;
         }
 
+
         isVisible = true;
         isActive = true;
+
+        activationTime = (int) (System.currentTimeMillis());
     }
 
     private void updateRects(double cameraOffsetX, double cameraOffsetY) {
@@ -104,7 +146,13 @@ public class Projectile {
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi, Painter g) {
 
         if(!isActive) {
+            return;
+        }
 
+
+        if(((int) System.currentTimeMillis() - activationTime) > MAX_TIME) {
+            isActive = false;
+            return;
         }
 
         else {
@@ -142,62 +190,80 @@ public class Projectile {
     }
 
     public void render(Painter g, double cameraOffsetX, double cameraOffsetY) {
-        if (!isVisible) {
+
+        if(isActive) {
+
+            if (!isVisible(cameraOffsetX, cameraOffsetY)) {
+                return;
+            } else {
+                g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
+            }
+
+        } else {
             return;
         }
-
-        else {
-            g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
-        }
-
-
     }
 
 
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
-        if(isVisible) {
-            g.setColor(Color.rgb(208, 244, 247));
+        if(isActive) {
+            if (isVisible) {
+                g.setColor(Color.rgb(208, 244, 247));
 
-            //rising
-            if (velY < 0) {
+                //rising
+                if (velY < 0) {
 
-                //moving right
-                if (velX > 0) {
-                    g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY),
-                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    //moving right
+                    if (velX > 0) {
+                        g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY),
+                                width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    }
+
+                    //moving left
+                    else {
+                        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
+                                width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    }
                 }
 
-                //moving left
-                else {
-                    g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
-                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
-                }
-            }
+                //falling
+                else if (velY > 0) {
 
-            //falling
-            else if (velY > 0) {
+                    //moving right
+                    if (velX > 0) {
+                        g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
+                                width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    }
 
-                //moving right
-                if (velX > 0) {
-                    g.fillRect((int) (x - cameraOffsetX) - RECT_LEEWAY_X, (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
-                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
-                }
-
-                //moving left
-                else {
-                    g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
-                            width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    //moving left
+                    else {
+                        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY - RECT_LEEWAY_Y),
+                                width + RECT_LEEWAY_X, height + RECT_LEEWAY_Y);
+                    }
                 }
             }
         }
     }
 
     private void checkCollisionsEnemies() {
+        if(isPlayers) {
+            //handle collisions
+        }
+
+        else {
+            return;
+        }
     }
 
     private void checkCollisionsPlayer(Player mawi) {
+        if(isPlayers) {
+            return;
+        }
 
+        else {
+            //handle collisions
+        }
     }
 
     private void checkYMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
@@ -684,6 +750,22 @@ public class Projectile {
 
     public double getY() {
         return y;
+    }
+
+    public int getActivationTime() {
+        return activationTime;
+    }
+
+    public void makeNonActive() {
+        isActive = false;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public boolean isSafeToRemove() {
+        return safeToRemove;
     }
 
     public boolean isFalling() {

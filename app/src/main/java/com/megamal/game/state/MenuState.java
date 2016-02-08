@@ -34,6 +34,7 @@ public class MenuState extends State {
     private static final int RIGHT = 1;
     private static final int LEFT = -1;
     private static final int TOUCH_THRESHOLD = 5;
+    private static final int MAX_PROJECTILES = 10;
 
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
@@ -45,7 +46,9 @@ public class MenuState extends State {
 
     private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
 
-    private UIButton walkR, walkL, runR, runL, jump;
+    private Projectile[] projectileArray = new Projectile[MAX_PROJECTILES];
+
+    private UIButton walkR, walkL, runR, runL, jump, shoot;
 
     private boolean walkingRight = false, walkingLeft = false, runningRight = false, runningLeft = false;
     private boolean initialRender = true;
@@ -85,9 +88,14 @@ public class MenuState extends State {
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
-       // hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+        //hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
 
-        testProjectile = new Projectile(400.0, 200.0, true, 1, cameraOffsetX, cameraOffsetY);
+        //create an array of 10 projectiles which are not active.
+        for(int i = 0; i < MAX_PROJECTILES; i++ ) {
+            projectileArray[i] = new Projectile(400.0, 200.0, true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+            projectileArray[i].makeNonActive();
+        }
+
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -96,6 +104,7 @@ public class MenuState extends State {
         walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);*/
 
         jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
+        shoot = new UIButton(740, 450, 800, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
         camera = new Camera(map);
 
@@ -129,7 +138,11 @@ public class MenuState extends State {
                 hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
             }
 
-            testProjectile.update(delta, map, cameraOffsetX, cameraOffsetY, mawi, g);
+            for(int i = 0; i < projectileArray.length; i++) {
+                if(projectileArray[i].isActive()) {
+                    projectileArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi, g);
+                }
+            }
 
             previousOffsetX = cameraOffsetX;
             previousOffsetY = cameraOffsetY;
@@ -170,6 +183,7 @@ public class MenuState extends State {
         runR.render(g);
         runL.render(g);
         jump.render(g);
+        shoot.render(g);
 
         renderPlayer(g);
 
@@ -197,27 +211,30 @@ public class MenuState extends State {
             mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
         }
 
-        if(testProjectile.isVisible(cameraOffsetX,cameraOffsetY)) {
-            testProjectile.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
-        }
 
+        for(int i = 0; i < projectileArray.length; i++) {
+            if(projectileArray[i].isActive()) {
+                projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+            }
+        }
 
     }
 
     private void renderProjectiles(Painter g) {
 
-        if(testProjectile.isVisible(cameraOffsetX,cameraOffsetY))
-        {
-            testProjectile.render(g, cameraOffsetX, cameraOffsetY);
-            tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, testProjectile.getX(),
-                    testProjectile.getY(), false, testProjectile.isFalling());
-           // Log.d("ProjVisibility", "IS VISIBLE");
-        }
+        for(int i = 0; i < projectileArray.length; i++) {
 
-        else {
-            //Log.d("ProjVisibility", "NOT VISIBLE");
-        }
+            //then necessary to render
+            if(projectileArray[i].isActive() &&
+                    projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
 
+                projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
+
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY,
+                        projectileArray[i].getX(), projectileArray[i].getY(), false,
+                        projectileArray[i].isFalling());
+            }
+        }
     }
 
     private void renderCollectables(Painter g) {
@@ -343,14 +360,25 @@ public class MenuState extends State {
                     } else {
                         mawi.stopRunning();
                     }
-
                     return true;
+
                 } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
                     mawi.jump();
                     return true;
+
                 } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
                     return true;
-                } else {
+
+                } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
+                    mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
+                    return true;
+
+                }
+                else if (shoot.buttonMovedOut(scaledX, scaledY, ID)) {
+                    return true;
+
+                }
+                else {
                     return true;
                 }
         }
@@ -379,6 +407,9 @@ public class MenuState extends State {
                     } else if (jump.onTouchDown(scaledX, scaledY, ID)) {
                         mawi.jump();
                         return true;
+                    } else if (shoot.onTouchDown(scaledX, scaledY, ID)) {
+                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
+                        return true;
                     }
 
                     //else, not of interest, event handled - return true
@@ -398,6 +429,9 @@ public class MenuState extends State {
                         return true;
                     } else if (jump.onTouchDown(scaledX, scaledY, ID)) {
                         mawi.jump();
+                        return true;
+                    } else if (shoot.onTouchDown(scaledX, scaledY, ID)) {
+                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
                         return true;
                     }
 
@@ -419,8 +453,8 @@ public class MenuState extends State {
                         } else {
                             mawi.stopRunning();
                         }
-
                         return true;
+
                     } else if (runL.onTouchUp(scaledX, scaledY, ID)) {
                         runningLeft = false;
 
@@ -429,9 +463,12 @@ public class MenuState extends State {
                         } else {
                             mawi.stopRunning();
                         }
-
                         return true;
+
                     } else if (jump.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+
+                    } else if (shoot.onTouchUp(scaledX, scaledY, ID)) {
                         return true;
                     }
 
@@ -464,6 +501,8 @@ public class MenuState extends State {
 
                         return true;
                     } else if (jump.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+                    } else if (shoot.onTouchUp(scaledX, scaledY, ID)) {
                         return true;
                     }
 

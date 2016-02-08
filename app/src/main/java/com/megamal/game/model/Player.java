@@ -602,6 +602,65 @@ public class Player {
         isWalking = true;
     }
 
+
+    //needs a ebtter way to get the ID of the projectile - will be done once powerups established
+    public void shoot(Projectile[] projectilesArray, double cameraOffsetX,
+                      double cameraOffsetY) {
+
+        //find first activation time, so that if all are active, then
+        //oldest one can be removed
+        int currentMin = projectilesArray[0].getActivationTime();
+        int currentMinIndex = 0;
+
+        for(int i = 0; i < projectilesArray.length; i++) {
+
+            if(projectilesArray[i].getActivationTime() < currentMin) {
+                currentMin = projectilesArray[i].getActivationTime();
+                currentMinIndex = i;
+            }
+
+            if(!projectilesArray[i].isActive()) {
+
+                //moving right
+                if(velX > 0) {
+                    projectilesArray[i].reset((x + width), (y + (height / 2)),
+                            true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+                }
+
+                else if(velX < 0) {
+                    projectilesArray[i].reset(x, (y + (height / 2)), true, 1, cameraOffsetX,
+                            cameraOffsetY, LEFT);
+                }
+
+                else {
+                    projectilesArray[i].reset((x + width), (y + (height / 2)),
+                            true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+                }
+
+                return;
+            }
+        }
+
+        //else, if came out of the loop, then this means all are active, therefore reset the oldest one
+
+        if(velX > 0) {
+            projectilesArray[currentMinIndex].reset((x + width), (y + (height / 2)),
+                    true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+        }
+
+        else if (velX < 0) {
+            projectilesArray[currentMinIndex].reset(x, (y + (height / 2)), true, 1, cameraOffsetX,
+                    cameraOffsetY, LEFT);
+        }
+
+        else {
+            projectilesArray[currentMinIndex].reset((x + width), (y + (height / 2)),
+                    true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+        }
+
+
+    }
+
     public void run(int direction) {
         if (direction > 0) {
             velX = RUNNING_SPEED;

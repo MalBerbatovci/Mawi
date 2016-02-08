@@ -58,7 +58,7 @@ public class InputHandler implements OnTouchListener {
            for(index = 0; index < pointerCount && index <= MAX_POINTERS; index++) {
                ID = event.getPointerId(index);
 
-               Log.d("MultiTouch", "Pointer ID: " + ID);
+               //Log.d("MultiTouch", "Pointer ID: " + ID);
 
                scaledX = (int) ((event.getX(index) / v.getWidth()) *
                        GameMainActivity.GAME_WIDTH);

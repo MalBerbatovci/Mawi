@@ -23,6 +23,8 @@ public class Collectable {
     private int scanLineDownXa, scanLineDownXb, scanLineDownY;
     private int scanLineAcrossX, scanLineAcrossYa, scanLineAcrossYb;
 
+    private int initialiseTime;
+
     private Tile tileA, tileB;
     private int tileY, tileX;
 
@@ -48,6 +50,8 @@ public class Collectable {
     private final static int SCAN_LEEWAY_Y = 10;
     private final static int SCAN_LEEWAY_X = 10;
 
+    private final static int MAX_TIME = 40000;
+
 
     //check ID before, if -1 then do not call this
     public Collectable(int ID, double x, double y, double cameraOffsetX, double cameraOffsetY) {
@@ -62,6 +66,8 @@ public class Collectable {
 
         tileA = new Tile(0);
         tileB = new Tile(0);
+
+        this.initialiseTime = (int) System.currentTimeMillis();
 
         setVariables(ID, x, y, cameraOffsetX, cameraOffsetY);
     }
@@ -111,7 +117,15 @@ public class Collectable {
 
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
 
-        if (isAlive) {
+       // Log.d("Timing", "currentTime - initialiseTime is: " + ((int)System.currentTimeMillis() - initialiseTime));
+        if(((int)System.currentTimeMillis() - initialiseTime) > MAX_TIME) {
+
+            //if been alive for longer than set time, then remove by making isAlive false
+            this.isAlive = false;
+
+        }
+
+        else if (isAlive) {
             x += velX * delta;
 
             if (!isGrounded) {
