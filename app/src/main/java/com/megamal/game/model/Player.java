@@ -52,6 +52,7 @@ public class Player {
 
     //velY for jumping, velX for walking/running
     private double velY = 0, velX = 0;
+    private int lastDirection = 0;
 
     private boolean isGrounded = true;
     private boolean isAlive = true;
@@ -605,12 +606,44 @@ public class Player {
 
     //needs a ebtter way to get the ID of the projectile - will be done once powerups established
     public void shoot(Projectile[] projectilesArray, double cameraOffsetX,
-                      double cameraOffsetY) {
+                      double cameraOffsetY, int[][] map) {
 
         //find first activation time, so that if all are active, then
         //oldest one can be removed
         int currentMin = projectilesArray[0].getActivationTime();
         int currentMinIndex = 0;
+
+        int tileIndexX;
+
+        if(velX < 0) {
+            tileIndexX = (int) Math.floor(((x - 20) + cameraOffsetX)
+                    / GameMainActivity.TILE_WIDTH);
+        }
+
+        else if (velX < 0) {
+            tileIndexX = (int) Math.floor((((x + width) + 20) + cameraOffsetX) /
+                    GameMainActivity.TILE_WIDTH);
+        }
+
+        else if (lastDirection == LEFT) {
+            tileIndexX = (int) Math.floor(((x - 20) + cameraOffsetX)
+                    / GameMainActivity.TILE_WIDTH);
+        }
+
+        else {
+            tileIndexX = (int) Math.floor((((x + width) + 20) + cameraOffsetX) /
+                    GameMainActivity.TILE_WIDTH);
+        }
+
+        int tileIndexY = (int) Math.floor((y + (height / 2) + cameraOffsetY)
+                / GameMainActivity.TILE_HEIGHT);
+
+        tileA.setID(map[tileIndexY][tileIndexX]);
+
+        if(tileA.isObstacle()) {
+            //playSound
+            return;
+        }
 
         for(int i = 0; i < projectilesArray.length; i++) {
 
@@ -623,18 +656,34 @@ public class Player {
 
                 //moving right
                 if(velX > 0) {
-                    projectilesArray[i].reset((x + width), (y + (height / 2)),
-                            true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+
+                    projectilesArray[i].reset(((x + width) + 10) + cameraOffsetX,
+                            (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                            cameraOffsetY, RIGHT);
                 }
 
                 else if(velX < 0) {
-                    projectilesArray[i].reset(x, (y + (height / 2)), true, 1, cameraOffsetX,
+                    projectilesArray[i].reset((x - 10) + cameraOffsetX,
+                            (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                            cameraOffsetY, LEFT);
+                }
+
+                else if (lastDirection == RIGHT){
+                    projectilesArray[i].reset((x + width) + cameraOffsetX,
+                            (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                            cameraOffsetY, RIGHT);
+                }
+
+                else if (lastDirection == LEFT) {
+                    projectilesArray[i].reset((x - 10) + cameraOffsetX,
+                            (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
                             cameraOffsetY, LEFT);
                 }
 
                 else {
-                    projectilesArray[i].reset((x + width), (y + (height / 2)),
-                            true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+                    projectilesArray[i].reset(((x + width) + 10) + cameraOffsetX,
+                            (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                            cameraOffsetY, RIGHT);
                 }
 
                 return;
@@ -644,18 +693,58 @@ public class Player {
         //else, if came out of the loop, then this means all are active, therefore reset the oldest one
 
         if(velX > 0) {
-            projectilesArray[currentMinIndex].reset((x + width), (y + (height / 2)),
-                    true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+
+            //so that image can be removed
+            projectilesArray[currentMinIndex].setPreviousX(projectilesArray[currentMinIndex].getX());
+            projectilesArray[currentMinIndex].setPreviousY(projectilesArray[currentMinIndex].getY());
+            projectilesArray[currentMinIndex].setRecentlyRemoved();
+
+            projectilesArray[currentMinIndex].reset(((x + width) + 10) + cameraOffsetX,
+                    (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                    cameraOffsetY, RIGHT);
         }
 
         else if (velX < 0) {
-            projectilesArray[currentMinIndex].reset(x, (y + (height / 2)), true, 1, cameraOffsetX,
-                    cameraOffsetY, LEFT);
-        }
 
-        else {
-            projectilesArray[currentMinIndex].reset((x + width), (y + (height / 2)),
-                    true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
+            //so that image can be removed
+            projectilesArray[currentMinIndex].setPreviousX(projectilesArray[currentMinIndex].getX());
+            projectilesArray[currentMinIndex].setPreviousY(projectilesArray[currentMinIndex].getY());
+            projectilesArray[currentMinIndex].setRecentlyRemoved();
+
+            projectilesArray[currentMinIndex].reset((x - 10) + cameraOffsetX,
+                    (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                    cameraOffsetY, LEFT);
+
+        } else if (lastDirection == RIGHT) {
+
+            //so that image can be removed
+            projectilesArray[currentMinIndex].setPreviousX(projectilesArray[currentMinIndex].getX());
+            projectilesArray[currentMinIndex].setPreviousY(projectilesArray[currentMinIndex].getY());
+            projectilesArray[currentMinIndex].setRecentlyRemoved();
+
+            projectilesArray[currentMinIndex].reset((x + width) + cameraOffsetX,
+                    (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                    cameraOffsetY, RIGHT);
+
+        } else if (lastDirection == LEFT) {
+
+            //so that image can be removed
+            projectilesArray[currentMinIndex].setPreviousX(projectilesArray[currentMinIndex].getX());
+            projectilesArray[currentMinIndex].setPreviousY(projectilesArray[currentMinIndex].getY());
+            projectilesArray[currentMinIndex].setRecentlyRemoved();
+
+            projectilesArray[currentMinIndex].reset((x - 10) + cameraOffsetX,
+                    (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                    cameraOffsetY, LEFT);
+        } else {
+
+            projectilesArray[currentMinIndex].setPreviousX(projectilesArray[currentMinIndex].getX());
+            projectilesArray[currentMinIndex].setPreviousY(projectilesArray[currentMinIndex].getY());
+            projectilesArray[currentMinIndex].setRecentlyRemoved();
+
+            projectilesArray[currentMinIndex].reset(((x + width) + 10) + cameraOffsetX,
+                    (y + (height / 2)) + cameraOffsetY, true, 1, cameraOffsetX,
+                    cameraOffsetY, RIGHT);
         }
 
 
@@ -681,6 +770,15 @@ public class Player {
     }
 
     public void stopRunning() {
+
+        if (velX < 0) {
+            lastDirection = LEFT;
+        }
+
+        else {
+            lastDirection = RIGHT;
+        }
+
         velX = 0;
         isRunning = false;
     }

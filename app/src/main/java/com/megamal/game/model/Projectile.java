@@ -25,7 +25,7 @@ public class Projectile {
     private final static int RECT_LEEWAY_Y_UPDATE = 2;
     private final static int VISIBILITY_THRESHOLD = 500;
 
-    private final static int VEL_X = 140;
+    private final static int VEL_X = 240;
     private final static int VEL_Y = 140;
     private final static int MAX_VEL_DOWN = 200;
     private final static int MAX_VEL_UP = 200;
@@ -55,6 +55,11 @@ public class Projectile {
     private boolean isActive = false;
     private boolean isPlayers;
     private boolean safeToRemove = false;
+    private boolean recentlyRemoved = false;
+
+    //STUB VALUES
+    private double previousX = -50;
+    private double previousY = -50;
 
     public Projectile(double x, double y, boolean isPlayers, int ID, double cameraOffsetX,
                       double cameraOffsetY, int direction) {
@@ -149,8 +154,14 @@ public class Projectile {
             return;
         }
 
+        if(recentlyRemoved) {
+            clearAreaAround(g, cameraOffsetX, cameraOffsetY, previousX, previousY);
+            recentlyRemoved = false;
+        }
+
 
         if(((int) System.currentTimeMillis() - activationTime) > MAX_TIME) {
+            clearAreaAround(g, cameraOffsetX, cameraOffsetY);
             isActive = false;
             return;
         }
@@ -204,6 +215,15 @@ public class Projectile {
         }
     }
 
+    public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY,
+                                double x, double y) {
+
+        g.setColor(Color.rgb(208, 244, 247));
+
+        g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
+                width, height);
+
+    }
 
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
@@ -775,6 +795,18 @@ public class Projectile {
 
         else
             return false;
+    }
+
+    public void setPreviousX(double x) {
+        previousX = x;
+    }
+
+    public void setPreviousY(double y) {
+        previousY = y;
+    }
+
+    public void setRecentlyRemoved() {
+        recentlyRemoved = true;
     }
 
 

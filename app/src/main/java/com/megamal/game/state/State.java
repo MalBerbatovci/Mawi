@@ -1,5 +1,6 @@
 package com.megamal.game.state;
 
+import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.View;
 

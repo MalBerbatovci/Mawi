@@ -370,7 +370,7 @@ public class MenuState extends State {
                     return true;
 
                 } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
-                    mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
+                    mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
                     return true;
 
                 }
@@ -408,7 +408,7 @@ public class MenuState extends State {
                         mawi.jump();
                         return true;
                     } else if (shoot.onTouchDown(scaledX, scaledY, ID)) {
-                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
+                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
                         return true;
                     }
 
@@ -431,7 +431,7 @@ public class MenuState extends State {
                         mawi.jump();
                         return true;
                     } else if (shoot.onTouchDown(scaledX, scaledY, ID)) {
-                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY);
+                        mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
                         return true;
                     }
 
