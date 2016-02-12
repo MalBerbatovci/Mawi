@@ -24,6 +24,9 @@ public class Projectile {
     private final static int RECT_LEEWAY_X_UPDATE = 2;
     private final static int RECT_LEEWAY_Y_UPDATE = 2;
     private final static int VISIBILITY_THRESHOLD = 500;
+    private final static int COLLISION_THRESHOLD_X = 100;
+    private final static int COLLISION_THRESHOLD_Y = 100;
+    private final static int DYING_VELOCITY = 6;
 
     private final static int VEL_X = 240;
     private final static int VEL_Y = 140;
@@ -56,6 +59,7 @@ public class Projectile {
     private boolean isPlayers;
     private boolean safeToRemove = false;
     private boolean recentlyRemoved = false;
+    private boolean isDying = false;
 
     //STUB VALUES
     private double previousX = -50;
@@ -134,6 +138,7 @@ public class Projectile {
 
         isVisible = true;
         isActive = true;
+        isDying = false;
 
         activationTime = (int) (System.currentTimeMillis());
     }
@@ -148,25 +153,38 @@ public class Projectile {
     }
 
 
-    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi, Painter g) {
+    public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY,
+                       Player mawi, Painter g, Enemy[] enemyArray) {
 
         if(!isActive) {
             return;
         }
 
-        if(recentlyRemoved) {
-            clearAreaAround(g, cameraOffsetX, cameraOffsetY, previousX, previousY);
-            recentlyRemoved = false;
+        else if(isDying) {
+            y += DYING_VELOCITY;
+
+            Log.d("Projectile Intersection", "visible, do not remove");
+
+            if(!isVisible(cameraOffsetX, cameraOffsetY)) {
+                Log.d("Projectile Intersection", "Not visible, remove");
+                clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                isActive = false;
+            }
         }
 
 
-        if(((int) System.currentTimeMillis() - activationTime) > MAX_TIME) {
+        else if(((int) System.currentTimeMillis() - activationTime) > MAX_TIME) {
             clearAreaAround(g, cameraOffsetX, cameraOffsetY);
             isActive = false;
             return;
         }
 
         else {
+
+            if(recentlyRemoved) {
+                clearAreaAround(g, cameraOffsetX, cameraOffsetY, previousX, previousY);
+                recentlyRemoved = false;
+            }
 
             x += velX * delta;
 
@@ -189,7 +207,7 @@ public class Projectile {
             updateRects(cameraOffsetX, cameraOffsetY);
 
             if (isPlayers) {
-                checkCollisionsEnemies();
+                checkCollisionsEnemies(enemyArray);
             }
             else {
                 checkCollisionsPlayer(mawi);
@@ -266,9 +284,31 @@ public class Projectile {
         }
     }
 
-    private void checkCollisionsEnemies() {
+    private void checkCollisionsEnemies(Enemy[] enemyArray) {
         if(isPlayers) {
-            //handle collisions
+            for(int i = 0; i < enemyArray.length; i++) {
+
+                //if enemy is not active, move to next
+                if (enemyArray[i].isActive()) {
+
+                    //close enough to check
+                    if (Math.abs(enemyArray[i].getX() - x) < COLLISION_THRESHOLD_X &&
+                            Math.abs(enemyArray[i].getY() - y) < COLLISION_THRESHOLD_Y) {
+
+                        if (rect.intersect(enemyArray[i].getRect())) {
+                            enemyArray[i].death();
+                            death();
+                            Log.d("Intersection", "Rect CONTAINED, but close enough");
+                        }
+
+                        else {
+                            Log.d("Intersection", "Rect not contained, but close enough");
+                        }
+                    } else {
+                        Log.d("Intersection", "Not close enough!");
+                    }
+                }
+            }
         }
 
         else {
@@ -776,6 +816,11 @@ public class Projectile {
         return activationTime;
     }
 
+    private void death() {
+        y -= 10;
+        isDying = true;
+    }
+
     public void makeNonActive() {
         isActive = false;
     }
@@ -807,6 +852,10 @@ public class Projectile {
 
     public void setRecentlyRemoved() {
         recentlyRemoved = true;
+    }
+
+    public boolean isDying() {
+        return isDying;
     }
 
 

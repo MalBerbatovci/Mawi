@@ -35,6 +35,7 @@ public class MenuState extends State {
     private static final int LEFT = -1;
     private static final int TOUCH_THRESHOLD = 5;
     private static final int MAX_PROJECTILES = 10;
+    private static final int NO_ENEMIES = 1;
 
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
@@ -47,6 +48,9 @@ public class MenuState extends State {
     private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
 
     private Projectile[] projectileArray = new Projectile[MAX_PROJECTILES];
+
+    private Enemy[] enemyArray = new Enemy[NO_ENEMIES];
+
 
     private UIButton walkR, walkL, runR, runL, jump, shoot;
 
@@ -96,6 +100,10 @@ public class MenuState extends State {
             projectileArray[i].makeNonActive();
         }
 
+        for(int i = 0; i < NO_ENEMIES; i++) {
+            enemyArray[i] = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+        }
+
 
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -134,13 +142,16 @@ public class MenuState extends State {
                 }
             }
 
-            if(hedge != null) {
-                hedge.update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+            for(int i = 0; i < enemyArray.length; i++) {
+                if(enemyArray[i] != null && enemyArray[i].isActive()) {
+                    enemyArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
+                }
             }
 
             for(int i = 0; i < projectileArray.length; i++) {
                 if(projectileArray[i].isActive()) {
-                    projectileArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi, g);
+                    projectileArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi, g,
+                            enemyArray);
                 }
             }
 
@@ -172,14 +183,16 @@ public class MenuState extends State {
 
         clearAreas(g);
 
-        renderEnemies(g);
+
         renderProjectiles(g);
+        renderEnemies(g);
         renderCollectables(g);
 
 
         //renderButton methods
 /*        walkR.render(g);
         walkL.render(g); */
+
         runR.render(g);
         runL.render(g);
         jump.render(g);
@@ -192,6 +205,8 @@ public class MenuState extends State {
 
     private void clearAreas(Painter g) {
 
+        boolean isDyingFlag = false;
+
         //clear collectables area first
         if (!collectables.isEmpty()) {
             for (int i = 0; i < collectables.size(); i++) {
@@ -201,11 +216,16 @@ public class MenuState extends State {
             }
         }
 
-        if (hedge != null) {
-            if (!hedge.isDying() && hedge.isActive()) {
-                hedge.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+        for(int i = 0; i < enemyArray.length; i++) {
+            if(enemyArray[i] != null && enemyArray[i].isActive() && !enemyArray[i].isDying()) {
+                enemyArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+            }
+
+            if(!isDyingFlag && enemyArray[i].isDying()) {
+                isDyingFlag = true;
             }
         }
+
 
         if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
             mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
@@ -215,8 +235,18 @@ public class MenuState extends State {
         for(int i = 0; i < projectileArray.length; i++) {
             if(projectileArray[i].isActive()) {
                 projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                
+                if(!isDyingFlag && projectileArray[i].isDying()) {
+                    isDyingFlag = true;
+                }
             }
         }
+
+        if(isDyingFlag) {
+            tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
+        }
+
+
 
     }
 
@@ -226,13 +256,22 @@ public class MenuState extends State {
 
             //then necessary to render
             if(projectileArray[i].isActive() &&
-                    projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
+                    projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY) &&
+                    !projectileArray[i].isDying()) {
+
 
                 projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
-
                 tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY,
                         projectileArray[i].getX(), projectileArray[i].getY(), false,
                         projectileArray[i].isFalling());
+
+            }
+
+           else {
+                if(projectileArray[i].isDying() && projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
+                    tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
+                    projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                }
             }
         }
     }
@@ -265,29 +304,26 @@ public class MenuState extends State {
 
     private void renderEnemies(Painter g) {
 
-        if (hedge != null) {
+        for(int i = 0; i < enemyArray.length; i++) {
+            if(enemyArray[i] != null && enemyArray[i].isActive()) {
+                if(!enemyArray[i].isDying()) {
+                    enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                            enemyArray[i].getY(), false, enemyArray[i].isFalling());
+                }
 
-            //if (hedge.isAlive()) {
-            if (!hedge.isDying() && hedge.isActive()) {
-                hedge.render(g, cameraOffsetX, cameraOffsetY);
-                //Log.d("Enemy", "Rendered");
+                else if(enemyArray[i].isDying() && !enemyArray[i].isDead()) {
+                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                            enemyArray[i].getY(), false, enemyArray[i].isFalling());
+                    enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
 
-                //if(hedge.isDying())
-                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, hedge.getX(),
-                        hedge.getY(), false, hedge.isFalling());
+                }
 
-
-            } else if (hedge.isDying() && hedge.isActive() && !hedge.isDead()) {
-                tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
-                hedge.render(g, cameraOffsetX, cameraOffsetY);
-            }
-
-            if (hedge.safeToRemove()) {
-                hedge = null;
+                else if(enemyArray[i].safeToRemove()) {
+                    enemyArray[i] = null;
+                }
             }
         }
-
-       // }
     }
 
     private void renderPlayer(Painter g) {

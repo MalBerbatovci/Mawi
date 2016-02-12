@@ -61,7 +61,11 @@ public abstract class Enemy {
 
     public abstract void render(Painter g, double cameraOffsetX, double cameraOffsetY);
 
+    public abstract void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY);
+
     public abstract double getX();
+
+    public abstract Rect getRect();
 
     public abstract boolean isFalling();
 

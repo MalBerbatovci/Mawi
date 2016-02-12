@@ -113,6 +113,7 @@ public class Hedgehog extends Mover {
         //Check playerX against enemy x
         if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
 
+           // Log.d("Intersection rect", "updated)");
             rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
             rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
 
@@ -345,6 +346,7 @@ public class Hedgehog extends Mover {
                 return;
 
     }
+
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
         if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height) && isAlive && isActive()) {
             if (velY <= 0) {
@@ -419,6 +421,10 @@ public class Hedgehog extends Mover {
     public double getX() { return x; }
 
     public double getY() { return y; }
+
+    public Rect getRect() {
+        return rect;
+    }
 
     public boolean safeToRemove() {
         if(!isActive() && isDead) {
