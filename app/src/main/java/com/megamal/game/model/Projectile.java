@@ -288,25 +288,29 @@ public class Projectile {
         if(isPlayers) {
             for(int i = 0; i < enemyArray.length; i++) {
 
-                //if enemy is not active, move to next
-                if (enemyArray[i].isActive()) {
+                if (!enemyArray[i].isDying() && enemyArray[i] != null) {
+                    //if enemy is not active, move to next
+                    if (enemyArray[i].isActive()) {
 
-                    //close enough to check
-                    if (Math.abs(enemyArray[i].getX() - x) < COLLISION_THRESHOLD_X &&
-                            Math.abs(enemyArray[i].getY() - y) < COLLISION_THRESHOLD_Y) {
+                        //close enough to check
+                        if (Math.abs(enemyArray[i].getX() - x) < COLLISION_THRESHOLD_X &&
+                                Math.abs(enemyArray[i].getY() - y) < COLLISION_THRESHOLD_Y) {
 
-                        if (rect.intersect(enemyArray[i].getRect())) {
-                            enemyArray[i].death();
-                            death();
-                            Log.d("Intersection", "Rect CONTAINED, but close enough");
+                            if (rect.intersect(enemyArray[i].getRect())) {
+                                enemyArray[i].death();
+                                death();
+                                Log.d("Intersection", "Rect CONTAINED, but close enough");
+                            } else {
+                                Log.d("Intersection", "Rect not contained, but close enough");
+                            }
+                        } else {
+                            Log.d("Intersection", "Not close enough!");
                         }
-
-                        else {
-                            Log.d("Intersection", "Rect not contained, but close enough");
-                        }
-                    } else {
-                        Log.d("Intersection", "Not close enough!");
                     }
+
+                //else, enemy is dying / == null, return
+                } else {
+                    return;
                 }
             }
         }

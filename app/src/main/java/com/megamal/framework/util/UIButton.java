@@ -17,15 +17,24 @@ public class UIButton {
     public UIButton(int left, int top, int right, int bottom, Bitmap buttonImage,
                     Bitmap buttonPressedImage) {
         buttonRect = new Rect(left, top, right, bottom);
-        this.buttonImage = buttonImage;
+
+        if(buttonImage != null) {
+            this.buttonImage = buttonImage;
+        }
         this.pointerID = -1;
-        this.buttonDownImage = buttonPressedImage;
+
+        if(buttonImage != null) {
+            this.buttonDownImage = buttonPressedImage;
+        }
     }
 
     public void render(Painter g) {
-        Bitmap currentButtonImage = buttonDown ? buttonDownImage : buttonImage;
-        g.drawImage(currentButtonImage, buttonRect.left, buttonRect.top, buttonRect.width(),
-                buttonRect.height());
+
+        if(buttonDownImage != null && buttonImage != null) {
+            Bitmap currentButtonImage = buttonDown ? buttonDownImage : buttonImage;
+            g.drawImage(currentButtonImage, buttonRect.left, buttonRect.top, buttonRect.width(),
+                    buttonRect.height());
+        }
 
     }
 

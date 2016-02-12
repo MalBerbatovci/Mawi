@@ -1,7 +1,6 @@
 package com.megamal.game.state;
 
 import android.view.MotionEvent;
-import android.view.View;
 
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;

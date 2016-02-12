@@ -173,8 +173,4 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
     }
-
-    public Painter getGraphics() {
-        return graphics;
-    }
 }

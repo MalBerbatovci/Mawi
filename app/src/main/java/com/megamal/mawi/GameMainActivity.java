@@ -2,6 +2,7 @@ package com.megamal.mawi;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
@@ -17,6 +18,7 @@ public class GameMainActivity extends Activity {
     public static final int TILE_WIDTH = 64;
     public static final int PLAYER_HEIGHT = 128;
     public static final int PLAYER_WIDTH = 64;
+    public static final int BACKGROUND_COLOUR = Color.rgb(80, 143, 240);
 
     public static GameView sGame;
     public static AssetManager assets;
