@@ -16,7 +16,7 @@ public class Camera {
     private final static int Y_THRESHOLD_UP = (GameMainActivity.GAME_HEIGHT / 2) - (int) (GameMainActivity.TILE_HEIGHT * 1.5);
     private final static int Y_THRESHOLD_DOWN = (GameMainActivity.GAME_HEIGHT / 2) + (int) (GameMainActivity.TILE_HEIGHT * 1.5);
 
-    private double playerCentreX, maxCameraOffsetX, overRun, maxCameraOffsetY, playerCentreY;
+    private double playerCentreX, maxCameraOffsetX, overRun, maxCameraOffsetY, playerCentreY, cameraOffsetX, cameraOffsetY;
 
 
     public Camera(int[][] map) {
@@ -41,20 +41,31 @@ public class Camera {
             //OffsetX = 0 is the case when mawi can only move camera to the RIGHT
             if (cameraOffsetX == 0) {
                 //control for if a certain area of a level is only 13 tiles in the x direction - no scrolling necessary
-                if (map[0].length == 13)
+                if (map[0].length == 13) {
+
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
+                }
                     //else, player not yet crossed the threshold
-                else if (playerCentreX < X_THRESHOLD_RIGHT)
+                else if (playerCentreX < X_THRESHOLD_RIGHT) {
+                    this.cameraOffsetX = 0;
                     return 0;
+                }
                     //else, player has crossed threshold, find overRun appropriately and start scrolling
                 else if (playerCentreX >= X_THRESHOLD_RIGHT) {
-                    if (playerCentreX > X_THRESHOLD_RIGHT)
+
+                    if (playerCentreX > X_THRESHOLD_RIGHT) {
                         overRun = playerCentreX - X_THRESHOLD_RIGHT;
-                    else
+                    }
+
+                    else {
                         overRun = 0;
+                    }
                     //Log.d("Camera","OverRun is: " + overRun + ". \n");
+
                     cameraOffsetX = cameraOffsetX + overRun;
                     player.lockToXThreshold(X_THRESHOLD_RIGHT);
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
                 }
                 //in this case, mawi can move the camera either to the RIGHT OR the LEFT, therefore
@@ -65,15 +76,22 @@ public class Camera {
                 //case moving to the right
                 //if(playerCentreX > DEAD_ZONE_RIGHT) {
                 if (playerCentreX >= X_THRESHOLD_RIGHT && player.isRight()) {
-                    if (playerCentreX > X_THRESHOLD_RIGHT)
+                    if (playerCentreX > X_THRESHOLD_RIGHT) {
                         overRun = playerCentreX - X_THRESHOLD_RIGHT;
-                    else
+                    }
+                    else {
                         overRun = 0;
+                    }
                     //Log.d("Camera","OverRun is: " + overRun + ". \n");
+
                     cameraOffsetX = cameraOffsetX + overRun;
-                    if (cameraOffsetX > maxCameraOffsetX)
+                    if (cameraOffsetX > maxCameraOffsetX) {
                         cameraOffsetX = maxCameraOffsetX;
+                    }
+
                     player.lockToXThreshold(X_THRESHOLD_RIGHT);
+
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
 
                     //case moving to the left
@@ -81,34 +99,59 @@ public class Camera {
                 //CASE WHERE going from right -> left result in huge leaps in co-ordsI also learned about the University database as a source of helpful information, along with a reinforced idea of how to collect information of relevance to a specific task.
 
                 else if (playerCentreX <= X_THRESHOLD_LEFT && player.isLeft()) {
-                    if (playerCentreX < X_THRESHOLD_LEFT)
+                    if (playerCentreX < X_THRESHOLD_LEFT) {
                         overRun = X_THRESHOLD_LEFT - playerCentreX;
-                    else
+                    }
+                    else {
                         overRun = 0;
+                    }
+
                     cameraOffsetX = cameraOffsetX - overRun;
-                    if (cameraOffsetX < 0)
+
+
+                    if (cameraOffsetX < 0) {
                         cameraOffsetX = 0;
+                    }
                     player.lockToXThreshold(X_THRESHOLD_LEFT);
+
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
+
                 } else {
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
 
                 }
+
+
+
                 //in this case, mawi can only move to the left
             } else if (cameraOffsetX == maxCameraOffsetX) {
-                if (playerCentreX > X_THRESHOLD_LEFT)
+
+                if (playerCentreX > X_THRESHOLD_LEFT) {
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
+                }
                 else if (playerCentreX <= X_THRESHOLD_LEFT && player.isLeft()) {
-                    if (playerCentreX < X_THRESHOLD_LEFT)
+
+                    if (playerCentreX < X_THRESHOLD_LEFT) {
                         overRun = X_THRESHOLD_LEFT - playerCentreX;
-                    else
+                    }
+
+                    else {
                         overRun = 0;
+                    }
+
                     cameraOffsetX = cameraOffsetX - overRun;
                     player.lockToXThreshold(X_THRESHOLD_LEFT);
+
+                    this.cameraOffsetX = cameraOffsetX;
                     return cameraOffsetX;
                 }
             }
         }
+
+        this.cameraOffsetX = cameraOffsetX;
         return cameraOffsetX;
     }
 
@@ -124,8 +167,10 @@ public class Camera {
             if (cameraOffsetY == 0) {
 
                 //if a levels height is 8, then no scrolling will be necessary, return ASAP
-                if (map.length == 8)
+                if (map.length == 8) {
+                    this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
+                }
 
                 //else case where player has not yet crossed the threshold
                 else if (playerCentreY < Y_THRESHOLD_DOWN) {
@@ -133,15 +178,19 @@ public class Camera {
                     return 0;
 
                 } else if (playerCentreY >= Y_THRESHOLD_DOWN) {
-                    if (playerCentreY > Y_THRESHOLD_DOWN)
+
+                    if (playerCentreY > Y_THRESHOLD_DOWN) {
                         overRun = playerCentreY - Y_THRESHOLD_DOWN;
-                    else
+                    }
+
+                    else {
                         overRun = 0;
+                    }
 
                    // Log.d("YCamera", "player passed threshold on offsetY = 0 w/ overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY + overRun;
                     player.lockToYThreshold(Y_THRESHOLD_DOWN);
-                    Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                    this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
                 }
 
@@ -150,34 +199,47 @@ public class Camera {
 
                 //if case where player has passed threshold to bring camera down
                 if (playerCentreY >= Y_THRESHOLD_DOWN && player.getVelY() > 0) {
-                    if (playerCentreY > Y_THRESHOLD_DOWN)
+                    if (playerCentreY > Y_THRESHOLD_DOWN) {
                         overRun = playerCentreY - Y_THRESHOLD_DOWN;
-                    else
+                    }
+                    else {
                         overRun = 0;
+                    }
 
                    // Log.d("YCamera", "player passed DOWN threshold on offsetY >0 with overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY + overRun;
-                    if (cameraOffsetY > maxCameraOffsetY)
+
+
+                    if (cameraOffsetY > maxCameraOffsetY) {
                         cameraOffsetY = maxCameraOffsetY;
+                    }
 
                     player.lockToYThreshold(Y_THRESHOLD_DOWN);
                    // Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+
+                    this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
                 }
 
                 //else case where player has passed threshold to bring camera up
                 else if (playerCentreY <= Y_THRESHOLD_UP && player.getVelY() < 0) {
-                    if (playerCentreY < Y_THRESHOLD_UP)
+                    if (playerCentreY < Y_THRESHOLD_UP) {
                         overRun = Y_THRESHOLD_UP - playerCentreY;
-                    else
+                    }
+                    else {
                         overRun = 0;
+                    }
 
                     //Log.d("YCamera", "player passed UP threshold on offsetY >0 with overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY - overRun;
-                    if (cameraOffsetY < 0)
+
+                    if (cameraOffsetY < 0) {
                         cameraOffsetY = 0;
+                    }
 
                     player.lockToYThreshold(Y_THRESHOLD_UP);
+                    this.cameraOffsetY = cameraOffsetY;
+
                     //Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
@@ -193,23 +255,38 @@ public class Camera {
             else if (cameraOffsetY == maxCameraOffsetY) {
 
                 //not passed threshold, leave as is
-                if (playerCentreY > Y_THRESHOLD_UP)
+                if (playerCentreY > Y_THRESHOLD_UP) {
                     return cameraOffsetY;
+                }
+
                 else if (playerCentreY <= Y_THRESHOLD_UP) {
-                    if (playerCentreY < Y_THRESHOLD_UP)
+                    if (playerCentreY < Y_THRESHOLD_UP) {
                         overRun = Y_THRESHOLD_UP - playerCentreY;
-                    else
+                    }
+
+                    else {
                         overRun = 0;
+                    }
 
                    // Log.d("YCamera", "player passed UP threshold on offsetY = max with overRun: " + overRun);
 
                     cameraOffsetY = cameraOffsetY - overRun;
                     player.lockToYThreshold(Y_THRESHOLD_UP);
+                    this.cameraOffsetY = cameraOffsetY;
                    // Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
                     return cameraOffsetY;
                 }
             }
         }
+        this.cameraOffsetY = cameraOffsetY;
+        return cameraOffsetY;
+    }
+
+    public double getCameraOffsetX() {
+        return cameraOffsetX;
+    }
+
+    public double getCameraOffsetY() {
         return cameraOffsetY;
     }
 }

@@ -363,7 +363,8 @@ public class PlayState extends State {
 
 
     @Override
-    public boolean onTouch(MotionEvent e,int scaledX, int scaledY, int ID, boolean moveAction) {
+    public boolean onTouch(MotionEvent e,int scaledX, int scaledY, int ID,
+                           boolean moveAction, View v) {
         //check if walk button is pressed, this changes walkR.isPressed to true if contained
         //in the buttons rect
 

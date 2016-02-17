@@ -34,6 +34,9 @@ public class UIButton {
             Bitmap currentButtonImage = buttonDown ? buttonDownImage : buttonImage;
             g.drawImage(currentButtonImage, buttonRect.left, buttonRect.top, buttonRect.width(),
                     buttonRect.height());
+
+        } else {
+            Log.d("UIButton", "One of the images is Null - NOT RENDERING");
         }
 
     }

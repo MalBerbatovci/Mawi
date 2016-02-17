@@ -3,6 +3,7 @@ package com.megamal.game.state;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.UIButton;
@@ -16,6 +17,8 @@ public class MenuState extends State {
 
     private UIButton playButton, exitButton, levelEditorButton;
     private boolean renderedFlag = false;
+
+
 
     @Override
     public void init() {
@@ -39,7 +42,8 @@ public class MenuState extends State {
     }
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int ID, boolean moveAction) {
+    public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int ID, boolean moveAction,
+                           View v) {
 
         //if action is a move on, ignore, only interested in when finger moves up
         //(Improve this if there is time later)

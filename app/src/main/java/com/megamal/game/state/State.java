@@ -23,5 +23,5 @@ public abstract class State {
     public abstract void render(Painter g);
 
     public abstract boolean onTouch(MotionEvent e,int scaledX, int scaledY, int ID,
-                                    boolean moveAction);
+                                    boolean moveAction, View v);
 }

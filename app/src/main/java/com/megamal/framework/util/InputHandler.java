@@ -47,7 +47,7 @@ public class InputHandler implements OnTouchListener {
         if(MotionEventCompat.getActionMasked(event) != MotionEvent.ACTION_MOVE) {
 
             moveAction = false;
-            return currentState.onTouch(event, scaledX, scaledY, ID, moveAction);
+            return currentState.onTouch(event, scaledX, scaledY, ID, moveAction, v);
         }
 
         else {
@@ -66,7 +66,7 @@ public class InputHandler implements OnTouchListener {
                        GameMainActivity.GAME_HEIGHT);
 
                //only needs to do move really, add move flag into method
-               moveFlagCheck = currentState.onTouch(event, scaledX, scaledY, ID, moveAction);
+               moveFlagCheck = currentState.onTouch(event, scaledX, scaledY, ID, moveAction, v);
 
                if(!moveFlagCheck) {
                    Log.d("MultiTouch", "NOT HANDLED!");
