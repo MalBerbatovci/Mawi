@@ -62,7 +62,7 @@ public class TileMapRenderer {
             int yStartScreen = (int) Math.ceil(mawi.getY() / GameMainActivity.TILE_HEIGHT) - 2;
 
             //now refresh suitable area of screen
-            g.setColor(Color.rgb(208, 244, 247));
+            g.setColor(Color.rgb(80, 143, 240));
             g.fillRect((xStartScreen * GameMainActivity.TILE_WIDTH), (yStartScreen * GameMainActivity.TILE_HEIGHT),
                     GameMainActivity.TILE_WIDTH * 4, GameMainActivity.TILE_HEIGHT * 5);
 
@@ -119,7 +119,7 @@ public class TileMapRenderer {
                 }
 
                 else {
-                    g.setColor(Color.rgb(208, 244, 247));
+                    g.setColor(Color.rgb(80, 143, 240));
                     currentTile.setLocation(yStart, (xStart + i), cameraOffsetX, cameraOffsetY);
                     g.fillRect((int) currentTile.getX(), (int) currentTile.getY(), GameMainActivity.TILE_WIDTH,
                             GameMainActivity.TILE_HEIGHT);
@@ -132,7 +132,7 @@ public class TileMapRenderer {
     }
 
     public void renderWholeMap(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY) {
-        g.setColor(Color.rgb(208, 244, 247));
+        g.setColor(Color.rgb(80, 143, 240));
         g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
 
         if (cameraOffsetX == 0 && cameraOffsetY == 0) {
@@ -208,7 +208,7 @@ public class TileMapRenderer {
                         currentTile.setID(map[y][x]);
                         if (currentTile.getImage() == null) {
                             if(backGroundFill) {
-                                g.setColor(Color.rgb(208, 244, 247));
+                                g.setColor(Color.rgb(80, 143, 240));
                                 g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
                                         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
                             }
@@ -242,7 +242,7 @@ public class TileMapRenderer {
                         currentTile.setID(map[y][x]);
                         if (currentTile.getImage() == null) {
                             if (backGroundFill) {
-                                g.setColor(Color.rgb(208, 244, 247));
+                                g.setColor(Color.rgb(80, 143, 240));
                                 g.fillRect(((int) ((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
                                         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
                             }

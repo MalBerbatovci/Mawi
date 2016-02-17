@@ -24,7 +24,8 @@ public class Assets {
             mawiRunR1, mawiRunR2, mawiRunR3, walkButtonR, walkButtonPressedR, runButtonR, runButtonPressedR, walkButtonL,
             walkButtonPressedL, runButtonL, runButtonPressedL, mawiWalkL1, mawiWalkL2, mawiWalkL3, mawiRunL1, mawiRunL2,
             mawiRunL3, mawiWalkHitR1, mawiWalkHitR2, mawiWalkHitR3, mawiWalkHitL1, mawiWalkHitL2, mawiWalkHitL3,
-            mawiJumpingR, mawiJumpingL, boxImage, boxUsedImage, startScreen, exitButton, exitButtonPressed;
+            mawiJumpingR, mawiJumpingL, boxImage, boxUsedImage, startScreen, exitButton, exitButtonPressed,
+            movingTool, movingToolUsed;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
 
@@ -76,6 +77,8 @@ public class Assets {
         exitButton = loadBitmap("ExitButton.png", true);
         exitButtonPressed = loadBitmap("ExitButtonPushed.png", true);
 
+        movingTool = loadBitmap("movingTool.png", true);
+        movingToolUsed = loadBitmap("movingToolPressed.png", true);
 
 
         //create walking animation

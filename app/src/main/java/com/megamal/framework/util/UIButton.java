@@ -147,5 +147,9 @@ public class UIButton {
     public boolean isTouched() {
         return buttonDown;
     }
+
+    public int getID() {
+        return pointerID;
+    }
 }
 

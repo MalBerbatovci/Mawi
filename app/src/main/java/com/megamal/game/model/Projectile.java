@@ -236,7 +236,7 @@ public class Projectile {
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY,
                                 double x, double y) {
 
-        g.setColor(Color.rgb(208, 244, 247));
+        g.setColor(Color.rgb(80, 143, 240));
 
         g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY),
                 width, height);
@@ -247,7 +247,7 @@ public class Projectile {
 
         if(isActive) {
             if (isVisible) {
-                g.setColor(Color.rgb(208, 244, 247));
+                g.setColor(Color.rgb(80, 143, 240));
 
                 //rising
                 if (velY < 0) {

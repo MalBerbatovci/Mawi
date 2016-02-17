@@ -398,10 +398,10 @@ public class Collectable {
     public void clearAreaAroundCoin(Painter g, double cameraOffsetX, double cameraOffsetY) {
         if (isVisible(cameraOffsetX, cameraOffsetY) && isAlive) {
             if (velY <= 0) {
-                g.setColor(Color.rgb(208, 244, 247));
+                g.setColor(Color.rgb(80, 143, 240));
                 g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
             } else {
-                g.setColor(Color.rgb(208, 244, 247));
+                g.setColor(Color.rgb(80, 143, 240));
                 g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y,
                         width, height + SCAN_LEEWAY_Y);
             }
@@ -409,7 +409,7 @@ public class Collectable {
     }
 
     public void removeImage(Painter g, double cameraOffsetX, double cameraOffsetY) {
-        g.setColor(Color.rgb(208, 244, 247));
+        g.setColor(Color.rgb(80, 143, 240));
         g.fillRect((int) (x - cameraOffsetX), (int) (y - cameraOffsetY) - SCAN_LEEWAY_Y, width,
                 (height + SCAN_LEEWAY_Y));
     }

@@ -850,7 +850,7 @@ public class Player {
     }
 
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
-        g.setColor(Color.rgb(208, 244, 247));
+        g.setColor(Color.rgb(80, 143, 240));
         g.fillRect((int) x, (int) y, width, height);
     }
 

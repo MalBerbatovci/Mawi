@@ -8,6 +8,8 @@ import android.view.View;
 
 import com.megamal.framework.util.LevelEditorCamera;
 import com.megamal.framework.util.Painter;
+import com.megamal.framework.util.RandomNumberGenerator;
+import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
@@ -31,6 +33,7 @@ public class LevelEditorState extends State {
     int previousX, previousY;
 
     private LevelEditorCamera camera;
+    private TileMapRenderer tileMapRenderer;
 
     @Override
     public void init() {
@@ -39,10 +42,23 @@ public class LevelEditorState extends State {
         exitButton = new UIButton(750, 440, 830, 510, Assets.exitButton, Assets.exitButtonPressed);
 
         //stub
-        dragButton = new UIButton(0, 0, 0, 0, Assets.earthImage, Assets.exitButtonPressed);
+        dragButton = new UIButton(670, 440, 734, 504, Assets.movingTool, Assets.movingToolUsed);
 
         //stub value to create as big as possible,
         map = new int[100][100];
+
+        for(int i = 0; i < 100; i++) {
+            for(int j = 0; j < 100; j++) {
+                if(RandomNumberGenerator.getRandInt(50) < 25) {
+                    map[i][j] = 1;
+                }
+                else {
+                    map[i][j] = 0;
+                }
+            }
+        }
+
+        tileMapRenderer = new TileMapRenderer(map);
 
         //create new camera
         camera = new LevelEditorCamera(map);
@@ -59,11 +75,17 @@ public class LevelEditorState extends State {
     public void render(Painter g) {
 
         if(mapChanged) {
-            g.setColor(Color.rgb(80, 143, 240));
-            g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);
+            /*g.setColor(Color.rgb(80, 143, 240));
+            g.fillRect(0, 0, GameMainActivity.GAME_WIDTH, GameMainActivity.GAME_HEIGHT);*/
+
+            tileMapRenderer.renderWholeMap(g, map, camera.getX(), camera.getY());
             mapChanged = false;
+
+
         }
+
         exitButton.render(g);
+        dragButton.render(g);
 
     }
 
@@ -76,22 +98,33 @@ public class LevelEditorState extends State {
         if(moveAction) {
 
 
+           /* if (!dragButton.isTouched() && dragButton.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+            }
+
+            else if (!dragButton.isTouched() && dragButton.buttonMovedOn(scaledX, scaledY, ID)) {
+                Log.d("dragButton", "Button movedOn");
+                return true;
+            } */
+
             //then it is safe to set ID to this
-            if(!camera.hasIDSet()  /*&& dragButton.isTouched()*/) {
+            if(!camera.hasIDSet()  && dragButton.isTouched()) {
                 //calculate distance in X and Y
 
                 previousX = scaledX;
                 previousY = scaledY;
 
                 camera.setControllerID(ID);
+                return true;
 
             }
 
             //then it is safe to calculate distance
-            else if (camera.hasIDSet() /*&& dragButton.isTouched()*/ && ID == camera.getControllerID()) {
+            else if (camera.hasIDSet() && dragButton.isTouched() && ID == camera.getControllerID()) {
 
-                //calculate distance in X and Y
-                //dont return just yet, so that exit button is checked
+                //flags to check whether whole map needs to be rendered or not
+                boolean xChanged = true;
+                boolean yChanged = true;
 
                 int distanceX = previousX - scaledX;
                 int distanceY = previousY - scaledY;
@@ -112,6 +145,7 @@ public class LevelEditorState extends State {
 
                     //distance X is 0
                     else {
+                        xChanged = false;
                         //no updating necessary
                     }
                 }
@@ -131,18 +165,26 @@ public class LevelEditorState extends State {
                     }
 
                     else {
+                        yChanged = false;
                         //no updating necessary, distanceY == 0
                     }
                 }
 
-                Log.d("LevelEditor", "Current Y: " + scaledY);
-                Log.d("LevelEditor", "Previous Y: " + previousY);
-
-                Log.d("LevelEditor", "****************");
-
-
                 previousX = scaledX;
                 previousY = scaledY;
+
+                /*Log.d("LevelEditor", "CameraX: " + camera.getX());
+                Log.d("LevelEditor", "CameraY: " + camera.getY()); */
+
+                if(!xChanged && !yChanged) {
+                    mapChanged = false;
+                }
+
+                else {
+                    mapChanged = true;
+                }
+
+                return true;
 
 
             }
@@ -170,6 +212,17 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
+                    else if (dragButton.isTouched() && ID == dragButton.getID()) {
+                        Log.d("dragButton", "isTouched && ID is the same");
+                        if(dragButton.onTouchUp(scaledX, scaledY, ID)) {
+                            return true;
+                        }
+                    }
+
+                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
                     else {
                         return true;
                     }
@@ -178,6 +231,22 @@ public class LevelEditorState extends State {
                 case (MotionEvent.ACTION_POINTER_DOWN): {
                     if(exitButton.onTouchDown(scaledX, scaledY, ID)) {
                         return true;
+                    }
+
+                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                        //i.e already activated, so much not be de activated
+                        if(ID == dragButton.getID() && dragButton.isContained(scaledX, scaledY) &&
+                                dragButton.isTouched()) {
+
+                            if(dragButton.onTouchUp(scaledX, scaledY, ID)) {
+                                return true;
+                            }
+                        }
+
+                        else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+                            return true;
+                        }
                     }
 
                     else {
@@ -191,6 +260,12 @@ public class LevelEditorState extends State {
 
                     if(camera.hasIDSet() && ID == camera.getControllerID()) {
                         camera.lockToNearest(map, ID);
+
+                        Log.d("LevelEditor", "Locked to closest");
+                        Log.d("LevelEditor", "CameraX: " + camera.getX());
+                        Log.d("LevelEditor", "CameraY: " + camera.getY());
+
+                        return true;
                     }
 
 
@@ -206,7 +281,7 @@ public class LevelEditorState extends State {
                 }
 
                 case (MotionEvent.ACTION_POINTER_UP): {
-                    if(exitButton.onTouchUp(scaledX, scaledY, ID)) {
+                    if (exitButton.onTouchUp(scaledX, scaledY, ID)) {
                         setCurrentState(new MenuState());
                         return true;
                     }
