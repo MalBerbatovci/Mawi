@@ -1,12 +1,6 @@
 package com.megamal.game.model;
 
-import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.util.Log;
-
 import com.megamal.framework.util.Painter;
-import com.megamal.framework.util.Tile;
-import com.megamal.mawi.GameMainActivity;
 
 /**
  * Created by malberbatovci on 10/01/16.

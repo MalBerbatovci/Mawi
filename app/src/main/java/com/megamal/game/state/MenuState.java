@@ -1,7 +1,6 @@
 package com.megamal.game.state;
 
 import android.support.v4.view.MotionEventCompat;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 

@@ -3,13 +3,9 @@ package com.megamal.framework.util;
 import com.megamal.mawi.GameMainActivity;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import android.content.res.AssetManager;
 
 /**
  * Created by malberbatovci on 08/10/15.

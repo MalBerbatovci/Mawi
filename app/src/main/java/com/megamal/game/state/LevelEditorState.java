@@ -1,6 +1,5 @@
 package com.megamal.game.state;
 
-import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -12,7 +11,6 @@ import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
-import com.megamal.mawi.GameMainActivity;
 
 /**
  * Created by malberbatovci on 12/02/16.

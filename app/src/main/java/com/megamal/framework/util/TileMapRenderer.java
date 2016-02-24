@@ -1,12 +1,9 @@
 package com.megamal.framework.util;
 
 import android.graphics.Color;
-import android.util.Log;
 
 import com.megamal.game.model.Player;
 import com.megamal.mawi.GameMainActivity;
-
-import java.io.IOException;
 
 /**
  * Created by malberbatovci on 08/10/15.

@@ -96,9 +96,16 @@ public class Projectile {
         velY = VEL_Y;
 
         switch(ID) {
-            case(1): this.image = Assets.coinImage;
-                     break;
+            case(1): {
+                this.image = Assets.coinImage;
+                break;
+            }
+            default: {
+                this.image = Assets.coinImage;
+                break;
+            }
         }
+
 
         isVisible = true;
         isActive = true;

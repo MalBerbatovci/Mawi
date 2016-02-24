@@ -1,7 +1,5 @@
 package com.megamal.framework.util;
 
-import android.util.Log;
-
 import com.megamal.game.model.Player;
 import com.megamal.mawi.GameMainActivity;
 

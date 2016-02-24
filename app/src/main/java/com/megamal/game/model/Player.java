@@ -2,7 +2,6 @@ package com.megamal.game.model;
 
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
