@@ -22,13 +22,18 @@ public class LevelEditorState extends State {
     private final static int DOWN = -1;
     private final static int RIGHT = 1;
     private final static int UP = 1;
+    private final static int REMINDER_DISTANCE_X = -15;
+    private final static int REMINDER_WITDH = 15;
+    private final static int REMINDER_HEIGHT = 15;
 
     protected int previousMapX = -1;
     protected int previousMapY = -1;
 
+    protected boolean showExtraToolKit = false;
+
 
     private boolean mapChanged = true;
-    private UIButton exitButton, dragButton, wrenchButton;
+    private UIButton exitButton, dragButton, pencilButton, wrenchButton;
     private int[][] map;
     private int maskedAction;
 
@@ -36,17 +41,18 @@ public class LevelEditorState extends State {
 
     private LevelEditorCamera camera;
     private TileMapRenderer tileMapRenderer;
+    private UIButton eraserButton;
 
     @Override
     public void init() {
 
         //832, 512
         exitButton = new UIButton(750, 440, 830, 510, Assets.exitButton, Assets.exitButtonPressed);
+        wrenchButton = new UIButton(32, 450, 96, 504, Assets.wrenchTool, Assets.wrenchToolInUse);
 
-
-        dragButton = new UIButton(670, 440, 734, 504, Assets.movingTool, Assets.movingToolUsed);
-
-        wrenchButton = new UIButton(20, 440, 84, 504, Assets.wrenchTool, Assets.wrenchToolInUse);
+        pencilButton = new UIButton(32, 364, 96, 428, Assets.pencilTool, Assets.pencilToolInUse);
+        eraserButton = new UIButton(96, 364, 160, 428, Assets.eraserTool, Assets.eraserToolInUse);
+        dragButton = new UIButton(160, 364, 224, 428, Assets.movingTool, Assets.movingToolUsed);
 
 
 
@@ -56,7 +62,7 @@ public class LevelEditorState extends State {
         for(int i = 0; i < 100; i++) {
             for(int j = 0; j < 100; j++) {
                 if(RandomNumberGenerator.getRandInt(50) < 25) {
-                    map[i][j] = 1;
+                    map[i][j] = 0;
                 }
                 else {
                     map[i][j] = 0;
@@ -91,9 +97,33 @@ public class LevelEditorState extends State {
         }
 
         exitButton.render(g);
-        dragButton.render(g);
         wrenchButton.render(g);
 
+        if(showExtraToolKit) {
+            dragButton.render(g);
+            pencilButton.render(g);
+            eraserButton.render(g);
+        }
+
+        if(dragButton.isTouched()) {
+            drawReminder(g, dragButton);
+        }
+
+        else if (pencilButton.isTouched()) {
+            drawReminder(g, pencilButton);
+        }
+
+        else if (eraserButton.isTouched()) {
+            drawReminder(g, eraserButton);
+        }
+
+    }
+
+    private void drawReminder(Painter g, UIButton button) {
+        g.drawImage(button.getButtonImage(), wrenchButton.getX() + REMINDER_DISTANCE_X,
+                wrenchButton.getY(), REMINDER_WITDH, REMINDER_HEIGHT);
+
+        mapChanged = true;
     }
 
     @Override
@@ -197,7 +227,47 @@ public class LevelEditorState extends State {
 
             }
 
-            if(exitButton.buttonMovedOn(scaledX, scaledY, ID)) {
+            //moved on, therefore show extra tools
+            /*else if(wrenchButton.buttonMovedOn(scaledX, scaledY, ID)) {
+                showExtraToolKit = true;
+                mapChanged = true;
+                return true;
+
+            }
+
+            else if(wrenchButton.buttonMovedOut(scaledX, scaledY, ID)) {
+                showExtraToolKit = false;
+                mapChanged = true;
+                return true;
+            }*/
+
+            else if(pencilButton.isTouched()) {
+
+                if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
+                        !wrenchButton.isContained(scaledX, scaledY)) {
+                    drawTile(scaledX, scaledY, 1);
+                }
+
+                else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                    drawTile(scaledX, scaledY, 1);
+                }
+
+            }
+
+            else if(eraserButton.isTouched()) {
+
+                if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
+                        !wrenchButton.isContained(scaledX, scaledY)) {
+                    drawTile(scaledX, scaledY, 0);
+                }
+
+                else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                    drawTile(scaledX, scaledY, 0);
+                }
+
+            }
+
+            else if(exitButton.buttonMovedOn(scaledX, scaledY, ID)) {
                 return true;
             }
 
@@ -220,53 +290,121 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
-                    else if (dragButton.isTouched() &&
-                            dragButton.isContained(scaledX, scaledY)) {
 
-                        Log.d("dragButton", "isTouched && ID is the same");
-                        if(dragButton.onTouchDownOff(scaledX, scaledY)) {
-                            return true;
-                        }
-                    }
-
-                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                        if(wrenchButton.isTouched()) {
-                            wrenchButton.forceTouchOff();
-                        }
-                        return true;
-                    }
-
-                    else if (wrenchButton.isTouched() &&
+                    else if(wrenchButton.isTouched() &&
                             wrenchButton.isContained(scaledX, scaledY)) {
 
                         if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
-
-                            //in order to remove
+                            showExtraToolKit = false;
                             mapChanged = true;
                             return true;
                         }
                     }
 
+                    //touch down, so show toolkit
                     else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                        if(dragButton.isTouched()) {
-                            dragButton.forceTouchOff();
-                            mapChanged = true;
-                        }
-
+                        showExtraToolKit = true;
+                        mapChanged = true;
                         return true;
                     }
 
-                    else if(wrenchButton.isTouched() &&
-                            !wrenchButton.isContained(scaledX, scaledY)) {
+                    else if (wrenchButton.isTouched()) {
 
-                        //in this case, when this means we have just placed finger onto blank screen
-                        //ready to draw!
+                        if (dragButton.isTouched() &&
+                                dragButton.isContained(scaledX, scaledY)) {
 
-                        drawTile(scaledX, scaledY);
+                            Log.d("dragButton", "isTouched && ID is the same");
+                            if (dragButton.onTouchDownOff(scaledX, scaledY)) {
+                                return true;
+                            }
+
+                        } else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if (pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if(eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            return true;
+
+                        } else if (pencilButton.isTouched() &&
+                                pencilButton.isContained(scaledX, scaledY)) {
+
+                            if (pencilButton.onTouchDownOff(scaledX, scaledY)) {
+
+                                //in order to remove
+                                mapChanged = true;
+                                return true;
+                            }
+                        } else if (pencilButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if (dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if (eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            return true;
+                        }
+
+                        else if(eraserButton.isTouched() &&
+                                eraserButton.isContained(scaledX, scaledY)) {
+
+                            if(eraserButton.onTouchDownOff(scaledX,scaledY)) {
+                                return true;
+                            }
+                        }
+
+                        else if (eraserButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if(dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if(pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                mapChanged= true;
+                            }
+
+                            return true;
+                        }
                     }
 
+                    else if(pencilButton.isTouched()) {
+
+                        if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 1);
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 1);
+                        }
+
+                    }
+
+                    else if(eraserButton.isTouched()) {
+
+                        if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
+                    }
                     else {
                         return true;
                     }
@@ -277,49 +415,116 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
-                    else if (dragButton.isTouched() &&
-                            dragButton.isContained(scaledX, scaledY)) {
-
-                        Log.d("dragButton", "isTouched && ID is the same");
-
-                        if(dragButton.onTouchDownOff(scaledX, scaledY)) {
-                            return true;
-                        }
-                    }
-
-                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                        //cannot have both drag and place tiles at the same time
-                        if(wrenchButton.isTouched()) {
-                            wrenchButton.forceTouchOff();
-                        }
-
-                        return true;
-                    }
-
-                    else if (wrenchButton.isTouched() &&
+                    else if(wrenchButton.isTouched() &&
                             wrenchButton.isContained(scaledX, scaledY)) {
 
                         if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
+                            showExtraToolKit = false;
+                            mapChanged = true;
                             return true;
                         }
                     }
 
+                    //touch down, so show toolkit
                     else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                        if(dragButton.isTouched()) {
-                            dragButton.forceTouchOff();
-                        }
+                        showExtraToolKit = true;
+                        mapChanged = true;
                         return true;
                     }
+
+                    else if(wrenchButton.isTouched()) {
+
+                        if (dragButton.isTouched() &&
+                                dragButton.isContained(scaledX, scaledY)) {
+
+                            Log.d("dragButton", "isTouched && ID is the same");
+
+                            if (dragButton.onTouchDownOff(scaledX, scaledY)) {
+                                return true;
+                            }
+                        } else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            //cannot have both drag and place tiles at the same time
+                            if (pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if(eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            return true;
+                        } else if (pencilButton.isTouched() &&
+                                pencilButton.isContained(scaledX, scaledY)) {
+
+                            if (pencilButton.onTouchDownOff(scaledX, scaledY)) {
+                                return true;
+                            }
+                        } else if (pencilButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if (dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if(eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+                            return true;
+                        }
+
+                        else if(eraserButton.isTouched() &&
+                                eraserButton.isContained(scaledX, scaledY)) {
+
+                            if(eraserButton.onTouchDownOff(scaledX,scaledY)) {
+                                return true;
+                            }
+                        }
+
+                        else if (eraserButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if(dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if(pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                mapChanged= true;
+                            }
+
+                            return true;
+                        }
+                    }
                     
-                    else if(wrenchButton.isTouched() &&
-                            !wrenchButton.isContained(scaledX, scaledY)) {
-                        
+                    else if(pencilButton.isTouched()) {
+
+                        if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 1);
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 1);
+                        }
                         //in this case, when this means we have just placed finger onto blank screen
                         //ready to draw!
-                        
-                        drawTile(scaledX, scaledY);
+                    }
+
+                    else if(eraserButton.isTouched()) {
+
+                        if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
                     }
 
                     else {
@@ -380,7 +585,7 @@ public class LevelEditorState extends State {
         return true;
     }
 
-    private void drawTile(int scaledX, int scaledY) {
+    private void drawTile(int scaledX, int scaledY, int ID) {
 
         int mapEntryX = (int) Math.floor((scaledX + camera.getX())
                 / GameMainActivity.TILE_WIDTH);
@@ -396,8 +601,8 @@ public class LevelEditorState extends State {
 
         else {
 
-            if(map[mapEntryY][mapEntryX] == 0) {
-                map[mapEntryY][mapEntryX] = 1;
+            if(!(map[mapEntryY][mapEntryX] == ID)) {
+                    map[mapEntryY][mapEntryX] = ID;
             }
 
             previousMapY = mapEntryY;

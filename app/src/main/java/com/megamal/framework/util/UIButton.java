@@ -172,5 +172,18 @@ public class UIButton {
     public int getID() {
         return pointerID;
     }
+
+    public Bitmap getButtonImage() {
+        return buttonImage;
+    }
+
+    public int getX() {
+        return buttonRect.right;
+    }
+
+    public int getY() {
+        return buttonRect.top;
+    }
 }
+
 
