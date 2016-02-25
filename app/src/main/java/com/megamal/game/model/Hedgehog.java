@@ -23,7 +23,7 @@ public class Hedgehog extends Mover {
     private Tile tileB;
 
     private Bitmap image;
-    private Rect rect;
+    protected Rect rect;
 
     private double x, y;
     private double rectX, rectY;

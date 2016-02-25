@@ -84,6 +84,14 @@ public class Tile {
                     this.isCollectable = true;
                     this.hasCollectable = false;
                     break;
+
+            default:
+                this.image = null;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+
         }
 
     }

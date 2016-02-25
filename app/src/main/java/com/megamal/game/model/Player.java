@@ -637,7 +637,13 @@ public class Player {
         int tileIndexY = (int) Math.floor((y + (height / 2) + cameraOffsetY)
                 / GameMainActivity.TILE_HEIGHT);
 
-        tileA.setID(map[tileIndexY][tileIndexX]);
+
+        if(tileIndexX > map[0].length || tileIndexX < 0
+                || tileIndexY > map.length || tileIndexY < 0) {
+
+                return;
+        }
+            tileA.setID(map[tileIndexY][tileIndexX]);
 
         if(tileA.isObstacle()) {
             //playSound

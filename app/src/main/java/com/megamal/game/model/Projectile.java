@@ -15,7 +15,7 @@ import com.megamal.mawi.GameMainActivity;
  */
 public class Projectile {
 
-    private final static int WIDTH = 16;
+    protected final static int WIDTH = 16;
     private final static int HEIGHT = 16;
     private final static int SCAN_LEEWAY_Y = 7;
     private final static int SCAN_LEEWAY_X = 7;
@@ -24,8 +24,8 @@ public class Projectile {
     private final static int RECT_LEEWAY_X_UPDATE = 2;
     private final static int RECT_LEEWAY_Y_UPDATE = 2;
     private final static int VISIBILITY_THRESHOLD = 500;
-    private final static int COLLISION_THRESHOLD_X = 100;
-    private final static int COLLISION_THRESHOLD_Y = 100;
+    private final static int COLLISION_THRESHOLD_X = 50;
+    private final static int COLLISION_THRESHOLD_Y = 50;
     private final static int DYING_VELOCITY = 6;
 
     private final static int VEL_X = 240;
@@ -40,7 +40,7 @@ public class Projectile {
     private final static int LEFT = -1;
     private final static int RIGHT = 1;
 
-    private Rect rect;
+    protected Rect rect;
     private Bitmap image;
     private Tile tileA, tileB;
 
@@ -67,12 +67,14 @@ public class Projectile {
 
     public Projectile(double x, double y, boolean isPlayers, int ID, double cameraOffsetX,
                       double cameraOffsetY, int direction) {
+
         this.x = x;
         this.y = y;
+
         this.isPlayers = isPlayers;
 
         tileA = new Tile(0);
-        tileB = new Tile(0);
+        tileB = new Tile(-1);
 
         rect = new Rect();
         updateRects(cameraOffsetX, cameraOffsetY);
@@ -107,7 +109,10 @@ public class Projectile {
         }
 
 
-        isVisible = true;
+        if(isVisible(cameraOffsetX, cameraOffsetY)) {
+            isVisible = true;
+        }
+
         isActive = true;
 
         activationTime = (int) (System.currentTimeMillis() / 1000000L);
@@ -150,7 +155,7 @@ public class Projectile {
         activationTime = (int) (System.currentTimeMillis());
     }
 
-    private void updateRects(double cameraOffsetX, double cameraOffsetY) {
+    protected void updateRects(double cameraOffsetX, double cameraOffsetY) {
         rectX = (x + RECT_LEEWAY_X_UPDATE - cameraOffsetX);
         rectY = (y + RECT_LEEWAY_Y_UPDATE - cameraOffsetY);
 
@@ -291,11 +296,11 @@ public class Projectile {
         }
     }
 
-    private void checkCollisionsEnemies(Enemy[] enemyArray) {
+    protected void checkCollisionsEnemies(Enemy[] enemyArray) {
         if(isPlayers) {
             for(int i = 0; i < enemyArray.length; i++) {
 
-                if (!enemyArray[i].isDying() && enemyArray[i] != null) {
+                if (enemyArray[i] != null && !enemyArray[i].isDying()) {
                     //if enemy is not active, move to next
                     if (enemyArray[i].isActive()) {
 
@@ -306,9 +311,10 @@ public class Projectile {
                             if (rect.intersect(enemyArray[i].getRect())) {
                                 enemyArray[i].death();
                                 death();
-                                Log.d("Intersection", "Rect CONTAINED, but close enough");
+                                //Log.d("Intersection", "Rect CONTAINED
+                                // close enough");
                             } else {
-                                Log.d("Intersection", "Rect not contained, but close enough");
+                                //Log.d("Intersection", "Rect not contained, but close enough");
                             }
                         } else {
                             Log.d("Intersection", "Not close enough!");
@@ -327,7 +333,7 @@ public class Projectile {
         }
     }
 
-    private void checkCollisionsPlayer(Player mawi) {
+    protected void checkCollisionsPlayer(Player mawi) {
         if(isPlayers) {
             return;
         }
@@ -337,7 +343,7 @@ public class Projectile {
         }
     }
 
-    private void checkYMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
+    protected void checkYMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         boolean twoTiles = false;
 
@@ -548,7 +554,7 @@ public class Projectile {
 
     }
 
-    private void checkXMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
+    protected void checkXMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         boolean twoTiles = false;
 
@@ -832,6 +838,7 @@ public class Projectile {
         isDying = true;
     }
 
+
     public void makeNonActive() {
         isActive = false;
     }
@@ -869,5 +876,18 @@ public class Projectile {
         return isDying;
     }
 
+    public int getCurrentDirection() {
+        if(velX < 0) {
+            return LEFT;
+        }
 
+        else {
+            return RIGHT;
+        }
+    }
+
+
+    public Rect getRect() {
+        return rect;
+    }
 }
