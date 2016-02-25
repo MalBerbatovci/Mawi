@@ -11,6 +11,7 @@ import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
+import com.megamal.mawi.GameMainActivity;
 
 /**
  * Created by malberbatovci on 12/02/16.
@@ -22,9 +23,12 @@ public class LevelEditorState extends State {
     private final static int RIGHT = 1;
     private final static int UP = 1;
 
+    protected int previousMapX = -1;
+    protected int previousMapY = -1;
+
 
     private boolean mapChanged = true;
-    private UIButton exitButton, dragButton;
+    private UIButton exitButton, dragButton, wrenchButton;
     private int[][] map;
     private int maskedAction;
 
@@ -39,8 +43,12 @@ public class LevelEditorState extends State {
         //832, 512
         exitButton = new UIButton(750, 440, 830, 510, Assets.exitButton, Assets.exitButtonPressed);
 
-        //stub
+
         dragButton = new UIButton(670, 440, 734, 504, Assets.movingTool, Assets.movingToolUsed);
+
+        wrenchButton = new UIButton(20, 440, 84, 504, Assets.wrenchTool, Assets.wrenchToolInUse);
+
+
 
         //stub value to create as big as possible,
         map = new int[100][100];
@@ -84,6 +92,7 @@ public class LevelEditorState extends State {
 
         exitButton.render(g);
         dragButton.render(g);
+        wrenchButton.render(g);
 
     }
 
@@ -174,6 +183,7 @@ public class LevelEditorState extends State {
                 /*Log.d("LevelEditor", "CameraX: " + camera.getX());
                 Log.d("LevelEditor", "CameraY: " + camera.getY()); */
 
+                //if xNotChanged and yNotChanged
                 if(!xChanged && !yChanged) {
                     mapChanged = false;
                 }
@@ -210,15 +220,51 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
-                    else if (dragButton.isTouched() && ID == dragButton.getID()) {
+                    else if (dragButton.isTouched() &&
+                            dragButton.isContained(scaledX, scaledY)) {
+
                         Log.d("dragButton", "isTouched && ID is the same");
-                        if(dragButton.onTouchUp(scaledX, scaledY, ID)) {
+                        if(dragButton.onTouchDownOff(scaledX, scaledY)) {
                             return true;
                         }
                     }
 
                     else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                        if(wrenchButton.isTouched()) {
+                            wrenchButton.forceTouchOff();
+                        }
                         return true;
+                    }
+
+                    else if (wrenchButton.isTouched() &&
+                            wrenchButton.isContained(scaledX, scaledY)) {
+
+                        if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
+
+                            //in order to remove
+                            mapChanged = true;
+                            return true;
+                        }
+                    }
+
+                    else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                        if(dragButton.isTouched()) {
+                            dragButton.forceTouchOff();
+                            mapChanged = true;
+                        }
+
+                        return true;
+                    }
+
+                    else if(wrenchButton.isTouched() &&
+                            !wrenchButton.isContained(scaledX, scaledY)) {
+
+                        //in this case, when this means we have just placed finger onto blank screen
+                        //ready to draw!
+
+                        drawTile(scaledX, scaledY);
                     }
 
                     else {
@@ -231,20 +277,49 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
-                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+                    else if (dragButton.isTouched() &&
+                            dragButton.isContained(scaledX, scaledY)) {
 
-                        //i.e already activated, so much not be de activated
-                        if(ID == dragButton.getID() && dragButton.isContained(scaledX, scaledY) &&
-                                dragButton.isTouched()) {
+                        Log.d("dragButton", "isTouched && ID is the same");
 
-                            if(dragButton.onTouchUp(scaledX, scaledY, ID)) {
-                                return true;
-                            }
-                        }
-
-                        else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+                        if(dragButton.onTouchDownOff(scaledX, scaledY)) {
                             return true;
                         }
+                    }
+
+                    else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                        //cannot have both drag and place tiles at the same time
+                        if(wrenchButton.isTouched()) {
+                            wrenchButton.forceTouchOff();
+                        }
+
+                        return true;
+                    }
+
+                    else if (wrenchButton.isTouched() &&
+                            wrenchButton.isContained(scaledX, scaledY)) {
+
+                        if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
+                            return true;
+                        }
+                    }
+
+                    else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                        if(dragButton.isTouched()) {
+                            dragButton.forceTouchOff();
+                        }
+                        return true;
+                    }
+                    
+                    else if(wrenchButton.isTouched() &&
+                            !wrenchButton.isContained(scaledX, scaledY)) {
+                        
+                        //in this case, when this means we have just placed finger onto blank screen
+                        //ready to draw!
+                        
+                        drawTile(scaledX, scaledY);
                     }
 
                     else {
@@ -256,14 +331,14 @@ public class LevelEditorState extends State {
                 //IF ACTION_UP is same ID as current camera controller, then ensure previousX = 0 etc
                 case (MotionEvent.ACTION_UP): {
 
-                    if(camera.hasIDSet() && ID == camera.getControllerID()) {
+                    if(dragButton.isTouched()) {
                         camera.lockToNearest(map, ID);
+
+                        mapChanged = true;
 
                         Log.d("LevelEditor", "Locked to closest");
                         Log.d("LevelEditor", "CameraX: " + camera.getX());
                         Log.d("LevelEditor", "CameraY: " + camera.getY());
-
-                        return true;
                     }
 
 
@@ -276,11 +351,22 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
+
                 }
 
                 case (MotionEvent.ACTION_POINTER_UP): {
                     if (exitButton.onTouchUp(scaledX, scaledY, ID)) {
                         setCurrentState(new MenuState());
+                        return true;
+                    }
+
+                    else if(dragButton.isTouched()) {
+                        camera.lockToNearest(map, ID);
+
+                        Log.d("LevelEditor", "Locked to closest");
+                        Log.d("LevelEditor", "CameraX: " + camera.getX());
+                        Log.d("LevelEditor", "CameraY: " + camera.getY());
+
                         return true;
                     }
 
@@ -292,5 +378,34 @@ public class LevelEditorState extends State {
         }
 
         return true;
+    }
+
+    private void drawTile(int scaledX, int scaledY) {
+
+        int mapEntryX = (int) Math.floor((scaledX + camera.getX())
+                / GameMainActivity.TILE_WIDTH);
+        int mapEntryY = (int) Math.floor((scaledY + camera.getY())
+                    / GameMainActivity.TILE_HEIGHT);
+
+        //
+        if(previousMapX == mapEntryX &&
+                previousMapY == mapEntryY) {
+
+            return;
+        }
+
+        else {
+
+            if(map[mapEntryY][mapEntryX] == 0) {
+                map[mapEntryY][mapEntryX] = 1;
+            }
+
+            previousMapY = mapEntryY;
+            previousMapX = mapEntryX;
+
+            mapChanged = true;
+        }
+
+
     }
 }

@@ -1,5 +1,7 @@
 package com.megamal.framework.util;
 
+import android.util.Log;
+
 import com.megamal.mawi.GameMainActivity;
 
 /**
@@ -135,17 +137,20 @@ public class LevelEditorCamera {
 
             if (remainderX == 0) {
                 //do nothing
+                Log.d("LECamera", "RemainderX == 0");
             }
 
             //else, if more than half, clip to next closest on the RIGHT
             else if (remainderX >= (GameMainActivity.TILE_WIDTH / 2)) {
 
                 cameraOffsetX = cameraOffsetX + (GameMainActivity.TILE_WIDTH - remainderX);
+                Log.d("LECamera", "RemainderX >=");
             }
 
             //else, less than half way, clip to next closest on the LEFT
             else {
                 cameraOffsetX = cameraOffsetX - remainderX;
+                Log.d("LECamera", "Else");
             }
 
 
@@ -164,6 +169,10 @@ public class LevelEditorCamera {
             else {
                 cameraOffsetY = cameraOffsetY - remainderY;
             }
+        }
+
+        else {
+            Log.d("LECamera", "ControllerID != ID");
         }
 
     }

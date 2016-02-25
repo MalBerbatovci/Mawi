@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 @PrepareForTest(Projectile.class)
 public class ProjectileTest {
 
-    @Mock
     private Projectile testProjectile;
 
     @Mock
@@ -33,7 +32,6 @@ public class ProjectileTest {
     @Mock
     private Rect mockRect;
 
-    @Mock
     private int[][] map;
 
     @Mock
@@ -47,10 +45,10 @@ public class ProjectileTest {
     public void setUp() throws Exception {
 
 
-       /* PowerMockito.whenNew(Rect.class).withAnyArguments().thenReturn(mockRect);
-        PowerMockito.whenNew(int[][].class).withAnyArguments().thenReturn(map);*/
-       /* PowerMockito.whenNew(Tile.class).withArguments(0).thenReturn(mockTileA);
-        PowerMockito.whenNew(Tile.class).withArguments(-1).thenReturn(mockTileB);*/
+        PowerMockito.whenNew(Rect.class).withAnyArguments().thenReturn(mockRect);
+//        PowerMockito.whenNew(int[][].class).withAnyArguments().thenReturn(map);
+        PowerMockito.whenNew(Tile.class).withArguments(0).thenReturn(mockTileA);
+        PowerMockito.whenNew(Tile.class).withArguments(-1).thenReturn(mockTileB);
         enemyArray = new Enemy[1];
         enemyArray[0] = hedge;
         testProjectile = Mockito.spy(new Projectile(10, 10, true, 1, 0, 0, 1));
@@ -62,13 +60,13 @@ public class ProjectileTest {
 
 
         when(hedge.isActive()).thenReturn(true);
-        when(mockRect.intersect(hedge.rect)).thenReturn(true);
+       when(mockRect.intersect(hedge.rect)).thenReturn(true);
         when(hedge.isDying()).thenReturn(true);
         testProjectile.checkCollisionsEnemies(enemyArray);
 
         assertFalse("Enemy was not dying when collision checked", testProjectile.isDying());
     }
- /*
+
    @Test
     public void collisionShouldKeepProjectileAliveAsEnemyArrayDoesNotExsist() throws Exception {
 
@@ -149,13 +147,13 @@ public class ProjectileTest {
         when(hedge.isActive()).thenReturn(true);
         when(hedge.isDying()).thenReturn(false);
         when(mockRect.intersect(hedge.rect)).thenReturn(false);
-        when(hedge.getX()).thenReturn(12.0);
-        when(hedge.getY()).thenReturn(12.0);
+        when(hedge.getX()).thenReturn(inBoundsX);
+        when(hedge.getY()).thenReturn(inBoundsY);
 
         testProjectile.checkCollisionsEnemies(enemyArray);
         assertFalse("isDying is true", testProjectile.isDying());
     }
- */
+
     /*@Test
     public void noXCollisionDueToOutOfBoundsValueLeft() throws Exception {
 

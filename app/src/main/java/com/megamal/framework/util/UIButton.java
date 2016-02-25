@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.megamal.mawi.Assets;
+
 public class UIButton {
     private Rect buttonRect;
     private boolean buttonDown = false;
@@ -66,22 +68,41 @@ public class UIButton {
         }
     }
 
+    public boolean onTouchDownOff(int touchX, int touchY) {
+
+        if(buttonRect.contains(touchX, touchY)) {
+            buttonDown = false;
+            this.pointerID = -1;
+            return true;
+        }
+
+        else {
+            return false;
+        }
+    }
+
+    //needed in order to ensure that only one button remains on at one time duirng level editor
+    public void forceTouchOff() {
+        buttonDown = false;
+        this.pointerID = -1;
+    }
+
     public boolean onTouchUp(int touchX, int touchY, int pointerID) {
 
-        if(this.pointerID != pointerID) {
+        if (this.pointerID != pointerID) {
             //Log.d("MultiTouch", "Pointer not associated with this button");
             return false;
         }
 
-        else {
-            if (buttonRect.contains(touchX, touchY)) {
-                    buttonDown = false;
-                    this.pointerID = -1;
-                    return true;
-            } else {
-                return false;
-            }
+        if (buttonRect.contains(touchX, touchY)) {
+            buttonDown = false;
+            this.pointerID = -1;
+            return true;
+
+        } else {
+            return false;
         }
+
     }
 
     //only called when button ID same as button, and not contained
