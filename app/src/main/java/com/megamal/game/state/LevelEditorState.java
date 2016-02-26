@@ -8,6 +8,7 @@ import android.view.View;
 import com.megamal.framework.util.LevelEditorCamera;
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.RandomNumberGenerator;
+import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
@@ -25,15 +26,19 @@ public class LevelEditorState extends State {
     private final static int REMINDER_DISTANCE_X = -15;
     private final static int REMINDER_WITDH = 15;
     private final static int REMINDER_HEIGHT = 15;
+    private final static int NUMBER_TILES = 4;
 
     protected int previousMapX = -1;
     protected int previousMapY = -1;
 
     protected boolean showExtraToolKit = false;
+    protected boolean showIDSwapper = false;
+
+    protected Tile testTile;
 
 
     private boolean mapChanged = true;
-    private UIButton exitButton, dragButton, pencilButton, wrenchButton;
+    private UIButton exitButton, dragButton, pencilButton, wrenchButton, leftButton, rightButton;
     private int[][] map;
     private int maskedAction;
 
@@ -46,13 +51,25 @@ public class LevelEditorState extends State {
     @Override
     public void init() {
 
-        //832, 512
+        //Placements for buttons
         exitButton = new UIButton(750, 440, 830, 510, Assets.exitButton, Assets.exitButtonPressed);
         wrenchButton = new UIButton(32, 450, 96, 504, Assets.wrenchTool, Assets.wrenchToolInUse);
 
+
+        //set of 'extra tool kit'
         pencilButton = new UIButton(32, 364, 96, 428, Assets.pencilTool, Assets.pencilToolInUse);
         eraserButton = new UIButton(96, 364, 160, 428, Assets.eraserTool, Assets.eraserToolInUse);
         dragButton = new UIButton(160, 364, 224, 428, Assets.movingTool, Assets.movingToolUsed);
+
+
+        //set of buttons to switch placement ID
+        leftButton = new UIButton(340, 450, 380, 504, Assets.leftID, Assets.leftIDUsed);
+        rightButton = new UIButton(452, 450, 492, 504, Assets.rightID, Assets.rightIDUsed);
+
+
+        //stub value for tile, just initialisig
+        testTile = new Tile(0);
+
 
 
 
@@ -81,6 +98,10 @@ public class LevelEditorState extends State {
     @Override
     public void update(float delta, Painter g) {
 
+        if(wrenchButton.isTouched() && pencilButton.isTouched()) {
+            showIDSwapper = true;
+            mapChanged = true;
+        }
     }
 
     @Override
@@ -105,6 +126,13 @@ public class LevelEditorState extends State {
             eraserButton.render(g);
         }
 
+        if(showIDSwapper) {
+            leftButton.render(g);
+            rightButton.render(g);
+
+            g.drawImage(testTile.getImage(), 384, 450);
+        }
+
         if(dragButton.isTouched()) {
             drawReminder(g, dragButton);
         }
@@ -116,6 +144,8 @@ public class LevelEditorState extends State {
         else if (eraserButton.isTouched()) {
             drawReminder(g, eraserButton);
         }
+
+
 
     }
 
@@ -222,6 +252,13 @@ public class LevelEditorState extends State {
                     mapChanged = true;
                 }
 
+                if(showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY) &&
+                        !dragButton.isContained(scaledX, scaledY)) {
+
+                    showExtraToolKit = false;
+                    wrenchButton.forceTouchOff();
+                }
+
                 return true;
 
 
@@ -243,13 +280,31 @@ public class LevelEditorState extends State {
 
             else if(pencilButton.isTouched()) {
 
+
                 if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
                         !wrenchButton.isContained(scaledX, scaledY)) {
-                    drawTile(scaledX, scaledY, 1);
+
+                    if(showIDSwapper && !rightButton.isContained(scaledX, scaledY) &&
+                        !leftButton.isContained(scaledX, scaledY)){
+
+                        drawTile(scaledX, scaledY, testTile.getID());
+
+                        showExtraToolKit = false;
+                        showIDSwapper = false;
+                        mapChanged = true;
+
+                        wrenchButton.forceTouchOff();
+                    }
+
+                    else if (!showIDSwapper) {
+                        drawTile(scaledX, scaledY, testTile.getID());
+                        mapChanged = true;
+                        wrenchButton.forceTouchOff();
+                    }
                 }
 
                 else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
-                    drawTile(scaledX, scaledY, 1);
+                    drawTile(scaledX, scaledY, testTile.getID());
                 }
 
             }
@@ -259,6 +314,8 @@ public class LevelEditorState extends State {
                 if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
                         !wrenchButton.isContained(scaledX, scaledY)) {
                     drawTile(scaledX, scaledY, 0);
+                    showExtraToolKit = false;
+                    wrenchButton.forceTouchOff();
                 }
 
                 else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
@@ -275,6 +332,25 @@ public class LevelEditorState extends State {
                 return true;
             }
 
+           /* else if (showIDSwapper) {
+
+                if(rightButton.buttonMovedOn(scaledX, scaledY, ID)) {
+                    return true;
+                }
+
+                else if(rightButton.buttonMovedOut(scaledX, scaledY, ID)) {
+                    return true;
+                }
+
+                else if(leftButton.buttonMovedOn(scaledX, scaledY, ID)) {
+                    return true;
+                }
+
+                else if(leftButton.buttonMovedOut(scaledX, scaledY, ID)) {
+                    return true;
+                }
+            } */
+
             else {
                 return true;
             }
@@ -286,6 +362,161 @@ public class LevelEditorState extends State {
 
             switch(maskedAction) {
                 case (MotionEvent.ACTION_DOWN): {
+                    if(exitButton.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+
+                    else if(wrenchButton.isTouched() &&
+                            wrenchButton.isContained(scaledX, scaledY)) {
+
+                        if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
+                            showExtraToolKit = false;
+                            showIDSwapper = false;
+                            mapChanged = true;
+                            return true;
+                        }
+                    }
+
+                    //touch down, so show toolkit
+                    else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
+                        showExtraToolKit = true;
+                        mapChanged = true;
+                        return true;
+                    }
+
+                    else if (wrenchButton.isTouched()) {
+
+                        if (dragButton.isTouched() &&
+                                dragButton.isContained(scaledX, scaledY)) {
+
+                            Log.d("dragButton", "isTouched && ID is the same");
+                            if (dragButton.onTouchDownOff(scaledX, scaledY)) {
+                                return true;
+                            }
+
+                        } else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if (pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged = true;
+                            }
+
+                            else if(eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            return true;
+
+                        } else if (pencilButton.isTouched() &&
+                                pencilButton.isContained(scaledX, scaledY)) {
+
+                            if (pencilButton.onTouchDownOff(scaledX, scaledY)) {
+
+                                //in order to remove
+                                showIDSwapper = false;
+                                mapChanged = true;
+                                return true;
+                            }
+                        } else if (pencilButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if (dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            else if (eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+                            }
+
+                            showIDSwapper = true;
+                            testTile.setID(1);
+
+                            return true;
+                        }
+
+                        else if(eraserButton.isTouched() &&
+                                eraserButton.isContained(scaledX, scaledY)) {
+
+                            if(eraserButton.onTouchDownOff(scaledX,scaledY)) {
+                                return true;
+                            }
+                        }
+
+                        else if (eraserButton.onTouchDown(scaledX, scaledY, ID)) {
+
+                            if(dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged = true;
+                            }
+
+                            else if(pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged= true;
+                            }
+
+                            return true;
+                        }
+
+                        //register left/right movement for ID Switching in this case
+                        else if(showIDSwapper) {
+
+                            if(rightButton.onTouchDown(scaledX, scaledY, ID)) {
+                                return true;
+                            }
+
+                            else if(leftButton.onTouchDown(scaledX, scaledY, ID)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    else if(pencilButton.isTouched()) {
+
+                        if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+
+                            if(showIDSwapper && !rightButton.isContained(scaledX, scaledY) &&
+                                    !leftButton.isContained(scaledX, scaledY)) {
+
+                                showIDSwapper = false;
+                                drawTile(scaledX, scaledY, testTile.getID());
+                            }
+
+                            else if (!showIDSwapper) {
+                                drawTile(scaledX, scaledY, testTile.getID());
+                            }
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, testTile.getID());
+                        }
+
+                    }
+
+                    else if(eraserButton.isTouched()) {
+
+                        if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
+                                !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
+                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                            drawTile(scaledX, scaledY, 0);
+                        }
+
+                    }
+                    else {
+                        return true;
+                    }
+                }
+
+                case (MotionEvent.ACTION_POINTER_DOWN): {
                     if(exitButton.onTouchDown(scaledX, scaledY, ID)) {
                         return true;
                     }
@@ -322,6 +553,7 @@ public class LevelEditorState extends State {
 
                             if (pencilButton.isTouched()) {
                                 pencilButton.forceTouchOff();
+                                showIDSwapper = false;
                                 mapChanged = true;
                             }
 
@@ -338,6 +570,7 @@ public class LevelEditorState extends State {
                             if (pencilButton.onTouchDownOff(scaledX, scaledY)) {
 
                                 //in order to remove
+                                showIDSwapper = false;
                                 mapChanged = true;
                                 return true;
                             }
@@ -353,6 +586,9 @@ public class LevelEditorState extends State {
                                 mapChanged = true;
                             }
 
+                            showIDSwapper = true;
+                            testTile.setID(1);
+
                             return true;
                         }
 
@@ -368,15 +604,29 @@ public class LevelEditorState extends State {
 
                             if(dragButton.isTouched()) {
                                 dragButton.forceTouchOff();
+                                showIDSwapper = false;
                                 mapChanged = true;
                             }
 
                             else if(pencilButton.isTouched()) {
                                 pencilButton.forceTouchOff();
+                                showIDSwapper = false;
                                 mapChanged= true;
                             }
 
                             return true;
+                        }
+
+                        //register left/right movement for ID Switching in this case
+                        else if(showIDSwapper) {
+
+                            if(rightButton.onTouchDown(scaledX, scaledY, ID)) {
+                                return true;
+                            }
+
+                            else if(leftButton.onTouchDown(scaledX, scaledY, ID)) {
+                                return true;
+                            }
                         }
                     }
 
@@ -384,11 +634,21 @@ public class LevelEditorState extends State {
 
                         if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
                                 !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 1);
+
+                            if(showIDSwapper && !rightButton.isContained(scaledX, scaledY) &&
+                                    !leftButton.isContained(scaledX, scaledY)) {
+
+                                showIDSwapper = false;
+                                drawTile(scaledX, scaledY, testTile.getID());
+                            }
+
+                            else if (!showIDSwapper) {
+                                drawTile(scaledX, scaledY, testTile.getID());
+                            }
                         }
 
                         else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 1);
+                            drawTile(scaledX, scaledY, testTile.getID());
                         }
 
                     }
@@ -405,128 +665,6 @@ public class LevelEditorState extends State {
                         }
 
                     }
-                    else {
-                        return true;
-                    }
-                }
-
-                case (MotionEvent.ACTION_POINTER_DOWN): {
-                    if(exitButton.onTouchDown(scaledX, scaledY, ID)) {
-                        return true;
-                    }
-
-                    else if(wrenchButton.isTouched() &&
-                            wrenchButton.isContained(scaledX, scaledY)) {
-
-                        if(wrenchButton.onTouchDownOff(scaledX, scaledY)) {
-                            showExtraToolKit = false;
-                            mapChanged = true;
-                            return true;
-                        }
-                    }
-
-                    //touch down, so show toolkit
-                    else if (wrenchButton.onTouchDown(scaledX, scaledY, ID)) {
-                        showExtraToolKit = true;
-                        mapChanged = true;
-                        return true;
-                    }
-
-                    else if(wrenchButton.isTouched()) {
-
-                        if (dragButton.isTouched() &&
-                                dragButton.isContained(scaledX, scaledY)) {
-
-                            Log.d("dragButton", "isTouched && ID is the same");
-
-                            if (dragButton.onTouchDownOff(scaledX, scaledY)) {
-                                return true;
-                            }
-                        } else if (dragButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                            //cannot have both drag and place tiles at the same time
-                            if (pencilButton.isTouched()) {
-                                pencilButton.forceTouchOff();
-                                mapChanged = true;
-                            }
-
-                            else if(eraserButton.isTouched()) {
-                                eraserButton.forceTouchOff();
-                                mapChanged = true;
-                            }
-
-                            return true;
-                        } else if (pencilButton.isTouched() &&
-                                pencilButton.isContained(scaledX, scaledY)) {
-
-                            if (pencilButton.onTouchDownOff(scaledX, scaledY)) {
-                                return true;
-                            }
-                        } else if (pencilButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                            if (dragButton.isTouched()) {
-                                dragButton.forceTouchOff();
-                                mapChanged = true;
-                            }
-
-                            else if(eraserButton.isTouched()) {
-                                eraserButton.forceTouchOff();
-                                mapChanged = true;
-                            }
-                            return true;
-                        }
-
-                        else if(eraserButton.isTouched() &&
-                                eraserButton.isContained(scaledX, scaledY)) {
-
-                            if(eraserButton.onTouchDownOff(scaledX,scaledY)) {
-                                return true;
-                            }
-                        }
-
-                        else if (eraserButton.onTouchDown(scaledX, scaledY, ID)) {
-
-                            if(dragButton.isTouched()) {
-                                dragButton.forceTouchOff();
-                                mapChanged = true;
-                            }
-
-                            else if(pencilButton.isTouched()) {
-                                pencilButton.forceTouchOff();
-                                mapChanged= true;
-                            }
-
-                            return true;
-                        }
-                    }
-                    
-                    else if(pencilButton.isTouched()) {
-
-                        if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
-                                !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 1);
-                        }
-
-                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 1);
-                        }
-                        //in this case, when this means we have just placed finger onto blank screen
-                        //ready to draw!
-                    }
-
-                    else if(eraserButton.isTouched()) {
-
-                        if(showExtraToolKit && !eraserButton.isContained(scaledX, scaledY) &&
-                                !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 0);
-                        }
-
-                        else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
-                            drawTile(scaledX, scaledY, 0);
-                        }
-
-                    }
-
                     else {
                         return true;
                     }
@@ -547,10 +685,40 @@ public class LevelEditorState extends State {
                     }
 
 
-                    if(exitButton.onTouchUp(scaledX, scaledY, ID)) {
+                    else if(exitButton.onTouchUp(scaledX, scaledY, ID)) {
                         setCurrentState(new MenuState());
                         return true;
                     }
+
+                    else if(showIDSwapper) {
+
+                        if (rightButton.onTouchUp(scaledX, scaledY, ID)) {
+
+                            if (testTile.getID() < NUMBER_TILES) {
+                                testTile.setID(testTile.getID() + 1);
+                            }
+
+                            //else testTile.getID >=
+                            else {
+                                testTile.setID(1);
+                            }
+
+                            Log.d("IDSwapper", "Right registered");
+                            return true;
+                        } else if (leftButton.onTouchUp(scaledX, scaledY, ID)) {
+
+                            if (testTile.getID() > 1) {
+                                testTile.setID(testTile.getID() - 1);
+                            }
+
+                            //else, getID == 1
+                            else {
+                                testTile.setID(NUMBER_TILES);
+                            }
+                            Log.d("IDSwapper", "Left registered");
+                        }
+                    }
+
 
                     else {
                         return true;
@@ -573,6 +741,15 @@ public class LevelEditorState extends State {
                         Log.d("LevelEditor", "CameraY: " + camera.getY());
 
                         return true;
+                    }
+
+                    else if(rightButton.onTouchUp(scaledX, scaledY, ID)) {
+                        Log.d("IDSwapper", "Right registered");
+                        return true;
+                    }
+
+                    else if(leftButton.onTouchUp(scaledX, scaledY, ID)) {
+                        Log.d("IDSwapper", "Left registered");
                     }
 
                     else {

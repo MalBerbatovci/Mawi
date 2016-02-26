@@ -26,7 +26,7 @@ public class Assets {
             mawiRunL3, mawiWalkHitR1, mawiWalkHitR2, mawiWalkHitR3, mawiWalkHitL1, mawiWalkHitL2, mawiWalkHitL3,
             mawiJumpingR, mawiJumpingL, boxImage, boxUsedImage, startScreen, exitButton, exitButtonPressed,
             movingTool, movingToolUsed, wrenchTool, wrenchToolInUse, eraserTool, eraserToolInUse,
-            pencilTool, pencilToolInUse;
+            pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
 
@@ -89,6 +89,12 @@ public class Assets {
 
         eraserTool = loadBitmap("eraser.png", true);
         eraserToolInUse = loadBitmap("erasedUsed.png", true);
+
+        leftID = loadBitmap("leftIDButton.png", true);
+        leftIDUsed = loadBitmap("leftIDButtonUsed.png", true);
+
+        rightID = loadBitmap("rightIDButton.png", true);
+        rightIDUsed = loadBitmap("rightIDUsed.png", true);
 
 
         //create walking animation

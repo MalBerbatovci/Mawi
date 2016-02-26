@@ -94,6 +94,18 @@ public class Collectable {
                       Log.d("Enemy", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
                       Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                       break;
+
+            default: this.image = Assets.coinBigImage;
+                    this.x = (x + cameraOffsetX);
+                    this.y = (y + cameraOffsetY) - GameMainActivity.TILE_HEIGHT;
+                    this.height = COIN_HEIGHT;
+                    this.width = COIN_WIDTH;
+                    this.isPowerUp = false;
+                    updateRect(x, y, cameraOffsetX, cameraOffsetY);
+                    Log.d("Enemy", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
+                    Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
+                    break;
+
         }
 
     }
