@@ -24,8 +24,9 @@ public class LevelEditorState extends State {
     private final static int RIGHT = 1;
     private final static int UP = 1;
     private final static int REMINDER_DISTANCE_X = -15;
-    private final static int REMINDER_WITDH = 15;
-    private final static int REMINDER_HEIGHT = 15;
+    private final static int REMINDER_DISTANCE_Y = 10;
+    private final static int REMINDER_WITDH = 20;
+    private final static int REMINDER_HEIGHT = 20;
     private final static int NUMBER_TILES = 4;
 
     protected int previousMapX = -1;
@@ -151,7 +152,7 @@ public class LevelEditorState extends State {
 
     private void drawReminder(Painter g, UIButton button) {
         g.drawImage(button.getButtonImage(), wrenchButton.getX() + REMINDER_DISTANCE_X,
-                wrenchButton.getY(), REMINDER_WITDH, REMINDER_HEIGHT);
+                wrenchButton.getY() + REMINDER_DISTANCE_Y, REMINDER_WITDH, REMINDER_HEIGHT);
 
         mapChanged = true;
     }
