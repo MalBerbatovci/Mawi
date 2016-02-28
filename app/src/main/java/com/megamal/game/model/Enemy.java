@@ -12,8 +12,6 @@ import com.megamal.mawi.GameMainActivity;
 //Abstract class to represent an enemy
 public abstract class Enemy {
 
-    public final int VISIBLE_THRESHOLD_X = 500;
-    public final int VISIBLE_THRESHOLD_Y = 500;
     public final int RECT_LEEWAY_X = 2;
     public final int RECT_LEEWAY_Y = 2;
 

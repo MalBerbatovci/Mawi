@@ -1,5 +1,6 @@
 package com.megamal.game.state;
 
+import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -13,6 +14,15 @@ import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
+import com.megamal.mawi.GameView;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 /**
  * Created by malberbatovci on 12/02/16.
@@ -28,6 +38,13 @@ public class LevelEditorState extends State {
     private final static int REMINDER_WITDH = 20;
     private final static int REMINDER_HEIGHT = 20;
     private final static int NUMBER_TILES = 4;
+    private final static int MIN_Y_CELLS = 7;
+    private final static int MIN_X_CELLS = 12;
+
+    private final static String FILE_NAME = "level2.txt";
+
+    protected int currentMaxX = 12;
+    protected int currentMaxY = 7;
 
     protected int previousMapX = -1;
     protected int previousMapY = -1;
@@ -39,7 +56,9 @@ public class LevelEditorState extends State {
 
 
     private boolean mapChanged = true;
-    private UIButton exitButton, dragButton, pencilButton, wrenchButton, leftButton, rightButton;
+    protected UIButton exitButton, dragButton, pencilButton, wrenchButton, leftButton, rightButton;
+    protected UIButton saveButton, playButton;
+
     private int[][] map;
     private int maskedAction;
 
@@ -53,7 +72,7 @@ public class LevelEditorState extends State {
     public void init() {
 
         //Placements for buttons
-        exitButton = new UIButton(750, 440, 830, 510, Assets.exitButton, Assets.exitButtonPressed);
+        exitButton = new UIButton(10, 10, 74, 54, Assets.exitButton, Assets.exitButtonPressed);
         wrenchButton = new UIButton(32, 450, 96, 504, Assets.wrenchTool, Assets.wrenchToolInUse);
 
 
@@ -61,6 +80,8 @@ public class LevelEditorState extends State {
         pencilButton = new UIButton(32, 364, 96, 428, Assets.pencilTool, Assets.pencilToolInUse);
         eraserButton = new UIButton(96, 364, 160, 428, Assets.eraserTool, Assets.eraserToolInUse);
         dragButton = new UIButton(160, 364, 224, 428, Assets.movingTool, Assets.movingToolUsed);
+        saveButton = new UIButton(768, 364, 832, 428, Assets.saveButton, Assets.saveButton);
+        playButton = new UIButton(702, 364, 766, 428, Assets.playButton, Assets.playButton);
 
 
         //set of buttons to switch placement ID
@@ -125,6 +146,8 @@ public class LevelEditorState extends State {
             dragButton.render(g);
             pencilButton.render(g);
             eraserButton.render(g);
+            saveButton.render(g);
+            playButton.render(g);
         }
 
         if(showIDSwapper) {
@@ -464,6 +487,34 @@ public class LevelEditorState extends State {
                             return true;
                         }
 
+                        else if (showExtraToolKit && saveButton.onTouchDown(scaledX, scaledY, ID)) {
+                            if(dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged = true;
+                            }
+
+                            else if(pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged= true;
+                            }
+
+                            else if (eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+
+                            }
+
+                            return true;
+                        }
+
+                        else if (playButton.onTouchDown(scaledX, scaledY, ID)) {
+                            setCurrentState(new LevelEditorPlayState(map, currentMaxX,
+                                    currentMaxY));
+                        }
+
+
                         //register left/right movement for ID Switching in this case
                         else if(showIDSwapper) {
 
@@ -618,6 +669,28 @@ public class LevelEditorState extends State {
                             return true;
                         }
 
+                        else if (showExtraToolKit && saveButton.onTouchDown(scaledX, scaledY, ID)) {
+                            if(dragButton.isTouched()) {
+                                dragButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged = true;
+                            }
+
+                            else if(pencilButton.isTouched()) {
+                                pencilButton.forceTouchOff();
+                                showIDSwapper = false;
+                                mapChanged= true;
+                            }
+
+                            else if (eraserButton.isTouched()) {
+                                eraserButton.forceTouchOff();
+                                mapChanged = true;
+
+                            }
+
+                            return true;
+                        }
+
                         //register left/right movement for ID Switching in this case
                         else if(showIDSwapper) {
 
@@ -691,6 +764,10 @@ public class LevelEditorState extends State {
                         return true;
                     }
 
+                    else if(showExtraToolKit && saveButton.onTouchUp(scaledX, scaledY, ID)) {
+                        parseMapAndsaveFile();
+                    }
+
                     else if(showIDSwapper) {
 
                         if (rightButton.onTouchUp(scaledX, scaledY, ID)) {
@@ -753,6 +830,10 @@ public class LevelEditorState extends State {
                         Log.d("IDSwapper", "Left registered");
                     }
 
+                    else if(showExtraToolKit && saveButton.onTouchUp(scaledX, scaledY, ID)) {
+                        parseMapAndsaveFile();
+                    }
+
                     else {
                         return true;
                     }
@@ -777,10 +858,14 @@ public class LevelEditorState extends State {
             return;
         }
 
+
+        //need to keep track of currentMax
         else {
 
             if(!(map[mapEntryY][mapEntryX] == ID)) {
                     map[mapEntryY][mapEntryX] = ID;
+
+                    updateMapBoundaries(mapEntryX, mapEntryY, ID);
             }
 
             previousMapY = mapEntryY;
@@ -791,4 +876,214 @@ public class LevelEditorState extends State {
 
 
     }
+
+
+    //updates maxX and maxY where a non 0 ID tile is placed,
+    //this means these are the boundaries of the level
+    private void updateMapBoundaries(int mapEntryX, int mapEntryY, int ID) {
+
+        //I.E if a tile is being drawn on, not erased
+        if(ID != 0) {
+            if (mapEntryX > currentMaxX) {
+
+                if (mapEntryX < MIN_X_CELLS) {
+                    currentMaxX = MIN_X_CELLS;
+                } else {
+                    currentMaxX = mapEntryX;
+                }
+            }
+
+
+            if (mapEntryY > currentMaxY) {
+
+                if(mapEntryY < MIN_Y_CELLS) {
+                    currentMaxY = MIN_Y_CELLS;
+                } else {
+                    currentMaxY = mapEntryY;
+                }
+
+            }
+        }
+
+        //else, in this case is being erased
+        else {
+
+            boolean maxFoundX = false;
+            boolean maxFoundY = false;
+
+
+            if(mapEntryX == currentMaxX && mapEntryY == currentMaxY) {
+
+                //code here
+                int previousCurrentMaxX = currentMaxX;
+
+                for(int i = currentMaxX; i >= 0 && !maxFoundX; i--) {
+                    for(int j = currentMaxY; j >= 0 && !maxFoundX; j--) {
+
+                        //once a non 0 ID is found, then this is current max
+                        if(map[j][i] != 0 ) {
+                            currentMaxX = i;
+                            maxFoundX = true;
+                        }
+                    }
+                }
+
+                if(!maxFoundX) {
+                    currentMaxX = MIN_X_CELLS;
+                }
+
+                if(currentMaxX < MIN_X_CELLS) {
+                    currentMaxX = MIN_X_CELLS;
+                }
+
+
+
+                for(int j = currentMaxY; j >= 0 && !maxFoundY; j--) {
+                    for(int i = currentMaxX; i >= 0 && !maxFoundY; i--) {
+
+                        if(map[j][i] != 0) {
+                            currentMaxY = j;
+                            maxFoundY = true;
+                        }
+                    }
+                }
+
+                if(!maxFoundY) {
+                    Log.d("Boundaries", "Max not found");
+                    currentMaxY  = MIN_Y_CELLS;
+                }
+
+                if(currentMaxY < MIN_Y_CELLS) {
+                    currentMaxY = MIN_Y_CELLS;
+                }
+
+            }
+
+            //if currentMax has been erased
+            else if(mapEntryX == currentMaxX) {
+
+                //we know currentMax is going to be much smaller than currentMaxX.
+                //and we know currentY is going to be max for Y searching.
+                for(int i = currentMaxX; i >= 0 && !maxFoundX; i--) {
+                    for(int j = currentMaxY; j >= 0 && !maxFoundX; j--) {
+
+                        //once a non 0 ID is found, then this is current max
+                        if(map[j][i] != 0 ) {
+                            currentMaxX = i;
+                            maxFoundX = true;
+                        }
+                    }
+                }
+
+                if(!maxFoundX) {
+                    currentMaxX = MIN_X_CELLS;
+                }
+
+                if(currentMaxX < MIN_X_CELLS) {
+                    currentMaxX = MIN_X_CELLS;
+                }
+            }
+
+            else if(mapEntryY == currentMaxY) {
+
+                //only need to search from currentMaxY and currentMaxX (must be smaller than these)
+
+
+                for(int j = currentMaxY; j >= 0 && !maxFoundY; j--) {
+                    for(int i = currentMaxX; i >= 0 && !maxFoundY; i--) {
+
+                        if(map[j][i] != 0) {
+                            currentMaxY = j;
+                            maxFoundY = true;
+                        }
+                    }
+                }
+
+                if(!maxFoundY) {
+                    currentMaxY  = MIN_Y_CELLS;
+                }
+
+                if(currentMaxY < MIN_Y_CELLS) {
+                    currentMaxY = MIN_Y_CELLS;
+                }
+            }
+        }
+
+        Log.d("Boundaries", "Max X: " + currentMaxX + ", Max Y: " + currentMaxY);
+    }
+
+
+    //method to save file into internal storage.
+    //need to read from saved file in order to see if saved correctly
+    private void parseMapAndsaveFile() {
+
+        String separator = System.getProperty("line.separator");
+
+        try {
+
+            //createFile
+            OutputStreamWriter outputStreamWriter =
+                    new OutputStreamWriter(GameMainActivity.sGame.getContext().openFileOutput(FILE_NAME,
+                            Context.MODE_PRIVATE));
+
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+
+            //write the dimensions of map first
+            bufferedWriter.write(String.valueOf(currentMaxY + 1));
+            bufferedWriter.write(",");
+            bufferedWriter.write(String.valueOf(currentMaxX + 1));
+
+
+            //separate lines
+            bufferedWriter.write(separator);
+
+
+            //now write the dimensions of the map, into parser friendly format
+            for(int j = 0; j <= currentMaxY; j++) {
+                for(int i = 0; i <= currentMaxX; i++) {
+                    bufferedWriter.write(String.valueOf(map[j][i]));
+
+                    //do not do a comma on the last line
+                    if(i != currentMaxX) {
+                        bufferedWriter.write(",");
+                    }
+                }
+
+                if(j != currentMaxY) {
+                    bufferedWriter.write(separator);
+                }
+            }
+
+            bufferedWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+
+
+        readAndPrintFile(FILE_NAME);
+    }
+
+
+    //to make sure everythings working
+    protected void readAndPrintFile(String fileName) {
+        String currentLine;
+
+        try {
+            //create buffered reading and input streams
+            InputStream inputStream = GameMainActivity.sGame.getContext().openFileInput(fileName);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bReader = new BufferedReader(inputStreamReader);
+
+            while ((currentLine = bReader.readLine()) != null) {
+                Log.d("currentline", currentLine);
+            }
+
+            bReader.close();
+
+        } catch (IOException e) {
+            Log.d("Exception", "File read failed: " + e.toString());
+        }
+    }
+
 }
