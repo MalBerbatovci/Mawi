@@ -65,7 +65,10 @@ public class MenuState extends State {
                 }
 
                 else if (levelEditorButton.isContained(scaledX,scaledY)) {
-                    setCurrentState(new LevelEditorState());
+
+                    //stub value
+                    int[][] map = new int[1][1];
+                    setCurrentState(new LevelEditorState(map));
                 }
 
             }

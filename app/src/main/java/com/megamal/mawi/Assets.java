@@ -27,7 +27,7 @@ public class Assets {
             mawiJumpingR, mawiJumpingL, boxImage, boxUsedImage, startScreen, exitButton, exitButtonPressed,
             movingTool, movingToolUsed, wrenchTool, wrenchToolInUse, eraserTool, eraserToolInUse,
             pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed, saveButton,
-            playButton;
+            playButton, backToLEButton;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
 
@@ -100,6 +100,8 @@ public class Assets {
         saveButton = loadBitmap("saveButton.png", true);
 
         playButton = loadBitmap("playButton.png", true);
+
+        backToLEButton = loadBitmap("goBack.png", true);
 
 
         //create walking animation

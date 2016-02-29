@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
@@ -100,22 +101,39 @@ public class GameView extends SurfaceView implements Runnable{
     public void run() {
         long updateDurationMillis = 0; //measuring update and rendering
         long sleepDurationMillis = 0; //measuring sleep
+        long currentTime = 0;
+        int frameRate = 0;
 
         while (running) {
             long beforeUpdateRender = System.nanoTime();
 
-            //calculate duration of each iteration of the game loop
+            //calculate duration of each iteration of the game loop,
+            //Number of milliseconds it takes for each loop
             long deltaMillis = sleepDurationMillis + updateDurationMillis;
-
 
             updateAndRender(deltaMillis);
 
             //calculate the duration of the steps above, and divide to produce milliseconds
             updateDurationMillis = (System.nanoTime() - beforeUpdateRender) / 1000000L;
 
+
+            //add updateTime onto currentTime
+            currentTime += updateDurationMillis;
+            frameRate++;
+
+
+            if(currentTime >= 1000) {
+                Log.d("FPS", "" + frameRate);
+                currentTime = 0;
+                frameRate = 0;
+            }
+
             //calculate sleeping time and choose max in order to enforce a minimum
-            //of 2 seconds of sleep, without going into negative numbers
+            //of 2 seconds of sleep, without going into negative numbers, not starve
+            //garbage collector
             sleepDurationMillis = Math.max(2, 17 - updateDurationMillis);
+
+            currentTime += sleepDurationMillis;
 
             try {
                 Thread.sleep(sleepDurationMillis);

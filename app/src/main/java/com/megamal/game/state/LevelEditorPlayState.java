@@ -106,6 +106,8 @@ public class LevelEditorPlayState extends State {
         jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
         shoot = new UIButton(740, 450, 800, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
+        backToLevelEditor = new UIButton(10, 10, 74, 74, Assets.backToLEButton, Assets.backToLEButton);
+
         camera = new Camera(map);
 
     }
@@ -180,6 +182,7 @@ public class LevelEditorPlayState extends State {
         runL.render(g);
         jump.render(g);
         shoot.render(g);
+        backToLevelEditor.render(g);
 
         renderPlayer(g);
 
@@ -398,6 +401,15 @@ public class LevelEditorPlayState extends State {
                     return true;
 
                 }
+
+                else if(backToLevelEditor.buttonMovedOn(scaledX, scaledY, ID)) {
+                    return true;
+                }
+
+                else if(backToLevelEditor.buttonMovedOut(scaledX, scaledY, ID)) {
+                    return true;
+                }
+
                 else {
                     return true;
                 }
@@ -432,6 +444,10 @@ public class LevelEditorPlayState extends State {
                         return true;
                     }
 
+                    else if(backToLevelEditor.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
                     //else, not of interest, event handled - return true
                     else {
                         return true;
@@ -452,6 +468,10 @@ public class LevelEditorPlayState extends State {
                         return true;
                     } else if (shoot.onTouchDown(scaledX, scaledY, ID)) {
                         mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
+                        return true;
+                    }
+
+                    else if(backToLevelEditor.onTouchDown(scaledX, scaledY, ID)) {
                         return true;
                     }
 
@@ -492,6 +512,10 @@ public class LevelEditorPlayState extends State {
                         return true;
                     }
 
+                    else if (backToLevelEditor.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new LevelEditorState(map));
+                    }
+
                     else {
                         return true;
                     }
@@ -526,6 +550,10 @@ public class LevelEditorPlayState extends State {
                         return true;
                     }
 
+                    else if (backToLevelEditor.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new LevelEditorState(map));
+                    }
+
                     else {
                         return true;
                     }
@@ -535,18 +563,5 @@ public class LevelEditorPlayState extends State {
 
         return false;
     }
-
-    /*@Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        System.out.println("Key: " + keyCode + " pressed!");
-
-        if (keyCode == event.KEYCODE_J) {
-            mawi.jump();
-            System.out.println("J pressed!");
-        }
-
-        return true;
-    }*/
 }
 

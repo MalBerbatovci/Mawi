@@ -68,6 +68,32 @@ public class LevelEditorState extends State {
     private TileMapRenderer tileMapRenderer;
     private UIButton eraserButton;
 
+    public LevelEditorState(int[][] newMap) {
+
+        //stub value to create as big as possible,
+        map = new int[100][100];
+
+        for(int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                map[i][j] = 0;
+            }
+        }
+
+        for(int i = 0; i < newMap.length; i++) {
+            for(int j = 0; j < newMap[0].length; j++) {
+                map[i][j] = newMap[i][j];
+            }
+        }
+
+        if((newMap.length - 1) > currentMaxY) {
+            currentMaxY = (newMap.length - 1);
+        }
+
+        if((newMap[0].length - 1) > currentMaxX) {
+            currentMaxX = (newMap[0].length - 1);
+        }
+    }
+
     @Override
     public void init() {
 
@@ -92,22 +118,6 @@ public class LevelEditorState extends State {
         //stub value for tile, just initialisig
         testTile = new Tile(0);
 
-
-
-
-        //stub value to create as big as possible,
-        map = new int[100][100];
-
-        for(int i = 0; i < 100; i++) {
-            for(int j = 0; j < 100; j++) {
-                if(RandomNumberGenerator.getRandInt(50) < 25) {
-                    map[i][j] = 0;
-                }
-                else {
-                    map[i][j] = 0;
-                }
-            }
-        }
 
         tileMapRenderer = new TileMapRenderer(map);
 
@@ -1018,6 +1028,7 @@ public class LevelEditorState extends State {
     private void parseMapAndsaveFile() {
 
         String separator = System.getProperty("line.separator");
+
 
         try {
 
