@@ -2,6 +2,7 @@ package com.megamal.game.model;
 
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
@@ -145,7 +146,6 @@ public class Player {
             locked = false;
 
         if (hasMoved(cameraOffsetX, cameraOffsetY))
-            //Log.d("Location", "Previous x: " + previousX + ". Previous y:" + previousY + ".\t x = " + x + ". y = " + y + ".\n");
 
         updateRects();
         updateAnim(delta);
@@ -294,12 +294,19 @@ public class Player {
                 yFloor = (int) Math.floor(yFloor / GameMainActivity.TILE_HEIGHT);
 
                 //do something if character has somehow fallen to bottom of map
-                if (yFloor < 0 || yFloor >= map.length)
+                if (yFloor < 0 ) {
                     return;
+                }
+
+                if(yFloor >= map.length) {
+                    Log.d("Death", "DEAD!");
+                    return;
+                }
 
                 //do something with this info about player being outside screen (indexOutOfBounds)
-                if (scanBDown >= map[0].length || scanBDown < 0 || scanADown < 0 || scanADown >= map[0].length)
+                if (scanBDown >= map[0].length || scanBDown < 0 || scanADown < 0 || scanADown >= map[0].length) {
                     return;
+                }
 
                 //check both of the tiles beneath mawi's feet
                 tileA.setID(map[yFloor][scanADown]);
@@ -600,6 +607,18 @@ public class Player {
         }
 
         isWalking = true;
+    }
+
+    public void walkUp() {
+        velY = -WALKING_SPEED;
+    }
+
+    public void walkDown() {
+        velY = WALKING_SPEED;
+    }
+
+    public void stopWalkingUpOrDown() {
+        velY = 0;
     }
 
 

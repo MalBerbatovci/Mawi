@@ -50,13 +50,13 @@ public class PlayState extends State {
     private Enemy[] enemyArray = new Enemy[NO_ENEMIES];
 
 
-    private UIButton walkR, walkL, runR, runL, jump, shoot;
+    private UIButton runR, runL, jump, shoot;
 
-    private boolean walkingRight = false, walkingLeft = false, runningRight = false, runningLeft = false;
+    private boolean runningRight = false, runningLeft = false;
     private boolean initialRender = true;
     private int[][] map;
 
-    private int maskedAction, pointerActiveIndex;
+    private int maskedAction;
     private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
@@ -106,9 +106,6 @@ public class PlayState extends State {
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        /*walkL = new UIButton(330, 450, 430, 490, Assets.walkButtonL, Assets.walkButtonPressedL);
-        walkR = new UIButton(435, 450, 535, 490, Assets.walkButtonR, Assets.walkButtonPressedR);*/
-
         jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
         shoot = new UIButton(740, 450, 800, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
@@ -116,9 +113,6 @@ public class PlayState extends State {
 
     }
 
-    /* private int calculateIndex(int x, int y) {
-        return (int) (y * MAP_HEIGHT) + x;
-    } */
 
     @Override
     public void update(float delta, Painter g) {
@@ -349,14 +343,11 @@ public class PlayState extends State {
                 else
                     Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
             }
+        }
 
-        } else if (mawi.isRunning()) {
-            if (mawi.isRight())
-                Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-            else
-                Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-        } else
+        else {
             g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+        }
     }
 
 

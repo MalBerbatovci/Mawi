@@ -81,9 +81,40 @@ public class Tile {
 
             case(7):this.image = Assets.boxUsedImage;
                     this.isObstacle = true;
-                    this.isCollectable = true;
+                    this.isCollectable = false;
                     this.hasCollectable = false;
                     break;
+
+            case(19): {
+                this.image = Assets.treeTile;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
+
+            case(20): {
+                this.image = Assets.pathTile;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
+
+            case (21): {
+                this.image = Assets.level1Tile;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
+            case (22): {
+                this.image = Assets.level2Tile;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
 
             default:
                 this.image = null;

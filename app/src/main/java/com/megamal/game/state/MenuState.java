@@ -61,7 +61,8 @@ public class MenuState extends State {
                 }
 
                 else if (exitButton.isContained(scaledX, scaledY)) {
-                    setCurrentState(new PlayState());
+                    //setCurrentState(new PlayState());
+                    setCurrentState(new LevelState());
                 }
 
                 else if (levelEditorButton.isContained(scaledX,scaledY)) {

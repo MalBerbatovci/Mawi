@@ -29,6 +29,8 @@ public class Assets {
             pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed, saveButton,
             playButton, backToLEButton;
 
+    public static Bitmap level1Tile, level2Tile, pathTile, treeTile;
+
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
 
     //input stream used to read data from device's file system
@@ -102,6 +104,12 @@ public class Assets {
         playButton = loadBitmap("playButton.png", true);
 
         backToLEButton = loadBitmap("goBack.png", true);
+
+
+        pathTile = loadBitmap("path.png", true);
+        level1Tile = loadBitmap("level1.png", true);
+        level2Tile = loadBitmap("level2.png", true);
+        treeTile = loadBitmap("treeTile.png", true);
 
 
         //create walking animation
