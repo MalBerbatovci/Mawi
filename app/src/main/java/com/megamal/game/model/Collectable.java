@@ -46,8 +46,8 @@ public class Collectable {
     private final static int COIN_WIDTH = 64;
     private final static int COIN_HEIGHT = 64;
 
-    private final static int SMALL_COIN_WIDTH = 32;
-    private final static int SMALL_COINT_HEIGHT = 32;
+    private final static int SMALL_COIN_WIDTH = 64;
+    private final static int SMALL_COINT_HEIGHT = 64;
 
     private final static int RECT_LEEWAY_X = 3;
     private final static int RECT_LEEWAY_Y = 3;

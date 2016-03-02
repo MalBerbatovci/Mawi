@@ -1179,8 +1179,8 @@ public class Player {
 
             //create new coins in random displacements from Mawi
             for(int i = 0; i < newCount; i++) {
-                randomX = RandomNumberGenerator.getRandIntBetween((int) x - 100, (int) x + 100);
-                collectables.add(new Collectable(2, randomX, (y + 90), cameraOffsetX, cameraOffsetY));
+                randomX = RandomNumberGenerator.getRandIntBetween((int) x - 200, (int) x + 200);
+                collectables.add(new Collectable(2, randomX, y, cameraOffsetX, cameraOffsetY));
             }
 
 
