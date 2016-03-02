@@ -50,7 +50,7 @@ public class LevelEditorPlayState extends State {
     private boolean initialRender = true;
     private int[][] map;
 
-    private int maskedAction, pointerActiveIndex;
+    private int maskedAction;
     private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
@@ -117,8 +117,7 @@ public class LevelEditorPlayState extends State {
     public void update(float delta, Painter g) {
 
         if (!mawi.isAlive()) {
-            //do something if end of game
-
+            setCurrentState(new LevelEditorState(map));
         } else {
 
             mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
@@ -313,38 +312,53 @@ public class LevelEditorPlayState extends State {
     }
 
     private void renderPlayer(Painter g) {
-        if (mawi.isJumping()) {
-            if (mawi.isRight()) {
-                g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                return;
-            } else if (mawi.isLeft()) {
-                g.drawImage(Assets.mawiJumpingL, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                return;
+
+        if(!mawi.isDying()) {
+            if (mawi.isJumping()) {
+                if (mawi.isRight()) {
+                    g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    return;
+                } else if (mawi.isLeft()) {
+                    g.drawImage(Assets.mawiJumpingL, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    return;
+                }
             }
+
+            if (mawi.isWalking()) {
+                if (mawi.isRight()) {
+                    if (mawi.isCollided())
+                        Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    else {
+                        //System.out.println("mawi.isCollided is false!");
+                        Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    }
+                } else {
+                    if (mawi.isCollided())
+                        Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    else
+                        Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                }
+
+            //else, running so draw necessary
+            } else if (mawi.isRunning()) {
+                if (mawi.isRight())
+                    Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                else
+                    Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+
+
+            //else, not doing anything
+            } else {
+                g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+            }
+
         }
 
-        if (mawi.isWalking()) {
-            if (mawi.isRight()) {
-                if (mawi.isCollided())
-                    Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                else {
-                    //System.out.println("mawi.isCollided is false!");
-                    Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                }
-            } else {
-                if (mawi.isCollided())
-                    Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                else
-                    Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-            }
 
-        } else if (mawi.isRunning()) {
-            if (mawi.isRight())
-                Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-            else
-                Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-        } else
+        //in this case, dying so draw necessary image and play necessary sound
+        else {
             g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+        }
     }
 
 
