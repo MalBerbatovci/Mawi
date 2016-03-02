@@ -36,6 +36,8 @@ public class Collectable {
     private Rect rect;
     private Bitmap image;
 
+    private long activationTime;
+
     private final static int JUMPING_ACCELERATION = -152;
     private final static int ACCEL_GRAVITY = 282;
     private final static int MOVING_VEL = 92;
@@ -44,13 +46,16 @@ public class Collectable {
     private final static int COIN_WIDTH = 64;
     private final static int COIN_HEIGHT = 64;
 
+    private final static int SMALL_COIN_WIDTH = 32;
+    private final static int SMALL_COINT_HEIGHT = 32;
+
     private final static int RECT_LEEWAY_X = 3;
     private final static int RECT_LEEWAY_Y = 3;
 
     private final static int SCAN_LEEWAY_Y = 10;
     private final static int SCAN_LEEWAY_X = 10;
 
-    private final static int MAX_TIME = 40000;
+    private final static int MAX_TIME = 20;
 
 
     //check ID before, if -1 then do not call this
@@ -95,6 +100,19 @@ public class Collectable {
                       Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                       break;
 
+            case (2): {
+                this.image = Assets.coinImage;
+                this.x = (x + cameraOffsetX);
+                this.y = (y + cameraOffsetY);
+                this.height = SMALL_COINT_HEIGHT;
+                this.width = SMALL_COIN_WIDTH;
+                this.isPowerUp = false;
+                updateRect(x, y, cameraOffsetX, cameraOffsetY);
+                velX = 0;
+                activationTime = System.currentTimeMillis();
+                break;
+            }
+
             default: this.image = Assets.coinBigImage;
                     this.x = (x + cameraOffsetX);
                     this.y = (y + cameraOffsetY) - GameMainActivity.TILE_HEIGHT;
@@ -102,8 +120,6 @@ public class Collectable {
                     this.width = COIN_WIDTH;
                     this.isPowerUp = false;
                     updateRect(x, y, cameraOffsetX, cameraOffsetY);
-                    Log.d("Enemy", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
-                    Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                     break;
 
         }
@@ -130,14 +146,25 @@ public class Collectable {
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
 
        // Log.d("Timing", "currentTime - initialiseTime is: " + ((int)System.currentTimeMillis() - initialiseTime));
-        if(((int)System.currentTimeMillis() - initialiseTime) > MAX_TIME) {
 
-            //if been alive for longer than set time, then remove by making isAlive false
-            this.isAlive = false;
+        if(ID == 1) {
+            if (((int) System.currentTimeMillis() - initialiseTime) / 1000 > MAX_TIME) {
 
+                //if been alive for longer than set time, then remove by making isAlive false
+                this.isAlive = false;
+
+            }
         }
 
-        else if (isAlive) {
+        else if(ID == 2) {
+            //longer than 10 seconds
+            if((System.currentTimeMillis() - activationTime) / 1000 > 10) {
+                this.isAlive = false;
+            }
+        }
+
+
+        if (isAlive) {
             x += velX * delta;
 
             if (!isGrounded) {
@@ -174,8 +201,10 @@ public class Collectable {
         if ((mawi.getplayerRect()).intersect(rect)) {
             collectableCaught(mawi);
         }
-        else
+        else {
+            Log.d("HealthCoins", "DO NOT INTERSECT");
             return;
+        }
 
     }
 

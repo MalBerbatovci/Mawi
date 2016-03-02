@@ -5,9 +5,12 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.megamal.framework.util.Painter;
+import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.Tile;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
+
+import java.util.ArrayList;
 
 /**
  * Created by malberbatovci on 14/10/15.
@@ -18,12 +21,14 @@ public class Player {
     //less than the size of Mawi
     private final static int X_RECT_LEEWAY = 15;
     private final static int Y_RECT_LEEWAY = 30;
+    private final static int MAX_INVINCIBLE_TIME = 5;
 
     //Constant for physics
     private final static double ACCEL_GRAVITY = 1722;
     private final static double WALKING_SPEED = 100;
     private final static double RUNNING_SPEED = 242;
     private final static double JUMPING_ACCELERATION = -852;
+
 
     //Scan Lines co-ordinates for obstacles underneath -  must be added to mawi.X
     private final static int SCAN_A_DOWN = 15;
@@ -45,6 +50,8 @@ public class Player {
     private double x, y, previousX, previousY;
     private int width, height;
 
+
+    private double cameraOffsetX, cameraOffsetY;
     //variables for the position of scanLines
     private double xScanLineADown, xScanLineBDown, yScanLineAAcross, yScanLineBAcross;
     private int scanADown, scanBDown;
@@ -67,8 +74,11 @@ public class Player {
     private boolean left, right = false;
     private boolean justGrounded = false;
     protected boolean isDying = false;
+    private boolean justHit = false;
+    private boolean removeCollectables = false;
 
     private Collectable collectable;
+    private int coinCount = 0;
 
     //DuckRect too, when implementing
     private Rect playerRect;
@@ -76,6 +86,11 @@ public class Player {
 
     //variable for tiles when checking scan lines
     private Tile tileA, tileB;
+    private boolean invincible = false;
+    private long invincibleStart;
+
+    private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
+
 
     public Player(double x, double y, int width, int height) {
         this.x = x;
@@ -104,6 +119,10 @@ public class Player {
     }
 
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY) {
+
+        this.cameraOffsetX = cameraOffsetX;
+        this.cameraOffsetY = cameraOffsetY;
+
 
         if(!isDying) {
             checkYMovement(map, cameraOffsetX, cameraOffsetY);
@@ -154,6 +173,26 @@ public class Player {
             }
 
             updateAnim(delta);
+
+
+            //check if has been invincible for more than 5 seconds, if so, then switch invincibility
+            //off
+            if(invincible) {
+                Log.d("Invisible", "true");
+
+                //check timing
+                if((System.currentTimeMillis() - invincibleStart) / 1000 >= MAX_INVINCIBLE_TIME) {
+                    Log.d("Invisible", "False!");
+                    invincible = false;
+                }
+            }
+
+
+            if(removeCollectables) {
+                for(int i = 0; i < collectables.size(); i++) {
+                    collectables.remove(i);
+                }
+            }
 
 
             //Log.d("Jumping", "Is jumping: " + isJumping + ".");
@@ -412,7 +451,7 @@ public class Player {
         }
     }
 
-    private void death() {
+    protected void death() {
         isDying = true;
 
         velY = DEATH_VELOCITY;
@@ -429,6 +468,8 @@ public class Player {
             if (grounded) {
                 isGrounded = false;
             }
+
+            coinCount++;
         }
 
     }
@@ -810,6 +851,7 @@ public class Player {
             coinRect = tileA.getRect();
             if (playerRect.intersect(coinRect)) {
                 map[yIndexA][xIndexA] = 0;
+                coinCount++;
             }
         }
 
@@ -818,7 +860,9 @@ public class Player {
             coinRect = tileB.getRect();
             if (playerRect.intersect(coinRect)) {
                 map[yIndexB][xIndexB] = 0;
+                coinCount++;
             }
+
         }
 
     }
@@ -831,6 +875,7 @@ public class Player {
             coinRect = tile.getRect();
             if (playerRect.intersect(coinRect)) {
                 map[yIndex][xIndex] = 0;
+                coinCount++;
             }
         }
 
@@ -1121,6 +1166,32 @@ public class Player {
         return hasMoved;
     }
 
+    protected void hitByEnemy() {
+        Log.d("CoinCount", "CoinCount is: " + coinCount);
+
+        if(coinCount == 0) {
+            death();
+        }
+
+        else {
+            int newCount = coinCount / 2;
+            int randomX;
+
+            //create new coins in random displacements from Mawi
+            for(int i = 0; i < newCount; i++) {
+                randomX = RandomNumberGenerator.getRandIntBetween((int) x - 100, (int) x + 100);
+                collectables.add(new Collectable(2, randomX, (y + 90), cameraOffsetX, cameraOffsetY));
+            }
+
+
+            coinCount = 0;
+            justHit = true;
+
+            invincible = true;
+            invincibleStart = System.currentTimeMillis();
+        }
+    }
+
     public void clearAreaAround(Painter g, double cameraOffsetX, double cameraOffsetY) {
         g.setColor(Color.rgb(80, 143, 240));
         g.fillRect((int) x, (int) y, width, height);
@@ -1185,7 +1256,27 @@ public class Player {
         switch(ID) {
             case(1): //Log.d("Collectable","coin registered as caught");
                      break;
+
+            case(2): {
+                coinCount++;
+                Log.d("CollectablesCoin", "Caught!");
+                break;
+            }
         }
+    }
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    public ArrayList<Collectable> getCoins() {
+        justHit = false;
+        removeCollectables = true;
+        return collectables;
+    }
+
+    public boolean justHit() {
+        return justHit;
     }
 
 }

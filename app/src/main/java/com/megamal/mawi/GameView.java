@@ -122,7 +122,7 @@ public class GameView extends SurfaceView implements Runnable{
             frameRate++;
 
 
-            if(currentTime >= 1000) {
+            if(currentTime >= 975) {
                 Log.d("FPS", "" + frameRate);
                 currentTime = 0;
                 frameRate = 0;

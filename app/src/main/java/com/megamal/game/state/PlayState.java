@@ -54,6 +54,8 @@ public class PlayState extends State {
 
     private boolean runningRight = false, runningLeft = false;
     private boolean initialRender = true;
+    private boolean makeFlash = false;
+    private int flashCount = 0;
     private int[][] map;
 
     private int maskedAction;
@@ -128,6 +130,11 @@ public class PlayState extends State {
                 if (mawi.hitNewBox()) {
                     collectables.add(mawi.getMostRecentCollectable());
                 }
+            }
+
+
+            if(mawi.justHit()) {
+                collectables.addAll(mawi.getCoins());
             }
 
             if(!collectables.isEmpty()) {
@@ -324,43 +331,107 @@ public class PlayState extends State {
     private void renderPlayer(Painter g) {
 
         if(!mawi.isDying()) {
-            if (mawi.isJumping()) {
-                if (mawi.isRight()) {
-                    g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                    return;
-                } else if (mawi.isLeft()) {
-                    g.drawImage(Assets.mawiJumpingL, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+
+            //if invincible, then we need to flash
+            if(mawi.isInvincible()) {
+
+                if(makeFlash) {
+
+                    if (mawi.isJumping()) {
+                        if (mawi.isRight()) {
+                            g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                            return;
+                        } else if (mawi.isLeft()) {
+                            g.drawImage(Assets.mawiJumpingL, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                            return;
+                        }
+                    }
+
+                    //if mawi is walking, find which way and render animation
+                    if (mawi.isWalking()) {
+                        if (mawi.isRight()) {
+                            if (mawi.isCollided())
+                                Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                            else {
+                                //System.out.println("mawi.isCollided is false!");
+                                Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                            }
+                        } else {
+                            if (mawi.isCollided())
+                                Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                            else
+                                Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        }
+
+                        //else in this case, mawi is running so draw necessary animation
+                    } else if (mawi.isRunning()) {
+                        if (mawi.isRight())
+                            Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        else
+                            Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+
+
+                        //else in this mawi, mawi is not doing anything, so render standing animation
+                    } else {
+                        g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+                    }
+
+                    flashCount++;
+
+                    if(flashCount > 10) {
+                        makeFlash = false;
+                        flashCount = 0;
+                    }
+                }
+
+                else {
+
+                    makeFlash = true;
                     return;
                 }
             }
 
-            //if mawi is walking, find which way and render animation
-            if (mawi.isWalking()) {
-                if (mawi.isRight()) {
-                    if (mawi.isCollided())
-                        Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                    else {
-                        //System.out.println("mawi.isCollided is false!");
-                        Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+            //else, not invincible - render as normal
+            else {
+                if (mawi.isJumping()) {
+                    if (mawi.isRight()) {
+                        g.drawImage(Assets.mawiJumpingR, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        return;
+                    } else if (mawi.isLeft()) {
+                        g.drawImage(Assets.mawiJumpingL, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        return;
                     }
-                } else {
-                    if (mawi.isCollided())
-                        Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                    else
-                        Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
                 }
 
-            //else in this case, mawi is running so draw necessary animation
-            } else if (mawi.isRunning()) {
-                if (mawi.isRight())
-                    Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
-                else
-                    Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                //if mawi is walking, find which way and render animation
+                if (mawi.isWalking()) {
+                    if (mawi.isRight()) {
+                        if (mawi.isCollided())
+                            Assets.walkHitAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        else {
+                            //System.out.println("mawi.isCollided is false!");
+                            Assets.walkAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        }
+                    } else {
+                        if (mawi.isCollided())
+                            Assets.walkHitAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                        else
+                            Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    }
+
+                    //else in this case, mawi is running so draw necessary animation
+                } else if (mawi.isRunning()) {
+                    if (mawi.isRight())
+                        Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
+                    else
+                        Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
 
 
-            //else in this mawi, mawi is not doing anything, so render standing animation
-            } else {
-                g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+                    //else in this mawi, mawi is not doing anything, so render standing animation
+                } else {
+                    g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
+                }
+
             }
         }
 

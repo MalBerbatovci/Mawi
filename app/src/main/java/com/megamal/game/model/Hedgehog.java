@@ -18,6 +18,7 @@ public class Hedgehog extends Mover {
     private static final int SCAN_LEEWAY_Y = 10;
     private final static int ACCEL_GRAVITY = 282;
     private final static int DEATH_VELOCITY = -222;
+    private static final int COLLISION_LEEWAY = 10;
 
     private Tile tileA;
     private Tile tileB;
@@ -113,12 +114,15 @@ public class Hedgehog extends Mover {
         //Check playerX against enemy x
         if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
 
-           // Log.d("Intersection rect", "updated)");
-            rectX = (x + RECT_LEEWAY_X - cameraOffsetX);
-            rectY = (y + RECT_LEEWAY_Y - cameraOffsetY);
 
-            rect.set((int) rectX, (int) rectY, (int) rectX + (width + RECT_LEEWAY_X),
-                    (int) rectY + (height + RECT_LEEWAY_Y));
+
+            //set so rect is smaller than enemy, in order to ensure
+            //fairness
+            rectX = (x - RECT_LEEWAY_X - cameraOffsetX);
+            rectY = (y - RECT_LEEWAY_Y - cameraOffsetY);
+
+            rect.set((int) rectX, (int) rectY, (int) rectX + (width - (RECT_LEEWAY_X * 2)),
+                    (int) rectY + (height - (RECT_LEEWAY_Y * 2)));
         }
 
         else {
@@ -361,23 +365,52 @@ public class Hedgehog extends Mover {
 
     @Override
     public void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY) {
+
+
         //Should only be done when within visible range!
         if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
             //Just a check, should be fine though
-            if (isAlive) {
+            if (isAlive && !mawi.isDying()) {
 
+                //if mawi rect has intersected with enemy rect
                 if ((mawi.getplayerRect()).intersect(rect)) {
+
+
+                    //if mawi is grounded, this means that mawi will definitely be harmed
                     if (mawi.isGrounded()) {
                         Log.d("EnemyCollision", "Mawi hit");
-                        //This means mawi is effected
-                        //mawi.enemyHit();
+
+                        if(mawi.isInvincible()) {
+                            Log.d("Invisible", "INVISIBLE");
+                            return;
+                        }
+
+                        else {
+                            mawi.hitByEnemy();
+                        }
+
+
+                    //else, mawi is not grounded - need to check bottom of rect to determine
+                    //who is effected
                     } else {
-                        Log.d("EnemyCollision", "Enemy hit");
-                        mawi.hitEnemy();
-                        death();
-                        //this means that the enemy was killed, flip image maybe and let fall off map - once off, will need to be defeated
-                        //death();
+
+                        if(mawi.getplayerRect().bottom < (rect.top + COLLISION_LEEWAY)) {
+                            mawi.hitEnemy();
+                            death();
+                        }
+
+                        else {
+                            if(mawi.isInvincible()) {
+                                Log.d("Invisible", "INVISIBLE");
+                                return;
+                            }
+
+                            else {
+                                mawi.hitByEnemy();
+                            }
+                        }
                     }
+
                 } else
                     return;
             }
