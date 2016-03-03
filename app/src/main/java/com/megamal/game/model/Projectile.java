@@ -554,6 +554,8 @@ public class Projectile {
 
     }
 
+    //method to check the movement of the projectile in the X dimension, if any collisions,
+    //they are dealt with and the projectiles velocity is appropriately changed
     protected void checkXMovement(int[][] map, Painter g, double cameraOffsetX, double cameraOffsetY) {
 
         boolean twoTiles = false;
@@ -667,8 +669,7 @@ public class Projectile {
             closenessToTile = (x % GameMainActivity.TILE_WIDTH);
 
             if (closenessToTile <= 6) {
-                //Log.d("MovingLeft", "Moving left!");
-                //scanLeewayX must be 4 or greater
+
                 scanLineXa = (int) Math.floor((x - SCAN_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
                 if (scanLineXa < 0 || scanLineXa >= map[0].length) {
@@ -889,5 +890,13 @@ public class Projectile {
 
     public Rect getRect() {
         return rect;
+    }
+
+    public int getVelX() {
+        return velX;
+    }
+
+    public int getVelY() {
+        return velY;
     }
 }
