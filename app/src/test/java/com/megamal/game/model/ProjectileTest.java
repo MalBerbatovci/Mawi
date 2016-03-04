@@ -156,7 +156,11 @@ public class ProjectileTest {
 
         when(hedge.isActive()).thenReturn(true);
         when(hedge.isDying()).thenReturn(false);
+
+        //no intersection
         when(mockRect.intersect(hedge.rect)).thenReturn(false);
+
+
         when(hedge.getX()).thenReturn(inBoundsX);
         when(hedge.getY()).thenReturn(inBoundsY);
 
@@ -752,6 +756,178 @@ public class ProjectileTest {
 
         //should have collided
         assertNotEquals("X is not close enough", velY, testProjectile.getVelY());
+
+    }
+
+    @Test
+    public void shouldBeVisibleWithNoCameraOffset() {
+
+        int cameraOffsetX = 0;
+        int cameraOffsetY = 0;
+        int id = 1;
+        int left = -1;
+        int right = 1;
+
+        //Left = <- == (x + width)
+        //Right = -> == x
+        //this value is the boundary for when moving right
+        int projectileX = 832;
+        int projectileY = 30;
+
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        //out of bounds value for moving left, should return false
+        projectileX = -15;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+
+        //Moving down = y == 513 boundary
+
+        projectileX = 30;
+        projectileY = 512;
+
+        //velY is naturally going downwards, so test this first
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with right, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        projectileY = 1;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        //now test with velY < 0 (i.e rising)
+        //Moving Up = y + height == -17 // 497;
+
+        projectileY = -15;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        testProjectile.forceVelY(-30);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        testProjectile.forceVelY(-30);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        projectileY = 494;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        testProjectile.forceVelY(-30);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        testProjectile.forceVelY(-30);
+        assertEquals(true, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+    }
+
+    @Test
+    public void shouldNotBeVisibleWithNoCameraOffset() {
+
+        int cameraOffsetX = 0;
+        int cameraOffsetY = 0;
+        int id = 1;
+        int left = -1;
+        int right = 1;
+
+        //Left = <- == (x + width)
+        //Right = -> == x
+        //this value is the boundary for when moving right
+        int projectileX = 833;
+        int projectileY = 30;
+
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        //out of bounds value for moving left, should return false
+        projectileX = -17;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+
+        //Moving down = y == 513 boundary
+
+        projectileX = 30;
+        projectileY = 513;
+
+        //velY is naturally going downwards, so test this first
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with right, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        projectileY = -1;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        //now test with velY < 0 (i.e rising)
+        //Moving Up = y + height == -17 // 497;
+
+        projectileY = -17;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        testProjectile.forceVelY(-30);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        testProjectile.forceVelY(-30);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+
+        projectileY = 497;
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                left);
+        testProjectile.forceVelY(-30);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
+
+        //try with left, to ensure still same
+        testProjectile.reset(projectileX, projectileY, true, id, cameraOffsetX, cameraOffsetY,
+                right);
+        testProjectile.forceVelY(-30);
+        assertEquals(false, testProjectile.isVisible(cameraOffsetX, cameraOffsetY));
 
     }
 }

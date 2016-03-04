@@ -186,8 +186,6 @@ public class TileMapRenderer {
     public void renderMapCollectable(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, double positionX,
                               double positionY, boolean backGroundFill, boolean falling) {
 
-        //ONLY NEEDS TO BE CALLED WHEN COLLECTABLE FALLING really
-
         /*g.setColor(Color.rgb(208, 244, 247));
         g.fillRect((int) (positionX - cameraOffsetX), (int) (positionY - cameraOffsetY),
                 GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);*/

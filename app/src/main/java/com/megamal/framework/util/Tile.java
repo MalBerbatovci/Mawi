@@ -33,57 +33,73 @@ public class Tile {
         this.collectableID = 0;
 
         switch(ID) {
-            case(0):this.image = null;
-                    this.isObstacle = false;
-                    this.isCollectable = false;
-                    this.hasCollectable = false;
-                    break;
+            case(0): {
+                this.image = null;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
 
-            case(1):this.image = Assets.grassImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = false;
-                    break;
+            case(1): {
+                this.image = Assets.grassImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
+            
+            case(2): {
+                this.image = Assets.earthImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
 
-            case(2):this.image = Assets.earthImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = false;
-                    break;
+            case(3): {
+                this.image = Assets.coinImage;
+                this.isObstacle = false;
+                this.isCollectable = true;
+                this.hasCollectable = false;
+                break;
+            }
 
-            case(3):this.image = Assets.coinImage;
-                    this.isObstacle = false;
-                    this.isCollectable = true;
-                    this.hasCollectable = false;
-                    break;
+            case(4): {
+                this.image = Assets.boxImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = true;
+                this.collectableID = 1;
+                break;
+            }
 
-            case(4):this.image = Assets.boxImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = true;
-                    this.collectableID = 1;
-                    break;
+            case(5): {
+                this.image = Assets.boxImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = true;
+                this.collectableID = 2;
+                break;
+            }
 
-            case(5):this.image = Assets.boxImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = true;
-                    this.collectableID = 2;
-                    break;
-
-            case(6):this.image = Assets.boxImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = true;
-                    this.collectableID = 3;
-                    break;
+            case(6): {
+                this.image = Assets.boxImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = true;
+                this.collectableID = 3;
+                break;
+            }
 
 
-            case(7):this.image = Assets.boxUsedImage;
-                    this.isObstacle = true;
-                    this.isCollectable = false;
-                    this.hasCollectable = false;
-                    break;
+            case(7): {
+                this.image = Assets.boxUsedImage;
+                this.isObstacle = true;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
 
             case(19): {
                 this.image = Assets.treeTile;

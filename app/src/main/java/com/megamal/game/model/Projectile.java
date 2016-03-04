@@ -35,7 +35,8 @@ public class Projectile {
     private final static int ACCEL_GRAVITY = 250;
     private final static int BOUNCING_VEL = -150;
 
-    private final static int MAX_TIME = 20000;
+    //Max time is twenty seconds
+    private final static int MAX_TIME = 20;
 
     private final static int LEFT = -1;
     private final static int RIGHT = 1;
@@ -115,7 +116,7 @@ public class Projectile {
 
         isActive = true;
 
-        activationTime = (int) (System.currentTimeMillis() / 1000000L);
+        activationTime = (int) System.currentTimeMillis();
     }
 
     public void reset(double x, double y, boolean isPlayers, int ID, double cameraOffsetX,
@@ -185,7 +186,9 @@ public class Projectile {
         }
 
 
-        else if(((int) System.currentTimeMillis() - activationTime) > MAX_TIME) {
+        else if(((int) System.currentTimeMillis() - activationTime) / 1000 > MAX_TIME) {
+
+            //Render map? - ensure norendeirng take aways
             clearAreaAround(g, cameraOffsetX, cameraOffsetY);
             isActive = false;
             return;
@@ -765,23 +768,24 @@ public class Projectile {
         }
     }
 
+
+    //Method to determine whether the projectile is still in visibility range or not
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
-        if ((velX > 0) && ((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) {
 
-            if (velY > 0 && (y + height - cameraOffsetY > 0) && (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+        //MOVING RIGHT, check if x is still in bounds
+        if ((velX > 0) && (x  - cameraOffsetX > 0) &&
+                ((x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) {
 
-                if ((x - cameraOffsetX - GameMainActivity.GAME_WIDTH) > VISIBILITY_THRESHOLD) {
-                    safeToRemove = true;
-                }
+            //MOVING UP
+            if (velY < 0 && (y + height - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
 
                 isVisible = true;
             }
 
-            else if (velY < 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
+            //MOVING DOWN
+            else if (velY > 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
 
-                if ((x - cameraOffsetX - GameMainActivity.GAME_WIDTH) > VISIBILITY_THRESHOLD) {
-                    safeToRemove = true;
-                }
 
                 isVisible = true;
             }
@@ -793,21 +797,19 @@ public class Projectile {
         }
 
 
-        else if ((velX < 0) && (x - cameraOffsetX) > 0 && (x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH) {
-            if (velY > 0 && (y + height - cameraOffsetY > 0) && (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+        //MOVING LEFT
+        else if ((velX < 0) && ((x + width) - cameraOffsetX) > 0
+                && ((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH) {
 
-                if ((x - cameraOffsetX - GameMainActivity.GAME_WIDTH) > VISIBILITY_THRESHOLD) {
-                    safeToRemove = true;
-                }
+            //MOVING UP
+            if (velY < 0 && ((y + height) - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
                 isVisible = true;
             }
 
-            else if (velY < 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
-
-                if ((x - cameraOffsetX - GameMainActivity.GAME_WIDTH) > VISIBILITY_THRESHOLD) {
-                    safeToRemove = true;
-                }
-
+            //MOVING DOWN
+            else if (velY > 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
                 isVisible = true;
             }
 
@@ -818,6 +820,14 @@ public class Projectile {
         } else {
             isVisible = false;
         }
+
+
+        if(velX > 0) {
+            if ((x - cameraOffsetX - GameMainActivity.GAME_WIDTH) > VISIBILITY_THRESHOLD) {
+                safeToRemove = true;
+            }
+        }
+
 
         return isVisible;
     }
@@ -898,5 +908,10 @@ public class Projectile {
 
     public int getVelY() {
         return velY;
+    }
+
+    //method to force velY in order to sufficiently test
+    protected void forceVelY(int velY) {
+        this.velY = velY;
     }
 }
