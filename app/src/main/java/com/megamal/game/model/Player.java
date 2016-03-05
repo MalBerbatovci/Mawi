@@ -1166,21 +1166,80 @@ public class Player {
         return hasMoved;
     }
 
-    protected void hitByEnemy() {
-        Log.d("CoinCount", "CoinCount is: " + coinCount);
+    protected void hitByEnemy(int[][] map) {
+        //Log.d("CoinCount", "CoinCount is: " + coinCount);
 
         if(coinCount == 0) {
             death();
         }
 
         else {
-            int newCount = coinCount / 2;
+            int newCount = (int) Math.ceil((double) coinCount / 2);
+
+            if(newCount == 0) {
+                newCount = 1;
+            }
+
+            Log.d("CoinCount", "newCount is: " + newCount + ". coinCount is: " + coinCount);
+
             int randomX;
+            int loopCount = 20;
+
 
             //create new coins in random displacements from Mawi
             for(int i = 0; i < newCount; i++) {
-                randomX = RandomNumberGenerator.getRandIntBetween((int) x - 200, (int) x + 200);
-                collectables.add(new Collectable(2, randomX, y, cameraOffsetX, cameraOffsetY));
+
+                loop:
+                for(int j = 0; j < loopCount; j++) {
+                    randomX = RandomNumberGenerator.getRandIntBetween((int) x - 100, (int) x + 100);
+
+                    //ensure not on mawi
+                    while((x - randomX) < 0 && (x - randomX) > (-GameMainActivity.TILE_WIDTH)) {
+
+                        Log.d("CoinCount", "X was inside mawi!");
+                        randomX = RandomNumberGenerator.getRandIntBetween((int) x - 100,
+                                (int) x + 100);
+
+                    }
+
+
+                    int mapY = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
+                    int mapX = (int) Math.floor(randomX / GameMainActivity.TILE_WIDTH);
+
+                    //check boundaries, ensure not OOB
+                    if (mapY < map.length && mapY > 0 && mapX < map[0].length && mapX > 0) {
+                        if (map[mapY][mapX] == 0) {
+                            collectables.add(new Collectable(2, randomX, y, cameraOffsetX, cameraOffsetY));
+                            break loop;
+                        }
+                    }
+
+                    //If on the last iteration, then check just above mawi
+                    if (j == (loopCount - 1)) {
+
+                        //try just above mawi, if not then just dont create the coin
+                        int newMapY = (int) Math.floor((y - GameMainActivity.TILE_HEIGHT) /
+                                GameMainActivity.TILE_HEIGHT);
+                        int newMapX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+
+                        //if in bounds, and is free, then create collectable here, else
+                        //break out of loop and dont create collectable at all
+                        if (newMapY < map.length && newMapY > 0 && newMapX < map[0].length && newMapX > 0) {
+                            if (map[mapY][mapX] == 0) {
+
+                                collectables.add(new Collectable(2, x,
+                                        (y - GameMainActivity.GAME_HEIGHT), cameraOffsetX,
+                                        cameraOffsetY));
+
+                                break loop;
+                            }
+
+                            Log.d("CoinCount", "Exited without creating - obstacle in way");
+                        }
+
+                        Log.d("CoinCoun", "Exited without creating - OOB");
+                    }
+                }
             }
 
 
@@ -1259,7 +1318,7 @@ public class Player {
 
             case(2): {
                 coinCount++;
-                Log.d("CollectablesCoin", "Caught!");
+                Log.d("CoinCount", "Caught!");
                 break;
             }
         }

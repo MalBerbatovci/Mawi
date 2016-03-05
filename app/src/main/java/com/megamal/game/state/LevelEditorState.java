@@ -68,16 +68,17 @@ public class LevelEditorState extends State {
     private TileMapRenderer tileMapRenderer;
     private UIButton eraserButton;
 
-    public LevelEditorState(int[][] newMap) {
+    public LevelEditorState(int[][] newMap, int maxX, int maxY) {
 
         //stub value to create as big as possible,
-        map = new int[100][100];
+        /*map = new int[100][100];
 
         for(int i = 0; i < 100; i++) {
             for (int j = 0; j < 100; j++) {
                 map[i][j] = 0;
             }
         }
+
 
         for(int i = 0; i < newMap.length; i++) {
             for(int j = 0; j < newMap[0].length; j++) {
@@ -91,6 +92,35 @@ public class LevelEditorState extends State {
 
         if((newMap[0].length - 1) > currentMaxX) {
             currentMaxX = (newMap[0].length - 1);
+        } */
+
+        if(newMap.length < 2) {
+            map = new int[100][100];
+
+            for(int i = 0; i < 100; i++) {
+                for (int j = 0; j < 100; j++) {
+                    map[i][j] = 0;
+                }
+            }
+
+
+            for(int i = 0; i < newMap.length; i++) {
+                for(int j = 0; j < newMap[0].length; j++) {
+                    map[i][j] = newMap[i][j];
+                }
+            }
+        }
+
+        else {
+            map = newMap.clone();
+        }
+
+        if(maxX > currentMaxX) {
+            currentMaxX = maxX;
+        }
+
+        if(maxY > currentMaxY) {
+            currentMaxY = maxY;
         }
     }
 
@@ -860,6 +890,14 @@ public class LevelEditorState extends State {
                 / GameMainActivity.TILE_WIDTH);
         int mapEntryY = (int) Math.floor((scaledY + camera.getY())
                     / GameMainActivity.TILE_HEIGHT);
+
+        if(mapEntryX < 0 || mapEntryX >= map[0].length) {
+            return;
+        }
+
+        if(mapEntryY < 0 || mapEntryY >= map.length) {
+            return;
+        }
 
         //
         if(previousMapX == mapEntryX &&

@@ -69,7 +69,7 @@ public class MenuState extends State {
 
                     //stub value
                     int[][] map = new int[1][1];
-                    setCurrentState(new LevelEditorState(map));
+                    setCurrentState(new LevelEditorState(map, 0, 0));
                 }
 
             }

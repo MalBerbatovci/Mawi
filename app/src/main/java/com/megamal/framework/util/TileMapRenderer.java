@@ -166,7 +166,7 @@ public class TileMapRenderer {
             startingY = Math.ceil(cameraOffsetY / GameMainActivity.TILE_HEIGHT);
 
             //Log.d("Camera", "1: remainderX is: " + remainderX + ". \n");
-           // Log.d("Camera", "2: StartingY is: " + startingY + ". Camera OffsetY is: " + cameraOffsetY + ". \n");
+            // Log.d("Camera", "2: StartingY is: " + startingY + ". Camera OffsetY is: " + cameraOffsetY + ". \n");
 
             for (int y = (int) (startingY - 1); y < (SCREEN_TILE_SIZE_Y + (int) startingY); y++) {
                 for (int x = (int) (startingX - 1); x < (SCREEN_TILE_SIZE_X + (int) startingX); x++) {
@@ -184,7 +184,7 @@ public class TileMapRenderer {
     }
 
     public void renderMapCollectable(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, double positionX,
-                              double positionY, boolean backGroundFill, boolean falling) {
+                                     double positionY, boolean backGroundFill, boolean falling) {
 
         /*g.setColor(Color.rgb(208, 244, 247));
         g.fillRect((int) (positionX - cameraOffsetX), (int) (positionY - cameraOffsetY),
@@ -210,9 +210,9 @@ public class TileMapRenderer {
                         } else {
                             //g.setColor(Color.rgb(2,2,2));
                             //g.fillRect(((int)((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
-                                   // GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            // GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
                             currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
-                             g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                            g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
                         }
                     }
 
@@ -222,13 +222,13 @@ public class TileMapRenderer {
 
         else {
 
-           // Log.d("Falling", "Is not falling");
+            // Log.d("Falling", "Is not falling");
 
             xStart = (int) Math.floor(positionX / GameMainActivity.TILE_WIDTH) - 1;
-           /// Log.d("RenderingEnemy", "xStart is: " + xStart + ".\n");
+            /// Log.d("RenderingEnemy", "xStart is: " + xStart + ".\n");
 
             yStart = (int) Math.floor(positionY / GameMainActivity.TILE_WIDTH) - 1;
-          //  Log.d("RenderingEnemy", "yStart is: " + yStart + ".\n");
+            //  Log.d("RenderingEnemy", "yStart is: " + yStart + ".\n");
 
             for (int y = yStart; y < (yStart + 2); y++) {
                 for (int x = xStart; x < (xStart + 3); x++) {
@@ -242,11 +242,11 @@ public class TileMapRenderer {
                                         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
                             }
                         } else {
-                           // g.setColor(Color.rgb(2, 2, 2));
-                           // g.fillRect(((int) ((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
-                           //         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                            // g.setColor(Color.rgb(2, 2, 2));
+                            // g.fillRect(((int) ((x * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                            //         GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
                             currentTile.setLocation(y, x, cameraOffsetX, cameraOffsetY);
-                             g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                            g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
                         }
                     }
 

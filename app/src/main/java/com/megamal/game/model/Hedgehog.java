@@ -18,7 +18,7 @@ public class Hedgehog extends Mover {
     private static final int SCAN_LEEWAY_Y = 10;
     private final static int ACCEL_GRAVITY = 282;
     private final static int DEATH_VELOCITY = -222;
-    private static final int COLLISION_LEEWAY = 10;
+    private static final int COLLISION_LEEWAY = 7;
 
     private Tile tileA;
     private Tile tileB;
@@ -84,7 +84,7 @@ public class Hedgehog extends Mover {
                 checkYMovement(map);
 
                 updateRects(cameraOffsetX, cameraOffsetY);
-                checkCollisions(mawi, cameraOffsetX, cameraOffsetY);
+                checkCollisions(mawi, cameraOffsetX, cameraOffsetY, map);
 
             }
 
@@ -364,7 +364,7 @@ public class Hedgehog extends Mover {
     }
 
     @Override
-    public void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY) {
+    public void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY, int[][] map) {
 
 
         //Should only be done when within visible range!
@@ -386,7 +386,7 @@ public class Hedgehog extends Mover {
                         }
 
                         else {
-                            mawi.hitByEnemy();
+                            mawi.hitByEnemy(map);
                         }
 
 
@@ -394,7 +394,7 @@ public class Hedgehog extends Mover {
                     //who is effected
                     } else {
 
-                        if(mawi.getplayerRect().bottom < (rect.top + COLLISION_LEEWAY)) {
+                        if(mawi.getplayerRect().bottom < (rect.top + (COLLISION_LEEWAY * 2))) {
                             mawi.hitEnemy();
                             death();
                         }
@@ -406,7 +406,7 @@ public class Hedgehog extends Mover {
                             }
 
                             else {
-                                mawi.hitByEnemy();
+                                mawi.hitByEnemy(map);
                             }
                         }
                     }

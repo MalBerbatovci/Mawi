@@ -324,7 +324,7 @@ public class Projectile {
                         }
                     }
 
-                //else, enemy is dying / == null, return
+                    //else, enemy is dying / == null, return
                 } else {
                     return;
                 }
@@ -432,15 +432,15 @@ public class Projectile {
 
                 if(twoTiles) {
                     tileB.setID(map[scanLineYb][scanLineXb]);
-                   // tileB.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXb);
+                    // tileB.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXb);
                 }
 
-               // tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXa);
+                // tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYb, scanLineXa);
 
                 //tileB.setID(map[scanLineYb][scanLineXb]);
 
                 if(tileA.isObstacle() || (twoTiles && tileB.isObstacle())) {
-                   // Log.d("Projectiles", "Is falling, Y movement");
+                    // Log.d("Projectiles", "Is falling, Y movement");
 
                     //Log.d("ProjectilesCollision", "FALLING: Co-ordinates: " + (int) x + ", " + (int) y + ".");
                     //Log.d("ProjectilesCollision", "Checked map[" + scanLineYb + "][" + scanLineXa + ".");
@@ -538,7 +538,7 @@ public class Projectile {
                 //tileB.setID(map[scanLineYa][scanLineXa]);
                 //tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
 
-               // Log.d("RisingProj", "RISING - checking col!");
+                // Log.d("RisingProj", "RISING - checking col!");
 
                 if (tileA.isObstacle() || (twoTiles && tileB.isObstacle())) {
 
@@ -714,7 +714,7 @@ public class Projectile {
                     }
 
 
-                   else if (y % GameMainActivity.TILE_HEIGHT <= 4) {
+                    else if (y % GameMainActivity.TILE_HEIGHT <= 4) {
                         scanLineYa = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
                         scanLineYb = (int) Math.floor((y - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
 
@@ -744,7 +744,7 @@ public class Projectile {
                 tileA.setID(map[scanLineYa][scanLineXa]);
 
                 //Log.d("Projectiles", "Map[" + scanLineYa + "][" + scanLineXa + "]");
-               // tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
+                // tileA.fillTile(g, cameraOffsetX, cameraOffsetY, scanLineYa, scanLineXa);
 
 
                 if(twoTiles) {

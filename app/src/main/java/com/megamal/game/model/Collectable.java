@@ -80,7 +80,7 @@ public class Collectable {
     public void setVariables(int ID, double x, double y, double cameraOffsetX, double cameraOffsetY) {
         this.ID = ID;
         this.velY = JUMPING_ACCELERATION;
-        this.velX = MOVING_VEL;
+        this.velX = -MOVING_VEL;
         isAlive = true;
 
         //true x and y of object
@@ -225,22 +225,22 @@ public class Collectable {
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
                 Log.d("Collectables", "isAlive false in checkY.velY > 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) - RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            scanLineDownXa = (int) Math.floor(((x + width) + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
             scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY > 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
             if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
@@ -270,22 +270,22 @@ public class Collectable {
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) - RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            scanLineDownXa = (int) Math.floor(((x + width) + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
             scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
-                isAlive = false;
+               // isAlive = false;
                 return;
             }
 
             if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
@@ -306,12 +306,12 @@ public class Collectable {
         } else {
             Log.d("Collectables", "Case 3a");
 
-            scanLineDownY = (int) Math.floor((y + height - RECT_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+            scanLineDownY = (int) Math.floor((y + height + RECT_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
 
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
                 Log.d("Collectables", "isAlive false in checkY.velY else");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
 
@@ -319,7 +319,7 @@ public class Collectable {
                 scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                     Log.d("Collectables", "isAlive false in checkY.velY else");
-                    isAlive = false;
+                    //isAlive = false;
                     return;
                 }
             }
@@ -327,14 +327,14 @@ public class Collectable {
                 scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                     Log.d("Collectables", "isAlive false in checkY.velY else");
-                    isAlive = false;
+                    //isAlive = false;
                     return;
                 }
             }
 
 
-            Log.d("CollectableBug", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
+
             if (!(tileA.isObstacle())) {
                 isGrounded = false;
             }
@@ -352,7 +352,7 @@ public class Collectable {
             scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkX.velX > 0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
         }
@@ -362,7 +362,7 @@ public class Collectable {
             scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkX. else velX >0");
-                isAlive = false;
+                //isAlive = false;
                 return;
             }
         }
@@ -372,12 +372,12 @@ public class Collectable {
 
         if (scanLineAcrossYa < 0 || scanLineAcrossYa >= map.length) {
             Log.d("Collectables", "isAlive false in checkX.velY != 0");
-            isAlive = false;
+            //isAlive = false;
             return;
         }
         if (scanLineAcrossYb < 0 || scanLineAcrossYb >= map.length) {
             Log.d("Collectables", "isAlive false in checkX.velY != 0");
-            isAlive = false;
+            //isAlive = false;
             return;
         }
 
@@ -403,27 +403,74 @@ public class Collectable {
     //method to check is coin is on screen and render appropriately
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
 
-        if ((((x + width) - cameraOffsetX > 0) && (((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) ||
-                ((x - cameraOffsetX > 0) && (x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)){
+        boolean isVisible;
 
-            if((((y + height) - cameraOffsetY) > 0 && (y + height <= GameMainActivity.GAME_HEIGHT)) ||
-                    ((y - cameraOffsetY > 0) && (y - cameraOffsetY <= GameMainActivity.GAME_HEIGHT))) {
+        if ((velX > 0) && (x  - cameraOffsetX > 0) &&
+                ((x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) {
 
-                    Log.d("RenderingCol", "Rendering!");
-                    return true;
+            //MOVING UP
+            if (velY > 0 && ((y + height) - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
+            }
+
+            //MOVING DOWN
+            else if (velY < 0 && (y - cameraOffsetY) > 0 &&
+                    (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
+
+                isVisible = true;
+            }
+
+            else if (velY == 0 && ((y - cameraOffsetY) > 0 &&
+                    (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT) ||
+                    ((y + height) - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
             }
 
             else {
-                return false;
+                isVisible = false;
+            }
+
+        }
+
+
+        //MOVING LEFT
+        else if ((velX < 0) && ((x + width) - cameraOffsetX) > 0
+                && ((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH) {
+
+            //MOVING UP
+            if (velY > 0 && ((y + height) - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
+            }
+
+            //MOVING DOWN
+            else if (velY < 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
+                isVisible = true;
             }
 
 
+            else if (velY == 0 && ((y - cameraOffsetY) > 0 &&
+                    (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT) ||
+                    ((y + height) - cameraOffsetY > 0) &&
+                            (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
+            }
+
+            else {
+                isVisible = false;
+            }
+
+        } else {
+            isVisible = false;
         }
 
-        else {
-            Log.d("RenderingCol", "Not rendering!");
-            return false;
-        }
+        return isVisible;
 
     }
 
@@ -474,6 +521,6 @@ public class Collectable {
     }
 
     public boolean isFalling() {
-        return (velY < 0);
+        return (velY > 0);
     }
 }

@@ -48,9 +48,9 @@ public class LevelEditorPlayState extends State {
 
     private boolean runningRight = false, runningLeft = false;
     private boolean initialRender = true;
-    private int[][] map;
+    private int[][] map, originalMap;
 
-    private int maskedAction;
+    private int maskedAction, maxX, maxY;
     private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
@@ -65,6 +65,11 @@ public class LevelEditorPlayState extends State {
                 map[j][i] = levelEditorMap[j][i];
             }
         }
+
+        //map = levelEditorMap.clone();
+        originalMap = levelEditorMap.clone();
+        this.maxX = currentMaxX;
+        this.maxY = currentMaxY;
     }
 
     @Override
@@ -112,12 +117,11 @@ public class LevelEditorPlayState extends State {
 
     }
 
-
     @Override
     public void update(float delta, Painter g) {
 
         if (!mawi.isAlive()) {
-            setCurrentState(new LevelEditorState(map));
+            setCurrentState(new LevelEditorState(originalMap, maxX, maxY));
         } else {
 
             mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
@@ -220,7 +224,7 @@ public class LevelEditorPlayState extends State {
         for(int i = 0; i < projectileArray.length; i++) {
             if(projectileArray[i].isActive()) {
                 projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
-                
+
                 if(!isDyingFlag && projectileArray[i].isDying()) {
                     isDyingFlag = true;
                 }
@@ -250,9 +254,7 @@ public class LevelEditorPlayState extends State {
                         projectileArray[i].getX(), projectileArray[i].getY(), false,
                         projectileArray[i].isFalling());
 
-            }
-
-           else {
+            } else {
                 if(projectileArray[i].isDying() && projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
                     tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
                     projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
@@ -273,7 +275,7 @@ public class LevelEditorPlayState extends State {
                 }
 
                 if (!(collectables.get(i).isAlive())) {
-                   // Log.d("Collectables", "isAlive = false!");
+                    // Log.d("Collectables", "isAlive = false!");
                     if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                         tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
                                 collectables.get(i).getY(), true, collectables.get(i).isFalling());
@@ -339,7 +341,7 @@ public class LevelEditorPlayState extends State {
                         Assets.walkAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
                 }
 
-            //else, running so draw necessary
+                //else, running so draw necessary
             } else if (mawi.isRunning()) {
                 if (mawi.isRight())
                     Assets.runAnimR.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
@@ -347,7 +349,7 @@ public class LevelEditorPlayState extends State {
                     Assets.runAnimL.render(g, (int) mawi.getX(), (int) mawi.getY(), mawi.getWidth(), mawi.getHeight());
 
 
-            //else, not doing anything
+                //else, not doing anything
             } else {
                 g.drawImage(Assets.mawiStandingFront, (int) mawi.getX(), (int) mawi.getY());
             }
@@ -369,64 +371,64 @@ public class LevelEditorPlayState extends State {
         //in the buttons rect
 
         if(moveAction) {
-                if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
-                    Log.d("MultiTouch", "Button moved on!");
-                    runningRight = true;
-                    mawi.run(RIGHT);
-                    return true;
-                } else if (runR.buttonMovedOut(scaledX, scaledY, ID)) {
-                    runningRight = false;
+            if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
+                Log.d("MultiTouch", "Button moved on!");
+                runningRight = true;
+                mawi.run(RIGHT);
+                return true;
+            } else if (runR.buttonMovedOut(scaledX, scaledY, ID)) {
+                runningRight = false;
 
-                    if (runningLeft) {
-                        mawi.run(LEFT);
-                    } else {
-                        mawi.stopRunning();
-                    }
-
-                    return true;
-                } else if (runL.buttonMovedOn(scaledX, scaledY, ID)) {
-                    runningLeft = true;
+                if (runningLeft) {
                     mawi.run(LEFT);
-                    return true;
-
-                } else if (runL.buttonMovedOut(scaledX, scaledY, ID)) {
-                    runningLeft = false;
-
-                    if (runningRight) {
-                        mawi.run(RIGHT);
-                    } else {
-                        mawi.stopRunning();
-                    }
-                    return true;
-
-                } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
-                    mawi.jump();
-                    return true;
-
-                } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-
-                } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
-                    mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
-                    return true;
-
-                }
-                else if (shoot.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-
+                } else {
+                    mawi.stopRunning();
                 }
 
-                else if(backToLevelEditor.buttonMovedOn(scaledX, scaledY, ID)) {
-                    return true;
-                }
+                return true;
+            } else if (runL.buttonMovedOn(scaledX, scaledY, ID)) {
+                runningLeft = true;
+                mawi.run(LEFT);
+                return true;
 
-                else if(backToLevelEditor.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-                }
+            } else if (runL.buttonMovedOut(scaledX, scaledY, ID)) {
+                runningLeft = false;
 
-                else {
-                    return true;
+                if (runningRight) {
+                    mawi.run(RIGHT);
+                } else {
+                    mawi.stopRunning();
                 }
+                return true;
+
+            } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
+                mawi.jump();
+                return true;
+
+            } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+
+            } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
+                mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
+                return true;
+
+            }
+            else if (shoot.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+
+            }
+
+            else if(backToLevelEditor.buttonMovedOn(scaledX, scaledY, ID)) {
+                return true;
+            }
+
+            else if(backToLevelEditor.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+            }
+
+            else {
+                return true;
+            }
         }
 
         else {
@@ -527,7 +529,7 @@ public class LevelEditorPlayState extends State {
                     }
 
                     else if (backToLevelEditor.onTouchUp(scaledX, scaledY, ID)) {
-                        setCurrentState(new LevelEditorState(map));
+                        setCurrentState(new LevelEditorState(originalMap, maxX, maxY));
                     }
 
                     else {
@@ -565,7 +567,7 @@ public class LevelEditorPlayState extends State {
                     }
 
                     else if (backToLevelEditor.onTouchUp(scaledX, scaledY, ID)) {
-                        setCurrentState(new LevelEditorState(map));
+                        setCurrentState(new LevelEditorState(originalMap, maxX, maxY));
                     }
 
                     else {

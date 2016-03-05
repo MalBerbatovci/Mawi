@@ -53,7 +53,7 @@ public abstract class Enemy {
 
     protected abstract void updateAnim(float delta);
 
-    public abstract void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY);
+    public abstract void checkCollisions(Player mawi, double cameraOffsetX, double cameraOffsetY, int[][] map);
 
     public abstract void render(Painter g, double cameraOffsetX, double cameraOffsetY);
 

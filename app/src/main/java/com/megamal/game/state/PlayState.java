@@ -219,7 +219,7 @@ public class PlayState extends State {
         }
 
         for(int i = 0; i < enemyArray.length; i++) {
-            if(enemyArray[i] != null && enemyArray[i].isActive() && !enemyArray[i].isDying()) {
+            if (enemyArray[i] != null && enemyArray[i].isActive() && !enemyArray[i].isDying()) {
                 enemyArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
             }
 
@@ -237,7 +237,7 @@ public class PlayState extends State {
         for(int i = 0; i < projectileArray.length; i++) {
             if(projectileArray[i].isActive()) {
                 projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
-                
+
                 if(!isDyingFlag && projectileArray[i].isDying()) {
                     isDyingFlag = true;
                 }
@@ -269,7 +269,7 @@ public class PlayState extends State {
 
             }
 
-           else {
+            else {
                 if(projectileArray[i].isDying() && projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
                     tileRenderer.renderWholeMap(g, map, cameraOffsetX, cameraOffsetY);
                     projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
@@ -290,7 +290,7 @@ public class PlayState extends State {
                 }
 
                 if (!(collectables.get(i).isAlive())) {
-                   // Log.d("Collectables", "isAlive = false!");
+                    // Log.d("Collectables", "isAlive = false!");
                     if(collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                         tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
                                 collectables.get(i).getY(), true, collectables.get(i).isFalling());
@@ -449,55 +449,55 @@ public class PlayState extends State {
         //in the buttons rect
 
         if(moveAction) {
-                if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
-                    Log.d("MultiTouch", "Button moved on!");
-                    runningRight = true;
-                    mawi.run(RIGHT);
-                    return true;
-                } else if (runR.buttonMovedOut(scaledX, scaledY, ID)) {
-                    runningRight = false;
+            if (runR.buttonMovedOn(scaledX, scaledY, ID)) {
+                Log.d("MultiTouch", "Button moved on!");
+                runningRight = true;
+                mawi.run(RIGHT);
+                return true;
+            } else if (runR.buttonMovedOut(scaledX, scaledY, ID)) {
+                runningRight = false;
 
-                    if (runningLeft) {
-                        mawi.run(LEFT);
-                    } else {
-                        mawi.stopRunning();
-                    }
-
-                    return true;
-                } else if (runL.buttonMovedOn(scaledX, scaledY, ID)) {
-                    runningLeft = true;
+                if (runningLeft) {
                     mawi.run(LEFT);
-                    return true;
-
-                } else if (runL.buttonMovedOut(scaledX, scaledY, ID)) {
-                    runningLeft = false;
-
-                    if (runningRight) {
-                        mawi.run(RIGHT);
-                    } else {
-                        mawi.stopRunning();
-                    }
-                    return true;
-
-                } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
-                    mawi.jump();
-                    return true;
-
-                } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-
-                } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
-                    mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
-                    return true;
-
+                } else {
+                    mawi.stopRunning();
                 }
-                else if (shoot.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
 
+                return true;
+            } else if (runL.buttonMovedOn(scaledX, scaledY, ID)) {
+                runningLeft = true;
+                mawi.run(LEFT);
+                return true;
+
+            } else if (runL.buttonMovedOut(scaledX, scaledY, ID)) {
+                runningLeft = false;
+
+                if (runningRight) {
+                    mawi.run(RIGHT);
+                } else {
+                    mawi.stopRunning();
                 }
-                else {
-                    return true;
-                }
+                return true;
+
+            } else if (jump.buttonMovedOn(scaledX, scaledY, ID)) {
+                mawi.jump();
+                return true;
+
+            } else if (jump.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+
+            } else if (shoot.buttonMovedOn(scaledX, scaledY, ID)) {
+                mawi.shoot(projectileArray, cameraOffsetX, cameraOffsetY, map);
+                return true;
+
+            }
+            else if (shoot.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+
+            }
+            else {
+                return true;
+            }
         }
 
         else {
@@ -646,4 +646,3 @@ public class PlayState extends State {
         return true;
     }*/
 }
-
