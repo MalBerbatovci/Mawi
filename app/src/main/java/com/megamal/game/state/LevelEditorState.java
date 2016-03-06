@@ -267,12 +267,12 @@ public class LevelEditorState extends State {
                     //moving LEFT
                     if (distanceX < 0) {
                         distanceX = Math.abs(distanceX);
-                        camera.updateCameraX(map, distanceX, LEFT, ID);
+                        camera.updateCameraX(distanceX, LEFT, ID);
                     }
 
                     //moving RIGHT
                     else if (distanceX > 0) {
-                        camera.updateCameraX(map, distanceX, RIGHT, ID);
+                        camera.updateCameraX(distanceX, RIGHT, ID);
 
                     }
 
@@ -288,12 +288,12 @@ public class LevelEditorState extends State {
                     //MOVING UP
                     if(distanceY < 0) {
                         distanceY = Math.abs(distanceY);
-                        camera.updateCameraY(map, distanceY, UP, ID);
+                        camera.updateCameraY(distanceY, UP, ID);
                     }
 
                     //MOVING DOWN
                     else if (distanceY > 0) {
-                        camera.updateCameraY(map, distanceY, DOWN, ID);
+                        camera.updateCameraY(distanceY, DOWN, ID);
 
                     }
 

@@ -151,9 +151,8 @@ public class UIButton {
         }
     }
 
-    public boolean compareID(int pointerID) {
-
-        return (this.pointerID == pointerID);
+    protected void forcePointerID(int iD) {
+        this.pointerID = iD;
     }
 
     //cancel the press

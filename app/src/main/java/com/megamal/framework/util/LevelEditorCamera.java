@@ -31,7 +31,7 @@ public class LevelEditorCamera {
         this.cameraOffsetY = 0;
     }
 
-    public void updateCameraX(int[][] map, int movementX, int direction, int ID) {
+    public void updateCameraX(int movementX, int direction, int ID) {
 
 
         //only carry out calculations if the controller ID is this pointer ID
@@ -78,7 +78,7 @@ public class LevelEditorCamera {
 
     }
 
-    public void updateCameraY(int[][] map, int movementY, int direction, int ID) {
+    public void updateCameraY(int movementY, int direction, int ID) {
 
         //make sure that pointer that initialised is controller movement
         if(controllerID == ID) {
@@ -202,6 +202,18 @@ public class LevelEditorCamera {
 
     public double getY() {
         return cameraOffsetY;
+    }
+
+    protected void forceNoID() {
+        IDSet = false;
+    }
+
+    protected void forceOffsetX(int offsetX) {
+        cameraOffsetX = offsetX;
+    }
+
+    protected void forceOffsetY(int offsetY) {
+        cameraOffsetY = offsetY;
     }
 
 }
