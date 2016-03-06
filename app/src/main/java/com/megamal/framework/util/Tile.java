@@ -181,15 +181,6 @@ public class Tile {
 
     }
 
-    public void fillTile(Painter g, double cameraOffsetX, double cameraOffsetY, int yIndex, int xIndex) {
-        setLocation(yIndex, xIndex, cameraOffsetX, cameraOffsetY);
-        g.setColor(Color.rgb(2, 24, 211));
-        g.fillRect((int) x, (int) y, GameMainActivity.TILE_WIDTH,
-                GameMainActivity.TILE_HEIGHT);
-
-
-    }
-
     public void setID(int ID) {
         this.ID = ID;
         setVariables();

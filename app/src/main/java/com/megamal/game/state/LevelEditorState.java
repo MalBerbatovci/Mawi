@@ -42,6 +42,8 @@ public class LevelEditorState extends State {
     private final static int MIN_X_CELLS = 12;
 
     private final static String FILE_NAME = "level2.txt";
+    private static final int BOX_ID = 4;
+    private static final int GRASS_ID = 1;
 
     protected int currentMaxX = 12;
     protected int currentMaxY = 7;
@@ -910,19 +912,47 @@ public class LevelEditorState extends State {
         //need to keep track of currentMax
         else {
 
-            if(!(map[mapEntryY][mapEntryX] == ID)) {
+            if(checkRestrictions(ID, mapEntryX, mapEntryY)) {
+                if (!(map[mapEntryY][mapEntryX] == ID)) {
                     map[mapEntryY][mapEntryX] = ID;
 
                     updateMapBoundaries(mapEntryX, mapEntryY, ID);
+                }
+
+
+                previousMapY = mapEntryY;
+                previousMapX = mapEntryX;
+
+                mapChanged = true;
             }
-
-            previousMapY = mapEntryY;
-            previousMapX = mapEntryX;
-
-            mapChanged = true;
         }
 
 
+    }
+
+    private boolean checkRestrictions(int id, int mapEntryX, int mapEntryY) {
+        
+        switch (id) {
+            case(BOX_ID): {
+
+                if((mapEntryY - 1) >= 0 || (mapEntryY - 1) < map.length) {
+                    if(map[mapEntryY - 1][mapEntryX] == BOX_ID) {
+                        return false;
+                    }
+                }
+                //if tile underneath is box, this one cant be
+
+                if((mapEntryY + 1) >= 0 || (mapEntryY + 1) < map.length) {
+                    if(map[mapEntryY + 1][mapEntryX] == BOX_ID) {
+                        return false;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        return true;
     }
 
 

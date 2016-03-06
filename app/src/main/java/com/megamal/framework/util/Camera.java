@@ -14,7 +14,8 @@ public class Camera {
     private final static int Y_THRESHOLD_UP = (GameMainActivity.GAME_HEIGHT / 2) - (int) (GameMainActivity.TILE_HEIGHT * 1.5);
     private final static int Y_THRESHOLD_DOWN = (GameMainActivity.GAME_HEIGHT / 2) + (int) (GameMainActivity.TILE_HEIGHT * 1.5);
 
-    private double playerCentreX, maxCameraOffsetX, overRun, maxCameraOffsetY, playerCentreY, cameraOffsetX, cameraOffsetY;
+    private double playerCentreX, overRun, playerCentreY, cameraOffsetX, cameraOffsetY;
+    private int maxCameraOffsetX, maxCameraOffsetY;
 
 
     public Camera(int[][] map) {
@@ -22,6 +23,17 @@ public class Camera {
         //calculate the maximum the camera can be offsetted for the map in question
         maxCameraOffsetY = (map.length * GameMainActivity.TILE_HEIGHT) - GameMainActivity.GAME_HEIGHT;
         maxCameraOffsetX = (map[0].length * GameMainActivity.TILE_WIDTH) - GameMainActivity.GAME_WIDTH;
+
+
+        //boundaries, just to make sure - even though map smaller than [8][13] should never be
+        //passed
+        if(maxCameraOffsetX < 0) {
+            maxCameraOffsetX = 0;
+        }
+
+        if(maxCameraOffsetY < 0) {
+            maxCameraOffsetY = 0;
+        }
 
     }
 
@@ -94,7 +106,7 @@ public class Camera {
 
                     //case moving to the left
                 } //else if (playerCentreX < DEAD_ZONE_LEFT) {
-                //CASE WHERE going from right -> left result in huge leaps in co-ordsI also learned about the University database as a source of helpful information, along with a reinforced idea of how to collect information of relevance to a specific task.
+                //CASE WHERE going from right -> left result in huge leaps in co-ords.
 
                 else if (playerCentreX <= X_THRESHOLD_LEFT && player.isLeft()) {
                     if (playerCentreX < X_THRESHOLD_LEFT) {
@@ -187,6 +199,11 @@ public class Camera {
 
                    // Log.d("YCamera", "player passed threshold on offsetY = 0 w/ overRun: " + overRun);
                     cameraOffsetY = cameraOffsetY + overRun;
+
+                    if(cameraOffsetY > maxCameraOffsetY) {
+                        cameraOffsetY = maxCameraOffsetY;
+                    }
+
                     player.lockToYThreshold(Y_THRESHOLD_DOWN);
                     this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
@@ -245,15 +262,17 @@ public class Camera {
                 //else, do nothing
                 else {
                     //Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
+                    this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
                 }
             }
 
-            //else case where Y_Threshold is maximum (aka bottom of screen)
-            else if (cameraOffsetY == maxCameraOffsetY) {
+            //else case where Y_Threshold is maximum (aka bottom of screen) - must be travelling up to change
+            else if (cameraOffsetY == maxCameraOffsetY && player.getVelY() < 0) {
 
                 //not passed threshold, leave as is
                 if (playerCentreY > Y_THRESHOLD_UP) {
+                    this.cameraOffsetY = cameraOffsetY;
                     return cameraOffsetY;
                 }
 
@@ -266,9 +285,15 @@ public class Camera {
                         overRun = 0;
                     }
 
+
                    // Log.d("YCamera", "player passed UP threshold on offsetY = max with overRun: " + overRun);
 
                     cameraOffsetY = cameraOffsetY - overRun;
+
+                    if(cameraOffsetY < 0) {
+                        cameraOffsetY = 0;
+                    }
+
                     player.lockToYThreshold(Y_THRESHOLD_UP);
                     this.cameraOffsetY = cameraOffsetY;
                    // Log.d("YCameraOffset", "Offset is: " + cameraOffsetY);
@@ -287,4 +312,10 @@ public class Camera {
     public double getCameraOffsetY() {
         return cameraOffsetY;
     }
+
+    protected int getMaxCameraOffsetX() {
+        return maxCameraOffsetX;
+    }
+
+    protected int getMaxCameraOffsetY() { return maxCameraOffsetY; }
 }
