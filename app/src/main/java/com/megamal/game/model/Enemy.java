@@ -81,5 +81,15 @@ public abstract class Enemy {
 
     public abstract boolean isDead();
 
+    public abstract boolean isGrounded();
+
+    public abstract int getVelX();
+
+    public abstract int getVelY();
+
+    public abstract int getWidth();
+
+    public abstract int getHeight();
+
 
 }

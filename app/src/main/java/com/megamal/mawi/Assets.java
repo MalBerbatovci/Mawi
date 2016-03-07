@@ -29,9 +29,14 @@ public class Assets {
             pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed, saveButton,
             playButton, backToLEButton;
 
+    public static Bitmap hedgeWalkR1, hedgeWalkR2, hedgeWalkR3, hedgeWalkR4, hedgeWalkR5, hedgeWalkR6,
+            hedgeWalkL1, hedgeWalkL2, hedgeWalkL3, hedgeWalkL4, hedgeWalkL5, hedgeWalkL6, hedgeStandard;
+
+
     public static Bitmap level1Tile, level2Tile, pathTile, treeTile;
 
-    public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL;
+    public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL,
+                hedgeAnimR, hedgeAnimL;
 
     //input stream used to read data from device's file system
     public static void load() {
@@ -110,6 +115,38 @@ public class Assets {
         level1Tile = loadBitmap("level1.png", true);
         level2Tile = loadBitmap("level2.png", true);
         treeTile = loadBitmap("treeTile.png", true);
+
+        hedgeStandard = loadBitmap("enemyRF2.png", false);
+
+        hedgeWalkR1 = loadBitmap("enemyRF1.png", false);
+        hedgeWalkR2 = loadBitmap("enemyRF2.png", false);
+        hedgeWalkR3 = loadBitmap("enemyRF3.png", false);
+        hedgeWalkR4 = loadBitmap("enemyRF4.png", false);
+        hedgeWalkR5 = loadBitmap("enemyRF5.png", false);
+        hedgeWalkR6 = loadBitmap("enemyRF6.png", false);
+
+        hedgeWalkL1 = loadBitmap("enemyLF1.png", false);
+        hedgeWalkL2 = loadBitmap("enemyLF2.png", false);
+        hedgeWalkL3 = loadBitmap("enemyLF3.png", false);
+        hedgeWalkL4 = loadBitmap("enemyLF4.png", false);
+        hedgeWalkL5 = loadBitmap("enemyLF5.png", false);
+        hedgeWalkL6 = loadBitmap("enemyLF6.png", false);
+
+        Frame eR1 = new Frame(hedgeWalkR1, 0.2f);
+        Frame eR2 = new Frame(hedgeWalkR2, 0.2f);
+        Frame eR3 = new Frame(hedgeWalkR3, 0.2f);
+        Frame eR4 = new Frame(hedgeWalkR4, 0.2f);
+        Frame eR5 = new Frame(hedgeWalkR5, 0.2f);
+        Frame eR6 = new Frame(hedgeWalkR6, 0.2f);
+        hedgeAnimR = new Animation(eR1, eR2, eR3, eR4, eR5, eR6);
+
+        Frame eL1 = new Frame(hedgeWalkL1, 0.2f);
+        Frame eL2 = new Frame(hedgeWalkL2, 0.2f);
+        Frame eL3 = new Frame(hedgeWalkL3, 0.2f);
+        Frame eL4 = new Frame(hedgeWalkL4, 0.2f);
+        Frame eL5 = new Frame(hedgeWalkL5, 0.2f);
+        Frame eL6 = new Frame(hedgeWalkL6, 0.2f);
+        hedgeAnimL = new Animation(eL1, eL2, eL3, eL4, eL5, eL6);
 
 
         //create walking animation

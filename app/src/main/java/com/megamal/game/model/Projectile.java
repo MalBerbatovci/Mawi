@@ -323,10 +323,6 @@ public class Projectile {
                             Log.d("Intersection", "Not close enough!");
                         }
                     }
-
-                    //else, enemy is dying / == null, return
-                } else {
-                    return;
                 }
             }
         }

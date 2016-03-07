@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.megamal.framework.util.Camera;
+import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapFactory;
 import com.megamal.framework.util.TileMapRenderer;
@@ -33,7 +34,7 @@ public class PlayState extends State {
     private static final int LEFT = -1;
     private static final int TOUCH_THRESHOLD = 5;
     private static final int MAX_PROJECTILES = 10;
-    private static final int NO_ENEMIES = 1;
+    private static final int NO_ENEMIES = 9;
 
     private TileMapRenderer tileRenderer;
     private TileMapFactory tileFactory;
@@ -92,7 +93,7 @@ public class PlayState extends State {
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
-        hedge = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+        hedge = new Hedgehog(1500.0, 0.0, cameraOffsetX, cameraOffsetY);
 
         //create an array of 10 projectiles which are not active.
         for(int i = 0; i < MAX_PROJECTILES; i++ ) {
@@ -101,7 +102,9 @@ public class PlayState extends State {
         }
 
         for(int i = 0; i < NO_ENEMIES; i++) {
-            enemyArray[i] = new Hedgehog(400.0, 0.0, cameraOffsetX, cameraOffsetY);
+            enemyArray[i] = new Hedgehog(RandomNumberGenerator.getRandIntBetween(0, 1500),
+                    RandomNumberGenerator.getRandIntBetween(0, 1500),
+                    cameraOffsetX, cameraOffsetY);
         }
 
 
@@ -145,7 +148,7 @@ public class PlayState extends State {
             }
 
             for(int i = 0; i < enemyArray.length; i++) {
-                if(enemyArray[i] != null && enemyArray[i].isActive()) {
+                if(enemyArray[i] != null) {
                     enemyArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
                 }
             }
@@ -214,6 +217,8 @@ public class PlayState extends State {
             for (int i = 0; i < collectables.size(); i++) {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                     collectables.get(i).clearAreaAroundCoin(g, cameraOffsetX, cameraOffsetY);
+                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
+                            collectables.get(i).getY(), true, collectables.get(i).isFalling());
                 }
             }
         }
@@ -221,9 +226,11 @@ public class PlayState extends State {
         for(int i = 0; i < enemyArray.length; i++) {
             if (enemyArray[i] != null && enemyArray[i].isActive() && !enemyArray[i].isDying()) {
                 enemyArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                        enemyArray[i].getY(), true, enemyArray[i].isFalling());
             }
 
-            if(!isDyingFlag && enemyArray[i].isDying()) {
+            if(enemyArray[i] != null && !isDyingFlag && enemyArray[i].isDying()) {
                 isDyingFlag = true;
             }
         }
@@ -285,8 +292,6 @@ public class PlayState extends State {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
 
                     collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                            collectables.get(i).getY(), false, collectables.get(i).isFalling());
                 }
 
                 if (!(collectables.get(i).isAlive())) {
@@ -307,11 +312,33 @@ public class PlayState extends State {
     private void renderEnemies(Painter g) {
 
         for(int i = 0; i < enemyArray.length; i++) {
+
             if(enemyArray[i] != null && enemyArray[i].isActive()) {
                 if(!enemyArray[i].isDying()) {
-                    enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
-                            enemyArray[i].getY(), false, enemyArray[i].isFalling());
+
+                    //if hedgehod, then has animation
+                    if(enemyArray[i] instanceof Hedgehog) {
+                        if (enemyArray[i].isAlive()) {
+                            if (enemyArray[i].getVelX() > 0) {
+                                Assets.hedgeAnimR.render(g, (int) (enemyArray[i].getX() - cameraOffsetX),
+                                        (int) (enemyArray[i].getY() - cameraOffsetY),
+                                        enemyArray[i].getHeight(), enemyArray[i].getWidth());
+                            } else {
+                                Assets.hedgeAnimL.render(g, (int) (enemyArray[i].getX() - cameraOffsetX),
+                                        (int) (enemyArray[i].getY() - cameraOffsetY),
+                                        enemyArray[i].getHeight(), enemyArray[i].getWidth());
+                            }
+
+                        } else {
+                            enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                        }
+                    }
+
+                    else {
+                        enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                                enemyArray[i].getY(), false, enemyArray[i].isFalling());
+                    }
                 }
 
                 else if(enemyArray[i].isDying() && !enemyArray[i].isDead()) {
@@ -320,10 +347,13 @@ public class PlayState extends State {
                     enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
 
                 }
+            }
 
-                else if(enemyArray[i].safeToRemove()) {
-                    enemyArray[i] = null;
-                }
+            if(enemyArray[i] != null && enemyArray[i].safeToRemove()) {
+                Log.d("EnemyStuff", "REMOVED");
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                        enemyArray[i].getY(), true, enemyArray[i].isFalling());
+                enemyArray[i] = null;
             }
         }
     }

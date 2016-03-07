@@ -51,6 +51,7 @@ public class Collectable {
 
     private final static int RECT_LEEWAY_X = 3;
     private final static int RECT_LEEWAY_Y = 3;
+    private final static int Y_MOVEMENT_EXTRA = 20;
 
     private final static int SCAN_LEEWAY_Y = 10;
     private final static int SCAN_LEEWAY_X = 10;
@@ -228,8 +229,14 @@ public class Collectable {
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            if(velX > 0) {
+                scanLineDownXa = (int) Math.floor(((x + width - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH));
+            }
+
+            else {
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+
+            }
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY > 0");
@@ -237,18 +244,18 @@ public class Collectable {
                 return;
             }
 
-            if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
+            /*if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
                 //isAlive = false;
                 return;
-            }
+            } */
 
             Log.d("CollectableBug1", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
+            //tileB.setID(map[scanLineDownY][scanLineDownXb]);
 
             //if obstacle then deal with appropriately
-            if(tileA.isObstacle() || tileB.isObstacle()) {
+            if(tileA.isObstacle()) {
                 isGrounded = true;
                 velY = 0;
 
@@ -273,8 +280,13 @@ public class Collectable {
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            if(velX > 0) {
+                scanLineDownXa = (int) Math.floor(((x + width) - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+            }
+
+            else {
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+            }
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkY.velY < 0");
@@ -282,15 +294,9 @@ public class Collectable {
                 return;
             }
 
-            if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
-                Log.d("Collectables", "isAlive false in checkY.velY < 0");
-                //isAlive = false;
-                return;
-            }
-
             Log.d("CollectableBug", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
+            //tileB.setID(map[scanLineDownY][scanLineDownXb]);
 
             //decrease velocity and set y to be just below tile
             if (tileA.isObstacle()) {
@@ -315,7 +321,7 @@ public class Collectable {
             }
 
             if (velX > 0) {
-                scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                scanLineDownXa = (int) Math.floor(((x + width) - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                     Log.d("Collectables", "isAlive false in checkY.velY else");
                     //isAlive = false;
@@ -323,7 +329,7 @@ public class Collectable {
                 }
             }
             else {
-                scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
                     Log.d("Collectables", "isAlive false in checkY.velY else");
                     //isAlive = false;
@@ -348,7 +354,7 @@ public class Collectable {
 
         if (velX > 0) {
             Log.d("Collectables", "Case 1b");
-            scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+            scanLineAcrossX = (int) Math.floor(((x + width) + (RECT_LEEWAY_X * 2)) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkX.velX > 0");
                 //isAlive = false;
@@ -358,7 +364,7 @@ public class Collectable {
 
         else {
             Log.d("Collectables", "Case 2b");
-            scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+            scanLineAcrossX = (int) Math.floor((x - (RECT_LEEWAY_X * 2)) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
                 Log.d("Collectables", "isAlive false in checkX. else velX >0");
                 //isAlive = false;
@@ -366,26 +372,34 @@ public class Collectable {
             }
         }
 
-        scanLineAcrossYa = (int) Math.floor((y + height - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
-        scanLineAcrossYb = (int) Math.floor((y + SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+        //FALLING
+        if(velY > 0) {
+            scanLineAcrossYa = (int) Math.floor((y + height - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+        }
+
+        //RISING
+        else if (velY < 0) {
+            scanLineAcrossYa = (int) Math.floor((y + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+        }
+
+        else {
+            scanLineAcrossYa = (int) Math.floor((y + (height / 2))/ GameMainActivity.TILE_HEIGHT);
+
+        }
 
         if (scanLineAcrossYa < 0 || scanLineAcrossYa >= map.length) {
             Log.d("Collectables", "isAlive false in checkX.velY != 0");
             //isAlive = false;
             return;
         }
-        if (scanLineAcrossYb < 0 || scanLineAcrossYb >= map.length) {
-            Log.d("Collectables", "isAlive false in checkX.velY != 0");
-            //isAlive = false;
-            return;
-        }
+
 
         Log.d("CollectableBug", "index [" + scanLineAcrossYa + "][" + scanLineAcrossX + "] checked.");
 
         tileA.setID(map[scanLineAcrossYa][scanLineAcrossX]);
-        tileB.setID(map[scanLineAcrossYb][scanLineAcrossX]);
+        //tileB.setID(map[scanLineAcrossYb][scanLineAcrossX]);
 
-        if (tileA.isObstacle() || tileB.isObstacle()) {
+        if (tileA.isObstacle()) {
             tileX = tileA.xLocationNoOffset(scanLineAcrossX);
 
             if (velX > 0) {

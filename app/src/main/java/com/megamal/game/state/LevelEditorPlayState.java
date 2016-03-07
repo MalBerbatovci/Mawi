@@ -137,7 +137,7 @@ public class LevelEditorPlayState extends State {
             }
 
             for(int i = 0; i < enemyArray.length; i++) {
-                if(enemyArray[i] != null && enemyArray[i].isActive()) {
+                if(enemyArray[i] != null) {
                     enemyArray[i].update(delta, map, cameraOffsetX, cameraOffsetY, mawi);
                 }
             }
@@ -201,6 +201,8 @@ public class LevelEditorPlayState extends State {
             for (int i = 0; i < collectables.size(); i++) {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
                     collectables.get(i).clearAreaAroundCoin(g, cameraOffsetX, cameraOffsetY);
+                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
+                            collectables.get(i).getY(), true, collectables.get(i).isFalling());
                 }
             }
         }
@@ -270,8 +272,6 @@ public class LevelEditorPlayState extends State {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
 
                     collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, collectables.get(i).getX(),
-                            collectables.get(i).getY(), false, collectables.get(i).isFalling());
                 }
 
                 if (!(collectables.get(i).isAlive())) {

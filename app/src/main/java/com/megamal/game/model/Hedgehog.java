@@ -19,6 +19,9 @@ public class Hedgehog extends Mover {
     private final static int ACCEL_GRAVITY = 282;
     private final static int DEATH_VELOCITY = -222;
     private static final int COLLISION_LEEWAY = 7;
+    private static final int Y_MOVEMENT_EXTRA = 20;
+    private final static int MAX_OUT_OF_BOUNDS = 5;
+    private static final int OBSTACLE_MAX_COUNT = 5;
 
     private Tile tileA;
     private Tile tileB;
@@ -26,15 +29,21 @@ public class Hedgehog extends Mover {
     private Bitmap image;
     protected Rect rect;
 
+    private int tileOnX, tileOnY;
     private double x, y;
     private double rectX, rectY;
     private int width, height;
     private int velX, velY;
     private boolean isAlive = true;
-    private boolean isActive = true;
+    private boolean isActive = false;
     private boolean isGrounded = false;
     private boolean isDying = false;
     private boolean isDead = false;
+    private boolean safeToRemove = false;
+
+    private int outOfBoundsCount = 0;
+    private int isInObstacleCount = 0;
+
 
     // if(isDying && !isActive) -> safe to remove
 
@@ -54,7 +63,7 @@ public class Hedgehog extends Mover {
         this.height = GameMainActivity.TILE_HEIGHT;
 
         //change to respective image
-        this.image = Assets.coinImage;
+        this.image = Assets.hedgeStandard;
 
         velX = 100;
         velY = 100;
@@ -67,8 +76,10 @@ public class Hedgehog extends Mover {
     @Override
     public void update(float delta, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
 
-        if (!isActive) {
-            //do what
+        if (!isActive && !isDead()) {
+            if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
+                isActive = true;
+            }
         }
 
         else {
@@ -84,6 +95,7 @@ public class Hedgehog extends Mover {
                 checkYMovement(map);
 
                 updateRects(cameraOffsetX, cameraOffsetY);
+                updateAnim(delta);
                 checkCollisions(mawi, cameraOffsetX, cameraOffsetY, map);
 
             }
@@ -96,14 +108,57 @@ public class Hedgehog extends Mover {
 
                 //Log.d("EnemyVisibility", "STILL VISIBLE");
 
-                if (!isVisible(cameraOffsetX,cameraOffsetY,x,y,width,height)) {
+                if (!isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height)) {
                     Log.d("EnemyVisibility", "NOT VISIBLE");
                     isDead = true;
                     isDying = false;
                     isActive = false;
+                    safeToRemove = true;
+                }
+
+                return;
+            }
+
+            if (outOfBoundsCount > MAX_OUT_OF_BOUNDS) {
+                isDead = true;
+                isDying = false;
+                isActive = false;
+                safeToRemove = true;
+                Log.d("EnemyStuff", "Removed - too many out of bounds");
+            }
+
+
+            tileOnX = (int) Math.floor((x + (width / 2)) / GameMainActivity.TILE_WIDTH);
+
+            if (tileOnX < 0 || tileOnX >= map[0].length) {
+                outOfBoundsCount++;
+                return;
+            }
+
+            tileOnY = (int) Math.floor((y + (height / 2)) / GameMainActivity.TILE_HEIGHT);
+
+            if (tileOnY < 0 || tileOnY >= map.length) {
+                outOfBoundsCount++;
+                return;
+            }
+
+            tileA.setID(map[tileOnY][tileOnX]);
+            if (tileA.isObstacle()) {
+                isInObstacleCount++;
+
+                if (isInObstacleCount > OBSTACLE_MAX_COUNT) {
+                    isDead = true;
+                    isDying = false;
+                    isActive = false;
+                    safeToRemove = true;
+                    Log.d("EnemyStuff", "Removed - too many out of obstacle");
                 }
             }
 
+            //not obstacle, reset count
+            else {
+                isInObstacleCount = 0;
+            }
         }
 
     }
@@ -132,89 +187,76 @@ public class Hedgehog extends Mover {
 
     }
 
+
     @Override
     protected void checkYMovement(int[][] map) {
 
         int tileY;
         int scanLineDownY;
         int scanLineDownXa;
-        int scanLineDownXb;
 
-        //means object is falling
+        //this means that the object is falling, therefore check scanline for underneath,
+        //if collision then set grounded to true, and set Y to be just above the suitable tile
         if (velY > 0) {
-            Log.d("Enemy", "Case 1a");
 
             scanLineDownY = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
-                Log.d("Enemy", "ScanLineDownY out of range, aka isAlive false");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) - RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            if(velX > 0) {
+                scanLineDownXa = (int) Math.floor(((x + width - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH));
+            }
+
+            else {
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+
+            }
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
-                Log.d("Enemy", "scanLineXa out range aka isAlive false");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
 
-            if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
-                Log.d("Enemy", "scanLineXb out range aka isAlive false");
-                isAlive = false;
-                return;
-            }
-
-            Log.d("Enemy", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
-
             //if obstacle then deal with appropriately
-            if (tileA.isObstacle() || tileB.isObstacle()) {
+            if(tileA.isObstacle()) {
                 isGrounded = true;
                 velY = 0;
-
-                //same scanLineDownY used so doesnt matter if tileA/tileB
                 tileY = tileA.yLocationNoOffset(scanLineDownY);
-
-                //set Y to be just above tile
                 y = tileY - height;
             }
+
+            outOfBoundsCount = 0;
             return;
 
 
             //this means that it is 'jumping', check scanLine above, if collision then decrease velY and set Y to suitable
         } else if (velY < 0) {
-            Log.d("Enemy", "Case 2a");
             scanLineDownY = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
 
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
-                Log.d("Enemy", "scanLineDownY out of range, isAlive = false");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
 
-            scanLineDownXa = (int) Math.floor(((x + width) - RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
-            scanLineDownXb = (int) Math.floor((x + RECT_LEEWAY_X) / GameMainActivity.TILE_WIDTH);
+            if(velX > 0) {
+                scanLineDownXa = (int) Math.floor(((x + width) - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+            }
+
+            else {
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
+            }
 
             if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
-                Log.d("Enemy", "scanLineDownXa is out of range, isAlive = false");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
 
-            if (scanLineDownXb < 0 || scanLineDownXb >= map[0].length) {
-                Log.d("Enemy", "scanLineDownXb is out of range, isAlive = false");
-                isAlive = false;
-                return;
-            }
-
-            Log.d("Enemy", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
-            tileB.setID(map[scanLineDownY][scanLineDownXb]);
 
             //decrease velocity and set y to be just below tile
             if (tileA.isObstacle()) {
@@ -222,97 +264,100 @@ public class Hedgehog extends Mover {
                 tileY = tileA.yLocationNoOffset(scanLineDownY);
                 y = tileY + GameMainActivity.TILE_HEIGHT;
             }
+
+            outOfBoundsCount = 0;
             return;
 
             //else, this is the case where the object is moving on the ground, check beneath to see if
             //still grounded
         } else {
-            Log.d("Enemy", "Case 3a");
-            scanLineDownY = (int) Math.floor((y + height) / GameMainActivity.TILE_HEIGHT);
+            scanLineDownY = (int) Math.floor((y + height + RECT_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+
 
             if (scanLineDownY < 0 || scanLineDownY >= map.length) {
-                Log.d("Enemy", "scanLineDownY out of range, isAlive = false");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
 
             if (velX > 0) {
-                scanLineDownXa = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+                scanLineDownXa = (int) Math.floor(((x + width) - Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
-                    Log.d("Enemy", "scanLineDownXa out of range, isAlive = false (MOVING RIGHT)");
-                    isAlive = false;
+                    outOfBoundsCount++;
                     return;
                 }
             }
             else {
-                scanLineDownXa = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+                scanLineDownXa = (int) Math.floor((x + Y_MOVEMENT_EXTRA) / GameMainActivity.TILE_WIDTH);
                 if (scanLineDownXa < 0 || scanLineDownXa >= map[0].length) {
-                    Log.d("Enemy", "scanLineDownXa out of range, isAlive = false (MOVING LEFT)");
-                    isAlive = false;
+                    outOfBoundsCount++;
                     return;
                 }
             }
 
 
-            Log.d("Enemy", "index [" + scanLineDownY + "][" + scanLineDownXa + "] checked.");
             tileA.setID(map[scanLineDownY][scanLineDownXa]);
+
             if (!(tileA.isObstacle())) {
-                Log.d("EnemyGrounded", "isGrounded made false, tile at : " + scanLineDownY + ", " + scanLineDownXa);
                 isGrounded = false;
             }
 
-            return;
-
         }
+
+        outOfBoundsCount = 0;
+        return;
     }
 
     protected void checkXMovement(int[][] map) {
 
         int scanLineAcrossX;
         int scanLineAcrossYa;
-        int scanLineAcrossYb;
         int tileX;
 
         if (velX > 0) {
-            Log.d("Enemy", "Case 1b");
-            scanLineAcrossX = (int) Math.floor((x + width) / GameMainActivity.TILE_WIDTH);
+            Log.d("Collectables", "Case 1b");
+            scanLineAcrossX = (int) Math.floor(((x + width) + (RECT_LEEWAY_X * 2)) / GameMainActivity.TILE_WIDTH);
+
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
-                Log.d("Enemy", "isAlive false in checkX.velX > 0");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
         }
 
         else {
-            Log.d("Enemy", "Case 2b");
-            scanLineAcrossX = (int) Math.floor(x / GameMainActivity.TILE_WIDTH);
+            scanLineAcrossX = (int) Math.floor((x - (RECT_LEEWAY_X * 2)) / GameMainActivity.TILE_WIDTH);
             if (scanLineAcrossX < 0 || scanLineAcrossX >= map[0].length) {
-                Log.d("Enemy", "isAlive false in checkX. else velX >0");
-                isAlive = false;
+                outOfBoundsCount++;
                 return;
             }
         }
 
-        scanLineAcrossYa = (int) Math.floor((y + height - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
-        scanLineAcrossYb = (int) Math.floor((y + SCAN_LEEWAY_Y)/ GameMainActivity.TILE_HEIGHT);
+        //FALLING
+        if(velY > 0) {
+            scanLineAcrossYa = (int) Math.floor((y + height - SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+        }
+
+        //RISING
+        else if (velY < 0) {
+            scanLineAcrossYa = (int) Math.floor((y + SCAN_LEEWAY_Y) / GameMainActivity.TILE_HEIGHT);
+        }
+
+        else {
+            scanLineAcrossYa = (int) Math.floor((y + (height / 2))/ GameMainActivity.TILE_HEIGHT);
+
+        }
 
         if (scanLineAcrossYa < 0 || scanLineAcrossYa >= map.length) {
-            Log.d("Enemy", "isAlive false in checkX.velY != 0");
-            isAlive = false;
-            return;
-        }
-        if (scanLineAcrossYb < 0 || scanLineAcrossYb >= map.length) {
-            Log.d("Enemy", "isAlive false in checkX.velY != 0");
-            isAlive = false;
+            outOfBoundsCount++;
             return;
         }
 
-        Log.d("CollectableBug", "index [" + scanLineAcrossYa + "][" + scanLineAcrossX + "] checked.");
+
+
 
         tileA.setID(map[scanLineAcrossYa][scanLineAcrossX]);
-        tileB.setID(map[scanLineAcrossYb][scanLineAcrossX]);
+        //tileB.setID(map[scanLineAcrossYb][scanLineAcrossX]);
 
-        if (tileA.isObstacle() || tileB.isObstacle()) {
+        if (tileA.isObstacle()) {
             tileX = tileA.xLocationNoOffset(scanLineAcrossX);
 
             if (velX > 0) {
@@ -323,6 +368,7 @@ public class Hedgehog extends Mover {
 
             velX = -(velX);
         }
+        outOfBoundsCount = 0;
         return;
     }
 
@@ -330,10 +376,16 @@ public class Hedgehog extends Mover {
     public void updateAnim(float delta) {
         if (isAlive) {
             if (isGrounded) {
-                //ASSETS FOR WALKING
+                if(velX > 0) {
+                    Assets.hedgeAnimR.update(delta);
+                }
+
+                else {
+                    Assets.hedgeAnimL.update(delta);
+                }
             }
             else {
-                //dont update anything
+
             }
 
         }
@@ -343,10 +395,9 @@ public class Hedgehog extends Mover {
     @Override
     public void render(Painter g, double cameraOffsetX, double cameraOffsetY) {
 
-        //if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height) && isActive() && isAlive) {
+        if (isVisible(cameraOffsetX, cameraOffsetY, x, y, width, height) && isActive()) {
                 g.drawImage(image, (int) (x - cameraOffsetX), (int) (y - cameraOffsetY), width, height);
-                Log.d("EnemyRendering", "image drawn at : " + (x - cameraOffsetX) + ", " + (y - cameraOffsetY));
-        //    } else
+            } else
                 return;
 
     }
@@ -419,7 +470,7 @@ public class Hedgehog extends Mover {
     }
 
     public void death() {
-        image = Assets.coinImage;
+        image = Assets.hedgeStandard;
 
         //set IsGrounded to false, as isAlive being false means that usual tile checking won't happen therefore
         //can fall through the ground
@@ -460,7 +511,7 @@ public class Hedgehog extends Mover {
     }
 
     public boolean safeToRemove() {
-        if(!isActive() && isDead) {
+        if(!isActive() && isDead && safeToRemove) {
             return true;
         }
 
@@ -470,6 +521,26 @@ public class Hedgehog extends Mover {
 
     public boolean isDead() {
         return isDead;
+    }
+
+    public boolean isGrounded() {
+        return isGrounded;
+    }
+
+    public int getVelX() {
+        return velX;
+    }
+
+    public int getVelY() {
+        return velY;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
     }
 
 
