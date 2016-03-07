@@ -81,12 +81,6 @@ public class UIButton {
         }
     }
 
-    //needed in order to ensure that only one button remains on at one time duirng level editor
-    public void forceTouchOff() {
-        buttonDown = false;
-        this.pointerID = -1;
-    }
-
     public boolean onTouchUp(int touchX, int touchY, int pointerID) {
 
         if (this.pointerID != pointerID) {
@@ -153,6 +147,17 @@ public class UIButton {
 
     protected void forcePointerID(int iD) {
         this.pointerID = iD;
+    }
+
+    protected void forceTouchDown(int iD) {
+        this.buttonDown = true;
+        this.pointerID = iD;
+    }
+
+    //needed in order to ensure that only one button remains on at one time duirng level editor
+    public void forceTouchOff() {
+        buttonDown = false;
+        this.pointerID = -1;
     }
 
     //cancel the press

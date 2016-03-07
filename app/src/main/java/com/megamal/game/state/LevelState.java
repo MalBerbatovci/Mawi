@@ -1,5 +1,6 @@
 package com.megamal.game.state;
 
+import android.support.v4.view.MotionEventCompat;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -24,7 +25,7 @@ public class LevelState extends State {
     //need walk up button
     //need walk down button
 
-    private static UIButton walkR, walkL, walkUp, walkDown;
+    private static UIButton walkR, walkL, walkUp, walkDown, backToMenuState;
     private TileMapFactory tileFactory;
     private TileMapRenderer tileRenderer;
 
@@ -55,6 +56,8 @@ public class LevelState extends State {
         mawi = new Player(tile.getX(), tile.getY()  - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
+        backToMenuState = new UIButton(10, 10, 74, 74, Assets.backToLEButton, Assets.backToLEButton);
+
         //create new Mawi, place on start
         //create new tilemap (8x13)
         //use persistent storage to establish what levels are unlocked
@@ -74,6 +77,8 @@ public class LevelState extends State {
 
         tileRenderer.renderWholeMap(g, map, 0, 0);
         renderPlayer(g);
+
+        backToMenuState.render(g);
         //if mawi has moved, render who map, render map
         //if mawi hasnt move, no need to render anything
 
@@ -120,6 +125,80 @@ public class LevelState extends State {
     //collison detection should be handeled appropriately, need diff buttons
     //gonna need walking Up and Down
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY, int ID, boolean moveAction, View v) {
-        return false;
+
+        int maskedAction;
+
+        if(moveAction) {
+            if(backToMenuState.buttonMovedOn(scaledX, scaledY, ID)) {
+                return true;
+            }
+
+            else if(backToMenuState.buttonMovedOut(scaledX, scaledY, ID)) {
+                return true;
+            }
+
+            else {
+                return true;
+            }
+        }
+
+
+        else {
+
+            maskedAction = MotionEventCompat.getActionMasked(e);
+
+            switch(maskedAction) {
+                case (MotionEvent.ACTION_DOWN): {
+                    if(backToMenuState.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+                    //else, not of interest, event handled - return true
+                    else {
+                        return true;
+                    }
+                }
+
+                case (MotionEvent.ACTION_POINTER_DOWN): {
+                    if(backToMenuState.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+                    //else, not of interest, event handled - return true
+                    else {
+                        return true;
+                    }
+                }
+
+                case (MotionEvent.ACTION_UP): {
+
+                    if (backToMenuState.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new MenuState());
+                    }
+
+                    else {
+                        return true;
+                    }
+
+                    break;
+                }
+
+                case (MotionEvent.ACTION_POINTER_UP): {
+
+                    if (backToMenuState.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new MenuState());
+                    }
+
+                    else {
+                        return true;
+                    }
+
+
+                    break;
+                }
+
+            }
+        }
+        return true;
     }
 }

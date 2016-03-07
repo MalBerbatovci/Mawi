@@ -933,18 +933,22 @@ public class LevelEditorState extends State {
     private boolean checkRestrictions(int id, int mapEntryX, int mapEntryY) {
         
         switch (id) {
-            case(BOX_ID): {
+            default: {
 
-                if((mapEntryY - 1) >= 0 || (mapEntryY - 1) < map.length) {
-                    if(map[mapEntryY - 1][mapEntryX] == BOX_ID) {
-                        return false;
+                if((mapEntryY - 1) >= 0 && (mapEntryY - 1) < map.length) {
+                    if((mapEntryX >= 0) && mapEntryX < map[0].length) {
+                        if (map[mapEntryY - 1][mapEntryX] == BOX_ID) {
+                            return false;
+                        }
                     }
                 }
                 //if tile underneath is box, this one cant be
 
-                if((mapEntryY + 1) >= 0 || (mapEntryY + 1) < map.length) {
-                    if(map[mapEntryY + 1][mapEntryX] == BOX_ID) {
-                        return false;
+                if((mapEntryY + 1) >= 0 && (mapEntryY + 1) < map.length) {
+                    if((mapEntryX >= 0) && mapEntryX < map[0].length) {
+                        if (map[mapEntryY + 1][mapEntryX] == BOX_ID) {
+                            return false;
+                        }
                     }
                 }
 

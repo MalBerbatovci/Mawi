@@ -80,7 +80,7 @@ public class Collectable {
     public void setVariables(int ID, double x, double y, double cameraOffsetX, double cameraOffsetY) {
         this.ID = ID;
         this.velY = JUMPING_ACCELERATION;
-        this.velX = -MOVING_VEL;
+        this.velX = MOVING_VEL;
         isAlive = true;
 
         //true x and y of object
@@ -197,24 +197,23 @@ public class Collectable {
 
     }*/
 
-    private void checkCollisions(Player mawi) {
+    protected void checkCollisions(Player mawi) {
         if ((mawi.getplayerRect()).intersect(rect)) {
             collectableCaught(mawi);
         }
         else {
-            Log.d("HealthCoins", "DO NOT INTERSECT");
             return;
         }
 
     }
 
-    private void collectableCaught(Player mawi) {
+    protected void collectableCaught(Player mawi) {
         mawi.performAction(ID);
         Log.d("Collectables", "player caught collectables");
         isAlive = false;
     }
 
-    private void checkYMovement(int[][] map) {
+    protected void checkYMovement(int[][] map) {
 
         //this means that the object is falling, therefore check scanline for underneath,
         //if collision then set grounded to true, and set Y to be just above the suitable tile
@@ -345,7 +344,7 @@ public class Collectable {
     }
 
     //method to check X movement against tiles and perform necessary actions
-    private void checkXMovement(int[][] map) {
+    protected void checkXMovement(int[][] map) {
 
         if (velX > 0) {
             Log.d("Collectables", "Case 1b");
@@ -403,20 +402,21 @@ public class Collectable {
     //method to check is coin is on screen and render appropriately
     public boolean isVisible(double cameraOffsetX, double cameraOffsetY) {
 
-        boolean isVisible;
+        boolean isVisible = false;
 
+        //RIGHT
         if ((velX > 0) && (x  - cameraOffsetX > 0) &&
                 ((x - cameraOffsetX) <= GameMainActivity.GAME_WIDTH)) {
 
             //MOVING UP
-            if (velY > 0 && ((y + height) - cameraOffsetY > 0) &&
+            if (velY < 0 && ((y + height) - cameraOffsetY > 0) &&
                     (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
 
                 isVisible = true;
             }
 
             //MOVING DOWN
-            else if (velY < 0 && (y - cameraOffsetY) > 0 &&
+            else if (velY > 0 && (y - cameraOffsetY) > 0 &&
                     (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
 
                 isVisible = true;
@@ -442,14 +442,14 @@ public class Collectable {
                 && ((x + width) - cameraOffsetX) <= GameMainActivity.GAME_WIDTH) {
 
             //MOVING UP
-            if (velY > 0 && ((y + height) - cameraOffsetY > 0) &&
+            if (velY < 0 && ((y + height) - cameraOffsetY > 0) &&
                     (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
 
                 isVisible = true;
             }
 
             //MOVING DOWN
-            else if (velY < 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
+            else if (velY > 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
                 isVisible = true;
             }
 
@@ -511,16 +511,46 @@ public class Collectable {
     }
 
     public double getX() {
-        Log.d("RenderingCollectable", "x is: " + x + ".\n");
         return x;
     }
 
     public double getY() {
-        Log.d("RenderingCollectable", "y is: " + y + ".\n");
         return y;
     }
 
     public boolean isFalling() {
         return (velY > 0);
+    }
+
+    protected void forceLeft() {
+        velX = -(MOVING_VEL);
+    }
+
+    protected void forceRight() {
+        velX = MOVING_VEL;
+    }
+
+    protected void forceUp() {
+        velY = JUMPING_ACCELERATION;
+    }
+
+    protected void forceDown() {
+        velY = -(JUMPING_ACCELERATION);
+    }
+
+    protected void forceY(double y) {
+        this.y = y;
+    }
+
+    protected void forceX(double x) {
+        this.x = x;
+    }
+
+    protected double getVelY() {
+        return velY;
+    }
+
+    protected double getVelX() {
+        return velX;
     }
 }
