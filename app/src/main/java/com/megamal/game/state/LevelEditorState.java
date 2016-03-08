@@ -12,6 +12,8 @@ import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.framework.util.UIButton;
+import com.megamal.game.model.Enemy;
+import com.megamal.game.model.Hedgehog;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
 import com.megamal.mawi.GameView;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 /**
  * Created by malberbatovci on 12/02/16.
@@ -51,15 +54,26 @@ public class LevelEditorState extends State {
     protected int previousMapX = -1;
     protected int previousMapY = -1;
 
+    protected int previousEnemyX = -1;
+    protected int previousEnemyY = -1;
+
+    protected boolean leftEnemyTouched = false;
+    protected boolean rightEnemyTouched = false;
+
     protected boolean showExtraToolKit = false;
     protected boolean showIDSwapper = false;
+    protected boolean showEnemySwapper = false;
 
     protected Tile testTile;
+    protected Enemy testEnemy;
 
 
     private boolean mapChanged = true;
     protected UIButton exitButton, dragButton, pencilButton, wrenchButton, leftButton, rightButton;
     protected UIButton saveButton, playButton;
+    protected UIButton enemyButton;
+
+    protected ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
     private int[][] map;
     private int maskedAction;
@@ -71,30 +85,6 @@ public class LevelEditorState extends State {
     private UIButton eraserButton;
 
     public LevelEditorState(int[][] newMap, int maxX, int maxY) {
-
-        //stub value to create as big as possible,
-        /*map = new int[100][100];
-
-        for(int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
-                map[i][j] = 0;
-            }
-        }
-
-
-        for(int i = 0; i < newMap.length; i++) {
-            for(int j = 0; j < newMap[0].length; j++) {
-                map[i][j] = newMap[i][j];
-            }
-        }
-
-        if((newMap.length - 1) > currentMaxY) {
-            currentMaxY = (newMap.length - 1);
-        }
-
-        if((newMap[0].length - 1) > currentMaxX) {
-            currentMaxX = (newMap[0].length - 1);
-        } */
 
         if(newMap.length < 2) {
             map = new int[100][100];
@@ -138,6 +128,7 @@ public class LevelEditorState extends State {
         pencilButton = new UIButton(32, 364, 96, 428, Assets.pencilTool, Assets.pencilToolInUse);
         eraserButton = new UIButton(96, 364, 160, 428, Assets.eraserTool, Assets.eraserToolInUse);
         dragButton = new UIButton(160, 364, 224, 428, Assets.movingTool, Assets.movingToolUsed);
+        enemyButton = new UIButton(234, 364, 298, 428, Assets.enemyButton, Assets.enemyButtonUsed);
         saveButton = new UIButton(768, 364, 832, 428, Assets.saveButton, Assets.saveButton);
         playButton = new UIButton(702, 364, 766, 428, Assets.playButton, Assets.playButton);
 
@@ -150,6 +141,8 @@ public class LevelEditorState extends State {
         //stub value for tile, just initialisig
         testTile = new Tile(0);
 
+        //stub value
+//        testEnemy = new Hedgehog(0, 0, camera.getX(), camera.getY());
 
         tileMapRenderer = new TileMapRenderer(map);
 
@@ -164,6 +157,11 @@ public class LevelEditorState extends State {
 
         if(wrenchButton.isTouched() && pencilButton.isTouched()) {
             showIDSwapper = true;
+            mapChanged = true;
+        }
+
+        if(wrenchButton.isTouched() && enemyButton.isTouched()) {
+            showEnemySwapper = true;
             mapChanged = true;
         }
     }
@@ -188,6 +186,7 @@ public class LevelEditorState extends State {
             dragButton.render(g);
             pencilButton.render(g);
             eraserButton.render(g);
+            enemyButton.render(g);
             saveButton.render(g);
             playButton.render(g);
         }
@@ -199,6 +198,22 @@ public class LevelEditorState extends State {
             g.drawImage(testTile.getImage(), 384, 450);
         }
 
+       /* else if (showEnemySwapper) {
+            leftButton.render(g);
+            rightButton.render(g);
+
+            if(leftEnemyTouched) {
+                g.drawImage(testEnemy.getImage(LEFT), 384, 450);
+                leftEnemyTouched = false;
+            }
+
+            else if (rightEnemyTouched) {
+                g.drawImage(testEnemy.getImage(RIGHT), 384, 450);
+                rightEnemyTouched = false;
+            }
+
+        } */
+
         if(dragButton.isTouched()) {
             drawReminder(g, dragButton);
         }
@@ -209,6 +224,10 @@ public class LevelEditorState extends State {
 
         else if (eraserButton.isTouched()) {
             drawReminder(g, eraserButton);
+        }
+
+        else if (enemyButton.isTouched()) {
+            drawReminder(g, enemyButton);
         }
 
 
@@ -229,16 +248,6 @@ public class LevelEditorState extends State {
         //check if moved onto exit button, or changing cameraOffsetButton
         //also will need to check placement of tiles.
         if(moveAction) {
-
-
-           /* if (!dragButton.isTouched() && dragButton.buttonMovedOut(scaledX, scaledY, ID)) {
-                return true;
-            }
-
-            else if (!dragButton.isTouched() && dragButton.buttonMovedOn(scaledX, scaledY, ID)) {
-                Log.d("dragButton", "Button movedOn");
-                return true;
-            } */
 
             //then it is safe to set ID to this
             if(!camera.hasIDSet()  && dragButton.isTouched()) {
@@ -330,23 +339,41 @@ public class LevelEditorState extends State {
 
             }
 
-            //moved on, therefore show extra tools
-            /*else if(wrenchButton.buttonMovedOn(scaledX, scaledY, ID)) {
-                showExtraToolKit = true;
-                mapChanged = true;
-                return true;
+            /*else if(enemyButton.isTouched()) {
 
-            }
+                //if extra tool kit is shown, but enemyButton not contained and wrench
+                //not contained
+                if(showExtraToolKit && !enemyButton.isContained(scaledX, scaledY) &&
+                        !wrenchButton.isContained(scaledX, scaledY)) {
 
-            else if(wrenchButton.buttonMovedOut(scaledX, scaledY, ID)) {
-                showExtraToolKit = false;
-                mapChanged = true;
-                return true;
-            }*/
+
+                    //this means they want to draw out of shwoing enemy swapper
+                    if(showEnemySwapper && !rightButton.isContained(scaledX, scaledY) &&
+                            !leftButton.isContained(scaledX, scaledY)) {
+
+                        drawEnemy(scaledX, scaledY);
+                        showEnemySwapper = false;
+                        showExtraToolKit = false;
+                        mapChanged = true;
+                        wrenchButton.forceTouchOff();
+
+                    }
+
+                    else if (!showEnemySwapper) {
+                        drawEnemy(scaledX, scaledY);
+                        mapChanged = true;
+                        wrenchButton.forceTouchOff();
+                    }
+
+
+                }
+
+                else if (!showExtraToolKit && !wrenchButton.isContained(scaledX, scaledY)) {
+                    drawEnemy(scaledX, scaledY);
+                }
+            } */
 
             else if(pencilButton.isTouched()) {
-
-
                 if(showExtraToolKit && !pencilButton.isContained(scaledX, scaledY) &&
                         !wrenchButton.isContained(scaledX, scaledY)) {
 
@@ -397,25 +424,6 @@ public class LevelEditorState extends State {
             else if (exitButton.buttonMovedOut(scaledX, scaledY, ID)) {
                 return true;
             }
-
-           /* else if (showIDSwapper) {
-
-                if(rightButton.buttonMovedOn(scaledX, scaledY, ID)) {
-                    return true;
-                }
-
-                else if(rightButton.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-                }
-
-                else if(leftButton.buttonMovedOn(scaledX, scaledY, ID)) {
-                    return true;
-                }
-
-                else if(leftButton.buttonMovedOut(scaledX, scaledY, ID)) {
-                    return true;
-                }
-            } */
 
             else {
                 return true;
@@ -884,6 +892,52 @@ public class LevelEditorState extends State {
         }
 
         return true;
+    }
+
+    private void drawEnemy(int scaledX, int scaledY) {
+
+        int mapEntryX = (int) Math.floor((scaledX + camera.getX())
+                / GameMainActivity.TILE_WIDTH);
+
+        int mapEntryY = (int) Math.floor((scaledY + camera.getY())
+                / GameMainActivity.TILE_HEIGHT);
+
+        if(mapEntryX < 0 || mapEntryX >= map[0].length) {
+            return;
+        }
+
+        if(mapEntryY < 0 || mapEntryY >= map.length) {
+            return;
+        }
+
+        else {
+
+            //i.e if map is not currently an enemy
+            if((map[mapEntryY][mapEntryX]) != -1) {
+
+                map[mapEntryY][mapEntryX] = -1;
+                testEnemy = new Hedgehog((mapEntryX * GameMainActivity.TILE_WIDTH),
+                        (mapEntryY * GameMainActivity.TILE_HEIGHT), camera.getX(), camera.getY());
+                enemies.add(testEnemy);
+
+
+            }
+
+          /*  if(checkRestrictions(ID, mapEntryX, mapEntryY)) {
+                if (!(map[mapEntryY][mapEntryX] == ID)) {
+                    map[mapEntryY][mapEntryX] = ID;
+
+                    updateMapBoundaries(mapEntryX, mapEntryY, ID);
+                }
+
+
+                previousMapY = mapEntryY;
+                previousMapX = mapEntryX;
+
+                mapChanged = true;
+            } */
+        }
+
     }
 
     private void drawTile(int scaledX, int scaledY, int ID) {

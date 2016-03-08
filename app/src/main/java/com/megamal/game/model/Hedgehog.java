@@ -22,6 +22,9 @@ public class Hedgehog extends Mover {
     private static final int Y_MOVEMENT_EXTRA = 20;
     private final static int MAX_OUT_OF_BOUNDS = 5;
     private static final int OBSTACLE_MAX_COUNT = 5;
+    private final static int LEFT = -1;
+    private final static int RIGHT = 1;
+
 
     private Tile tileA;
     private Tile tileB;
@@ -30,6 +33,7 @@ public class Hedgehog extends Mover {
     protected Rect rect;
 
     private int tileOnX, tileOnY;
+    private int mostRecentDirecton = RIGHT;
     private double x, y;
     private double rectX, rectY;
     private int width, height;
@@ -539,8 +543,51 @@ public class Hedgehog extends Mover {
         return height;
     }
 
+    @Override
+    public Bitmap getImage(int direction) {
+
+        mostRecentDirecton = direction;
+
+        if(direction == LEFT) {
+            return(Assets.hedgeWalkL1);
+        }
+
+        else if (direction == RIGHT) {
+            return(Assets.hedgeWalkR1);
+        }
+
+        else {
+            return(Assets.hedgeWalkL1);
+        }
+    }
+
+    @Override
+    public int getMostRecentDirection() {
+
+        if(mostRecentDirecton != LEFT && mostRecentDirecton != RIGHT) {
+            mostRecentDirecton = LEFT;
+            return mostRecentDirecton;
+        }
+
+        else {
+            return mostRecentDirecton;
+        }
+    }
+
     public int getWidth() {
         return width;
+    }
+
+    public void forceDirection(int direction) {
+
+        if(direction == LEFT) {
+            velX = -100;
+        }
+
+        else {
+            velX = 100;
+        }
+
     }
 
 

@@ -210,6 +210,8 @@ public class LevelEditorPlayState extends State {
         for(int i = 0; i < enemyArray.length; i++) {
             if(enemyArray[i] != null && enemyArray[i].isActive() && !enemyArray[i].isDying()) {
                 enemyArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                        enemyArray[i].getY(), true, enemyArray[i].isFalling());
             }
 
             if(enemyArray[i] != null && !isDyingFlag && enemyArray[i].isDying()) {
@@ -220,12 +222,21 @@ public class LevelEditorPlayState extends State {
 
         if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
             mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+            tileRenderer.renderMapMawi(g, map, cameraOffsetX, cameraOffsetY, mawi.getX(),
+                    mawi.getY(), true);
+        }
+
+        else if(mawi.hasMoved(cameraOffsetX, cameraOffsetY) || mawi.isGrounded()) {
+
         }
 
 
         for(int i = 0; i < projectileArray.length; i++) {
             if(projectileArray[i].isActive()) {
                 projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY,
+                        projectileArray[i].getX(), projectileArray[i].getY(), false,
+                        projectileArray[i].isFalling());
 
                 if(!isDyingFlag && projectileArray[i].isDying()) {
                     isDyingFlag = true;
@@ -246,15 +257,11 @@ public class LevelEditorPlayState extends State {
         for(int i = 0; i < projectileArray.length; i++) {
 
             //then necessary to render
-            if(projectileArray[i].isActive() &&
+            if (projectileArray[i].isActive() &&
                     projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY) &&
                     !projectileArray[i].isDying()) {
-
-
                 projectileArray[i].render(g, cameraOffsetX, cameraOffsetY);
-                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY,
-                        projectileArray[i].getX(), projectileArray[i].getY(), false,
-                        projectileArray[i].isFalling());
+
 
             } else {
                 if(projectileArray[i].isDying() && projectileArray[i].isVisible(cameraOffsetX, cameraOffsetY)) {
@@ -291,12 +298,35 @@ public class LevelEditorPlayState extends State {
 
     private void renderEnemies(Painter g) {
 
+
         for(int i = 0; i < enemyArray.length; i++) {
+
             if(enemyArray[i] != null && enemyArray[i].isActive()) {
                 if(!enemyArray[i].isDying()) {
-                    enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
-                            enemyArray[i].getY(), false, enemyArray[i].isFalling());
+
+                    //if hedgehod, then has animation
+                    if(enemyArray[i] instanceof Hedgehog) {
+                        if (enemyArray[i].isAlive()) {
+                            if (enemyArray[i].getVelX() > 0) {
+                                Assets.hedgeAnimR.render(g, (int) (enemyArray[i].getX() - cameraOffsetX),
+                                        (int) (enemyArray[i].getY() - cameraOffsetY),
+                                        enemyArray[i].getHeight(), enemyArray[i].getWidth());
+                            } else {
+                                Assets.hedgeAnimL.render(g, (int) (enemyArray[i].getX() - cameraOffsetX),
+                                        (int) (enemyArray[i].getY() - cameraOffsetY),
+                                        enemyArray[i].getHeight(), enemyArray[i].getWidth());
+                            }
+
+                        } else {
+                            enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                        }
+                    }
+
+                    else {
+                        enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
+                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                                enemyArray[i].getY(), false, enemyArray[i].isFalling());
+                    }
                 }
 
                 else if(enemyArray[i].isDying() && !enemyArray[i].isDead()) {
@@ -305,10 +335,13 @@ public class LevelEditorPlayState extends State {
                     enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
 
                 }
+            }
 
-                else if(enemyArray[i].safeToRemove()) {
-                    enemyArray[i] = null;
-                }
+            if(enemyArray[i] != null && enemyArray[i].safeToRemove()) {
+                Log.d("EnemyStuff", "REMOVED");
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
+                        enemyArray[i].getY(), true, enemyArray[i].isFalling());
+                enemyArray[i] = null;
             }
         }
     }

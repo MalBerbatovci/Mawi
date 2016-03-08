@@ -32,6 +32,9 @@ public class Assets {
     public static Bitmap hedgeWalkR1, hedgeWalkR2, hedgeWalkR3, hedgeWalkR4, hedgeWalkR5, hedgeWalkR6,
             hedgeWalkL1, hedgeWalkL2, hedgeWalkL3, hedgeWalkL4, hedgeWalkL5, hedgeWalkL6, hedgeStandard;
 
+    public static Bitmap enemyButton, enemyButtonUsed, jumpButton, jumpButtonPressed, projectileButton,
+        projectileButtonPressed;
+
 
     public static Bitmap level1Tile, level2Tile, pathTile, treeTile;
 
@@ -82,6 +85,12 @@ public class Assets {
         runButtonPressedR = loadBitmap("runButtonRPressed.png", false);
         runButtonPressedL = loadBitmap("runButtonLPressed.png", false);
 
+        jumpButton = loadBitmap("jumpButton.png", false);
+        jumpButtonPressed = loadBitmap("jumpButtonPressed.png", false);
+
+        projectileButton = loadBitmap("projectileButton.png", false);
+        projectileButtonPressed = loadBitmap("projectileButtonPressed.png", false);
+
         startScreen = loadBitmap("startScreen.png", true);
         exitButton = loadBitmap("ExitButton.png", true);
         exitButtonPressed = loadBitmap("ExitButtonPushed.png", true);
@@ -97,6 +106,9 @@ public class Assets {
 
         eraserTool = loadBitmap("eraser.png", true);
         eraserToolInUse = loadBitmap("erasedUsed.png", true);
+
+        enemyButton = loadBitmap("enemyButton.png", true);
+        enemyButtonUsed = loadBitmap("enemyButtonUsed.png", true);
 
         leftID = loadBitmap("leftIDButton.png", true);
         leftIDUsed = loadBitmap("leftIDButtonUsed.png", true);

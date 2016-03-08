@@ -108,11 +108,11 @@ public class PlayState extends State {
         }
 
 
-        runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
+        runL = new UIButton(100, 450, 200, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
-        shoot = new UIButton(740, 450, 800, 490, Assets.runButtonR, Assets.runButtonPressedR);
+        jump = new UIButton(610, 440, 710, 500, Assets.jumpButton, Assets.jumpButtonPressed);
+        shoot = new UIButton(720, 420, 820, 480, Assets.projectileButton, Assets.projectileButtonPressed);
 
         camera = new Camera(map);
 
@@ -138,6 +138,7 @@ public class PlayState extends State {
 
             if(mawi.justHit()) {
                 collectables.addAll(mawi.getCoins());
+                Log.d("CoinCount", "Coins added!");
             }
 
             if(!collectables.isEmpty()) {
@@ -238,12 +239,16 @@ public class PlayState extends State {
 
         if (!mawi.hasMoved(cameraOffsetX, cameraOffsetY)) {
             mawi.clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+            tileRenderer.renderMapMawi(g, map, cameraOffsetX, cameraOffsetY, mawi.getX(),
+                    mawi.getY(), true);
         }
 
 
         for(int i = 0; i < projectileArray.length; i++) {
             if(projectileArray[i].isActive()) {
                 projectileArray[i].clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, projectileArray[i].getX(),
+                        projectileArray[i].getY(), false, projectileArray[i].isFalling());
 
                 if(!isDyingFlag && projectileArray[i].isDying()) {
                     isDyingFlag = true;
@@ -292,6 +297,7 @@ public class PlayState extends State {
                 if (collectables.get(i).isAlive() && collectables.get(i).isVisible(cameraOffsetX, cameraOffsetY)) {
 
                     collectables.get(i).render(g, cameraOffsetX, cameraOffsetY);
+                    //Log.d("CoinCount", "Rendering collectables");
                 }
 
                 if (!(collectables.get(i).isAlive())) {
@@ -336,21 +342,16 @@ public class PlayState extends State {
 
                     else {
                         enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
-                        tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
-                                enemyArray[i].getY(), false, enemyArray[i].isFalling());
                     }
                 }
 
                 else if(enemyArray[i].isDying() && !enemyArray[i].isDead()) {
-                    tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
-                            enemyArray[i].getY(), false, enemyArray[i].isFalling());
                     enemyArray[i].render(g, cameraOffsetX, cameraOffsetY);
 
                 }
             }
 
-            if(enemyArray[i] != null && enemyArray[i].safeToRemove()) {
-                Log.d("EnemyStuff", "REMOVED");
+            if (enemyArray[i] != null && enemyArray[i].safeToRemove()) {
                 tileRenderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, enemyArray[i].getX(),
                         enemyArray[i].getY(), true, enemyArray[i].isFalling());
                 enemyArray[i] = null;

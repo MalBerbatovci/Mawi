@@ -674,7 +674,7 @@ public class CollectableTest {
 
         expectedVelY = testCollectable.getVelY();
         testCollectable.checkYMovement(testMap);
-        assertEquals(expectedVelY, testCollectable.getVelY(), 0);
+        assertNotEquals(expectedVelY, testCollectable.getVelY(), 0);
 
         collectableX = -70;
         testCollectable.forceRight();
@@ -719,7 +719,7 @@ public class CollectableTest {
 
         expectedVelY = testCollectable.getVelY();
         testCollectable.checkYMovement(testMap);
-        assertEquals(expectedVelY, testCollectable.getVelY(), 0);
+        assertNotEquals(expectedVelY, testCollectable.getVelY(), 0);
 
         collectableX = -70;
         testCollectable.forceUp();
@@ -813,7 +813,7 @@ public class CollectableTest {
 
         expectedVelY = testCollectable.getVelY();
         testCollectable.checkYMovement(testMap);
-        assertEquals(expectedVelY, testCollectable.getVelY(), 0);
+        assertNotEquals(expectedVelY, testCollectable.getVelY(), 0);
 
         collectableX = -70;
         testCollectable.forceUp();

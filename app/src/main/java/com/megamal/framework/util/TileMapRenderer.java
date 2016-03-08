@@ -97,7 +97,7 @@ public class TileMapRenderer {
 
     //Method to fix any discontinuties when mawi is just grounded - Looks at the four tiles under mawi,
     //and renders them respectively
-    private void renderUnderMawi(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
+    protected void renderUnderMawi(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, Player mawi) {
 
 
         xStart = (int) Math.ceil((mawi.getX() + cameraOffsetX) / GameMainActivity.TILE_WIDTH);
@@ -278,5 +278,52 @@ public class TileMapRenderer {
             }
             return;*/
 
+    }
+
+
+    public void renderMapMawi(Painter g, int[][] map, double cameraOffsetX, double cameraOffsetY, double positionX,
+                                     double positionY, boolean backGroundFill) {
+
+
+        //left first
+        xStart = (int) Math.floor((positionX + 5)/ GameMainActivity.TILE_WIDTH) - 1;
+        yStart = (int) Math.floor((positionY + 5)/ GameMainActivity.TILE_WIDTH);
+
+        for (int y = yStart; y < (yStart + 4); y++) {
+            if (y >= 0 && xStart >= 0 && y < map.length && xStart < map[0].length) {
+
+                currentTile.setID(map[y][xStart]);
+                if (currentTile.getImage() == null) {
+                    if (backGroundFill) {
+                        g.setColor(Color.rgb(80, 143, 240));
+                        g.fillRect(((int) ((xStart * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                    }
+                } else {
+                    currentTile.setLocation(y, xStart, cameraOffsetX, cameraOffsetY);
+                    g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                }
+            }
+        }
+
+        xStart = (int) Math.floor((positionX + 5) / GameMainActivity.TILE_WIDTH) + 1;
+        yStart = (int) Math.floor((positionY + 5)/ GameMainActivity.TILE_WIDTH);
+
+        for (int y = yStart; y < (yStart + 4); y++) {
+            if (y >= 0 && xStart >= 0 && y < map.length && xStart < map[0].length) {
+
+                currentTile.setID(map[y][xStart]);
+                if (currentTile.getImage() == null) {
+                    if (backGroundFill) {
+                        g.setColor(Color.rgb(80, 143, 240));
+                        g.fillRect(((int) ((xStart * GameMainActivity.TILE_WIDTH) - cameraOffsetX)), (int) ((y * GameMainActivity.TILE_HEIGHT) - cameraOffsetY),
+                                GameMainActivity.TILE_WIDTH, GameMainActivity.TILE_HEIGHT);
+                    }
+                } else {
+                    currentTile.setLocation(y, xStart, cameraOffsetX, cameraOffsetY);
+                    g.drawImage(currentTile.getImage(), (int) currentTile.getX(), (int) currentTile.getY());
+                }
+            }
+        }
     }
 }

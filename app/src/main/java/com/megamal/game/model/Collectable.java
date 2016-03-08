@@ -97,8 +97,6 @@ public class Collectable {
                       this.width = COIN_WIDTH;
                       this.isPowerUp = false;
                       updateRect(x, y, cameraOffsetX, cameraOffsetY);
-                      Log.d("Enemy", "collectable rendered with co-ords: ( " + (this.x - cameraOffsetX) + "," + (this.y - cameraOffsetY) + ". \n");
-                      Log.d("Collectables", "collectable made with tile co-ords: ( " + x + "," + y + ". \n");
                       break;
 
             case (2): {
@@ -160,6 +158,7 @@ public class Collectable {
         else if(ID == 2) {
             //longer than 10 seconds
             if((System.currentTimeMillis() - activationTime) / 1000 > 10) {
+                Log.d("CoinCount", "Made not alive!");
                 this.isAlive = false;
             }
         }
@@ -480,7 +479,37 @@ public class Collectable {
                 isVisible = false;
             }
 
-        } else {
+        }
+
+        else if (velX == 0) {
+            //MOVING UP
+            if (velY < 0 && ((y + height) - cameraOffsetY > 0) &&
+                    (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
+            }
+
+            //MOVING DOWN
+            else if (velY > 0 && (y - cameraOffsetY) > 0 && (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT){
+                isVisible = true;
+            }
+
+
+            else if (velY == 0 && ((y - cameraOffsetY) > 0 &&
+                    (y - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT) ||
+                    ((y + height) - cameraOffsetY > 0) &&
+                            (((y + height) - cameraOffsetY) <= GameMainActivity.GAME_HEIGHT)) {
+
+                isVisible = true;
+            }
+
+            else {
+                isVisible = false;
+            }
+
+        }
+
+        else {
             isVisible = false;
         }
 

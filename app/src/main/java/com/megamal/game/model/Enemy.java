@@ -1,5 +1,6 @@
 package com.megamal.game.model;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import com.megamal.framework.util.Painter;
@@ -90,6 +91,12 @@ public abstract class Enemy {
     public abstract int getWidth();
 
     public abstract int getHeight();
+
+    public abstract Bitmap getImage(int direction);
+
+    public abstract int getMostRecentDirection();
+
+    public abstract void forceDirection(int direction);
 
 
 }

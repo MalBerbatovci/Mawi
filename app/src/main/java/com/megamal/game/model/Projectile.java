@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.Tile;
+import com.megamal.framework.util.TileMapRenderer;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
 
@@ -180,7 +181,11 @@ public class Projectile {
 
             if(!isVisible(cameraOffsetX, cameraOffsetY)) {
                 Log.d("Projectile Intersection", "Not visible, remove");
+
+                TileMapRenderer renderer = new TileMapRenderer(map);
                 clearAreaAround(g, cameraOffsetX, cameraOffsetY);
+                renderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, x, y, true,
+                        false);
                 isActive = false;
             }
         }

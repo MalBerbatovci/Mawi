@@ -61,6 +61,8 @@ public class Player {
     //velY for jumping, velX for walking/running
     private double velY = 0, velX = 0;
     private int lastDirection = 0;
+    private int maxMapX;
+    private int maxMapY;
 
     private boolean isGrounded = true;
     private boolean isAlive = true;
@@ -494,6 +496,9 @@ public class Player {
     //method to check mawi's closeness to an object, and pop out if relevant (using the scanLinesAcross)
     private void checkXMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
 
+        maxMapX = map[0].length;
+        maxMapY = map.length;
+
         if (hasMoved(cameraOffsetX, cameraOffsetY) || collisionWithObj || justGrounded()) {
 
             yScanLineAAcross = y + SCAN_A_ACROSS + cameraOffsetY;
@@ -526,6 +531,14 @@ public class Player {
             int scanEndAcrossX = (int) Math.floor(xEndAcross / GameMainActivity.TILE_HEIGHT);
             if (scanEndAcrossX < 0 || scanEndAcrossX >= map[0].length) {
                 endValid = false;
+
+                if(left) {
+
+                }
+
+                else {
+                    return;
+                }
                 //return;
             }
 
@@ -832,11 +845,15 @@ public class Player {
         tile.setLocation(yIndex, xIndex, cameraOffsetX, cameraOffsetY);
 
 
-        if(direction == LEFT)
-         x = (tile.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+        if(direction == LEFT) {
+            x = (tile.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
+            Log.d("EdgeBug", "MAWI MOVED LEFT");
+        }
 
-        else if (direction == RIGHT)
-         x = (tile.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
+        else if (direction == RIGHT) {
+            x = (tile.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
+            Log.d("EdgeBug", "MAWI MOVED RIGHT");
+        }
 
         collisionWithObj = true;
         return;
@@ -931,7 +948,7 @@ public class Player {
                     / GameMainActivity.TILE_WIDTH);
         }
 
-        else if (velX < 0) {
+        else if (velX > 0) {
             tileIndexX = (int) Math.floor((((x + width) + 20) + cameraOffsetX) /
                     GameMainActivity.TILE_WIDTH);
         }
@@ -1191,7 +1208,7 @@ public class Player {
 
                 loop:
                 for(int j = 0; j < loopCount; j++) {
-                    randomX = RandomNumberGenerator.getRandIntBetween((int) x - 100, (int) x + 100);
+                    randomX = RandomNumberGenerator.getRandIntBetween((int) x - 200, (int) x + 200);
 
                     //ensure not on mawi
                     while((x - randomX) < 0 && (x - randomX) > (-GameMainActivity.TILE_WIDTH)) {
@@ -1204,12 +1221,12 @@ public class Player {
 
 
                     int mapY = (int) Math.floor(y / GameMainActivity.TILE_HEIGHT);
-                    int mapX = (int) Math.floor(randomX / GameMainActivity.TILE_WIDTH);
+                    int mapX = (int) Math.floor((double)randomX / GameMainActivity.TILE_WIDTH);
 
                     //check boundaries, ensure not OOB
                     if (mapY < map.length && mapY > 0 && mapX < map[0].length && mapX > 0) {
                         if (map[mapY][mapX] == 0) {
-                            collectables.add(new Collectable(2, randomX, y, cameraOffsetX, cameraOffsetY));
+                            collectables.add(new Collectable(2, randomX, (y + 64), cameraOffsetX, cameraOffsetY));
                             break loop;
                         }
                     }
@@ -1228,7 +1245,7 @@ public class Player {
                             if (map[mapY][mapX] == 0) {
 
                                 collectables.add(new Collectable(2, x,
-                                        (y - GameMainActivity.GAME_HEIGHT), cameraOffsetX,
+                                        (y - GameMainActivity.TILE_HEIGHT), cameraOffsetX,
                                         cameraOffsetY));
 
                                 break loop;
@@ -1330,6 +1347,8 @@ public class Player {
 
     public ArrayList<Collectable> getCoins() {
         justHit = false;
+
+        //collectables given to playstate, so safe to remove
         removeCollectables = true;
         return collectables;
     }
