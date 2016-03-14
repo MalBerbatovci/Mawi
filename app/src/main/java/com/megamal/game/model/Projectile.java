@@ -183,9 +183,10 @@ public class Projectile {
                 Log.d("Projectile Intersection", "Not visible, remove");
 
                 TileMapRenderer renderer = new TileMapRenderer(map);
+
                 clearAreaAround(g, cameraOffsetX, cameraOffsetY);
                 renderer.renderMapCollectable(g, map, cameraOffsetX, cameraOffsetY, x, y, true,
-                        false);
+                        true);
                 isActive = false;
             }
         }

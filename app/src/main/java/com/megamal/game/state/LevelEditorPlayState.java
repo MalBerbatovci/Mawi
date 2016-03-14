@@ -108,8 +108,8 @@ public class LevelEditorPlayState extends State {
         runL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        jump = new UIButton(610, 440, 730, 500, Assets.walkButtonL, Assets.walkButtonPressedL);
-        shoot = new UIButton(740, 450, 800, 490, Assets.runButtonR, Assets.runButtonPressedR);
+        jump = new UIButton(610, 440, 710, 500, Assets.jumpButton, Assets.jumpButtonPressed);
+        shoot = new UIButton(720, 420, 820, 480, Assets.projectileButton, Assets.projectileButtonPressed);
 
         backToLevelEditor = new UIButton(10, 10, 74, 74, Assets.backToLEButton, Assets.backToLEButton);
 

@@ -22,6 +22,7 @@ public class Player {
     private final static int X_RECT_LEEWAY = 15;
     private final static int Y_RECT_LEEWAY = 30;
     private final static int MAX_INVINCIBLE_TIME = 5;
+    private final static int MAX_DOWNWARDS_VELOCITY = 1000;
 
     //Constant for physics
     private final static double ACCEL_GRAVITY = 1722;
@@ -134,6 +135,11 @@ public class Player {
 
             if (!isGrounded) {
                 velY += ACCEL_GRAVITY * delta;
+
+                if(velY > MAX_DOWNWARDS_VELOCITY) {
+                    velY = MAX_DOWNWARDS_VELOCITY;
+                }
+
             } else {
                 velY = 0;
             }

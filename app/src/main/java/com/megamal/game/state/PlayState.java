@@ -101,11 +101,17 @@ public class PlayState extends State {
             projectileArray[i].makeNonActive();
         }
 
-        for(int i = 0; i < NO_ENEMIES; i++) {
+        /*for(int i = 0; i < NO_ENEMIES; i++) {
             enemyArray[i] = new Hedgehog(RandomNumberGenerator.getRandIntBetween(0, 1500),
                     RandomNumberGenerator.getRandIntBetween(0, 1500),
                     cameraOffsetX, cameraOffsetY);
-        }
+        } */
+
+        enemyArray[0] = new Hedgehog(512, 200, cameraOffsetX, cameraOffsetY);
+        enemyArray[1] = new Hedgehog(830, 200, cameraOffsetX, cameraOffsetY);
+        enemyArray[2] = new Hedgehog(900, 200, cameraOffsetX, cameraOffsetY);
+        enemyArray[3] = new Hedgehog(870, 200, cameraOffsetX, cameraOffsetY);
+        enemyArray[4] = new Hedgehog(900, 800, cameraOffsetX, cameraOffsetY);
 
 
         runL = new UIButton(100, 450, 200, 490, Assets.runButtonL, Assets.runButtonPressedL);
