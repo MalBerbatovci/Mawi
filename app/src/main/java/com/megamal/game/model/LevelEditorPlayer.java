@@ -100,7 +100,7 @@ public class LevelEditorPlayer {
         previousY = y;
 
         //if mawi is not in collision with an Object & is walking/running then update x appropriately
-        if (isWalking) {
+        if (isWalking || isWalkingUp) {
             if (!horizontalCollision) {
                 x += velX * delta;
 
@@ -179,8 +179,8 @@ public class LevelEditorPlayer {
     //this is then used to establish whether mawi is grounded or not
     private void checkYMovement(int[][] map) {
 
-        //i.e if has moved in Y direction
-        if (previousY != y || verticalCollision) {
+        //i.e if moving  in Y direction
+        if (velY != 0) {
 
             verticalCollision = false;
 
@@ -198,7 +198,7 @@ public class LevelEditorPlayer {
             //this means charatcer is currently Moving up first get map[Y] value then see if obstacles
             //if obstacles then charatcer has hit head
             if (velY < 0) {
-                yFloor = (int) Math.floor((y) / GameMainActivity.TILE_HEIGHT);
+                yFloor = (int) Math.floor((y - 2) / GameMainActivity.TILE_HEIGHT);
 
                 //boundary conditions
                 if (yFloor < 0 || yFloor >= map.length) {
@@ -214,8 +214,7 @@ public class LevelEditorPlayer {
                     tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
                     yObstacleCollision(tileA, yFloor, scanADown);
 
-                   /* y = tileA.getY() + GameMainActivity.TILE_HEIGHT;
-                    velY = Math.abs(velY) / 5; */
+                   return;
 
                 }
 
@@ -224,8 +223,7 @@ public class LevelEditorPlayer {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                     yObstacleCollision(tileB, yFloor, scanBDown);
 
-                    /*y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
-                    velY = Math.abs(velY) / 5;*/
+                    return;
 
                 }
 
@@ -287,12 +285,12 @@ public class LevelEditorPlayer {
 
         //travelling downwards
         if(velY > 0) {
-            y = (tile.getY() - CLOSENESS_TO_OBSTACLE - height);
+            y = (tile.getY() - height);
         }
 
         //travelling upwards
-        else {
-            y = (tile.getY() + CLOSENESS_TO_OBSTACLE + height);
+        else if (velY < 0) {
+            y = (tile.getY() + GameMainActivity.TILE_HEIGHT);
         }
 
         verticalCollision = true;
@@ -486,10 +484,8 @@ public class LevelEditorPlayer {
 
         if (direction == LEFT) {
             x = (tile.getX() + CLOSENESS_TO_OBSTACLE + GameMainActivity.TILE_WIDTH);
-            Log.d("EdgeBug", "MAWI MOVED LEFT");
         } else if (direction == RIGHT) {
             x = (tile.getX() - CLOSENESS_TO_OBSTACLE - GameMainActivity.TILE_WIDTH);
-            Log.d("EdgeBug", "MAWI MOVED RIGHT");
         }
 
         horizontalCollision = true;
@@ -523,8 +519,8 @@ public class LevelEditorPlayer {
 
     public void walkDown() {
         velY = WALKING_SPEED;
-        up = true;
-        down = false;
+        up = false;
+        down = true;
         isWalkingUp = true;
     }
 

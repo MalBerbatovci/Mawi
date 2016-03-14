@@ -349,17 +349,8 @@ public class LevelState extends State {
                             mawi.walk(LEFT);
                         }
 
-                        else if (walkingUp) {
-                            mawi.walkUp();
-                        }
-
-                        else if (walkingDown) {
-                            mawi.walkDown();
-                        }
-
                         else {
                             mawi.stopWalking();
-                            mawi.stopWalkingVert();
                         }
 
                         return true;
@@ -371,15 +362,8 @@ public class LevelState extends State {
                             mawi.walk(RIGHT);
                         }
 
-                        else if (walkingUp) {
-                            mawi.walkUp();
-                        } else if (walkingDown) {
-                            mawi.walkDown();
-                        }
-
                         else {
                             mawi.stopWalking();
-                            mawi.stopWalkingVert();
                         }
 
                         return true;
@@ -393,16 +377,7 @@ public class LevelState extends State {
                             mawi.walkDown();
                         }
 
-                        else if (walkingRight) {
-                            mawi.walk(RIGHT);
-                        }
-
-                        else if (walkingLeft) {
-                            mawi.walk(LEFT);
-                        }
-
                         else {
-                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
@@ -417,16 +392,7 @@ public class LevelState extends State {
                             mawi.walkUp();
                         }
 
-                        else if (walkingRight) {
-                            mawi.walk(RIGHT);
-                        }
-
-                        else if (walkingLeft) {
-                            mawi.walk(LEFT);
-                        }
-
                         else {
-                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
@@ -473,16 +439,7 @@ public class LevelState extends State {
                             mawi.walkDown();
                         }
 
-                        else if (walkingRight) {
-                            mawi.walk(RIGHT);
-                        }
-
-                        else if (walkingLeft) {
-                            mawi.walk(LEFT);
-                        }
-
                         else {
-                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
@@ -497,16 +454,7 @@ public class LevelState extends State {
                             mawi.walkUp();
                         }
 
-                        else if (walkingRight) {
-                            mawi.walk(RIGHT);
-                        }
-
-                        else if (walkingLeft) {
-                            mawi.walk(LEFT);
-                        }
-
                         else {
-                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
