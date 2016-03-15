@@ -29,6 +29,8 @@ public class Assets {
             pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed, saveButton,
             playButton, backToLEButton;
 
+    public static Bitmap walkButtonU, walkButtonUPressed, walkButtonD, walkButtonDPressed;
+
     public static Bitmap hedgeWalkR1, hedgeWalkR2, hedgeWalkR3, hedgeWalkR4, hedgeWalkR5, hedgeWalkR6,
             hedgeWalkL1, hedgeWalkL2, hedgeWalkL3, hedgeWalkL4, hedgeWalkL5, hedgeWalkL6, hedgeStandard;
 
@@ -36,7 +38,8 @@ public class Assets {
         projectileButtonPressed;
 
 
-    public static Bitmap level1Tile, level2Tile, pathTile, treeTile;
+    public static Bitmap level1Tile, level2Tile, pathTile, pathTileB, pathTileC, treeTile, treeTileB,
+        treeTileC, portalBottomR, portalTopR, portalBottomL, portalTopL, level3Tile;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL,
                 hedgeAnimR, hedgeAnimL;
@@ -80,6 +83,12 @@ public class Assets {
         walkButtonL = loadBitmap("walkButtonL.png", false);
         walkButtonPressedR = loadBitmap("walkButtonRPressed.png", false);
         walkButtonPressedL = loadBitmap("walkButtonLPressed.png", false);
+        walkButtonU = loadBitmap("walkButtonU.png", false);
+        walkButtonUPressed = loadBitmap("walkButtonUPressed.png", false);
+        walkButtonD = loadBitmap("walkButtonD.png", false);
+        walkButtonDPressed = loadBitmap("walkButtonDPressed.png", false);
+
+
         runButtonR = loadBitmap("runButtonR.png", false);
         runButtonL = loadBitmap("runButtonL.png", false);
         runButtonPressedR = loadBitmap("runButtonRPressed.png", false);
@@ -124,9 +133,23 @@ public class Assets {
 
 
         pathTile = loadBitmap("path.png", true);
+        pathTileB = loadBitmap("path2.png", true);
+        pathTileC = loadBitmap("path3.png", true);
+
+        treeTile = loadBitmap("treeTile.png", true);
+        treeTileB = loadBitmap("treeTileB.png", true);
+        treeTileC = loadBitmap("treeTileC.png", true);
+
         level1Tile = loadBitmap("level1.png", true);
         level2Tile = loadBitmap("level2.png", true);
-        treeTile = loadBitmap("treeTile.png", true);
+        level3Tile = loadBitmap("level3.png", true);
+
+
+        portalBottomR = loadBitmap("portalBottomR.png", true);
+        portalTopR = loadBitmap("portalTopR.png", true);
+        portalBottomL = loadBitmap("portalBottomL.png", true);
+        portalTopL = loadBitmap("portalTopL.png", true);
+
 
         hedgeStandard = loadBitmap("enemyRF2.png", false);
 

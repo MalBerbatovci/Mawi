@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.megamal.framework.util.Camera;
+import com.megamal.framework.util.EnemyFactory;
 import com.megamal.framework.util.RandomNumberGenerator;
 import com.megamal.framework.util.Tile;
 import com.megamal.framework.util.TileMapFactory;
@@ -22,6 +23,7 @@ import com.megamal.game.model.Projectile;
 import com.megamal.mawi.Assets;
 import com.megamal.framework.util.Painter;
 import com.megamal.mawi.GameMainActivity;
+import com.megamal.mawi.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,12 +47,13 @@ public class PlayState extends State {
     //private Projectile testProjectile;
     private Tile tile;
     private String levelString = "level";
+    private String enemyString = "enemy";
 
     private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
 
     private Projectile[] projectileArray = new Projectile[MAX_PROJECTILES];
 
-    private Enemy[] enemyArray = new Enemy[NO_ENEMIES];
+    private Enemy[] enemyArray;
 
 
     private UIButton runR, runL, jump, shoot;
@@ -65,9 +68,14 @@ public class PlayState extends State {
     private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
+    private int currentLevel;
+
 
     public PlayState(int levelToPlay) {
+
         levelString = levelString + levelToPlay + ".txt";
+        enemyString = enemyString + levelToPlay + ".txt";
+        currentLevel = levelToPlay;
     }
 
     @Override
@@ -79,6 +87,7 @@ public class PlayState extends State {
 
         tile = new Tile(1);
 
+        //parse txt file into appropriate tileMap
         try {
             map = tileFactory.parseFileIntoMap(levelString);
         } catch (IOException e) {
@@ -86,6 +95,13 @@ public class PlayState extends State {
         }
 
         tileRenderer = new TileMapRenderer(map);
+
+        //parse txt file into appropriate enemyArray
+        try {
+            enemyArray = EnemyFactory.parseEnemyFileIntoData(enemyString);
+        } catch (IOException e) {
+            System.err.print("Error parsing file: " + levelString);
+        }
 
         //loop to find first tile to place mawi on
         loop:
@@ -101,26 +117,11 @@ public class PlayState extends State {
                 tile.getY() - GameMainActivity.PLAYER_HEIGHT,
                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
 
-        hedge = new Hedgehog(1500.0, 0.0, cameraOffsetX, cameraOffsetY);
-
         //create an array of 10 projectiles which are not active.
         for(int i = 0; i < MAX_PROJECTILES; i++ ) {
             projectileArray[i] = new Projectile(400.0, 200.0, true, 1, cameraOffsetX, cameraOffsetY, RIGHT);
             projectileArray[i].makeNonActive();
         }
-
-        /*for(int i = 0; i < NO_ENEMIES; i++) {
-            enemyArray[i] = new Hedgehog(RandomNumberGenerator.getRandIntBetween(0, 1500),
-                    RandomNumberGenerator.getRandIntBetween(0, 1500),
-                    cameraOffsetX, cameraOffsetY);
-        } */
-
-        enemyArray[0] = new Hedgehog(512, 200, cameraOffsetX, cameraOffsetY);
-        enemyArray[1] = new Hedgehog(830, 200, cameraOffsetX, cameraOffsetY);
-        enemyArray[2] = new Hedgehog(900, 200, cameraOffsetX, cameraOffsetY);
-        enemyArray[3] = new Hedgehog(870, 200, cameraOffsetX, cameraOffsetY);
-        enemyArray[4] = new Hedgehog(900, 800, cameraOffsetX, cameraOffsetY);
-
 
         runL = new UIButton(100, 450, 200, 490, Assets.runButtonL, Assets.runButtonPressedL);
         runR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
@@ -137,9 +138,12 @@ public class PlayState extends State {
     public void update(float delta, Painter g) {
 
         if (!mawi.isAlive()) {
-            setCurrentState(new MenuState());
+            setCurrentState(new LevelState());
         } else {
 
+            if(mawi.setNewLevel()) {
+                transitionAndUpdateLevels();
+            }
 
             mawi.update(delta, map, cameraOffsetX, cameraOffsetY);
 
@@ -180,6 +184,41 @@ public class PlayState extends State {
             cameraOffsetX = camera.updateCameraX(mawi, cameraOffsetX, map);
             cameraOffsetY = camera.updateCameraY(mawi, cameraOffsetY, map);
         }
+
+    }
+
+    //Method to update current level in shared preferences, and then transition to levelState
+    private void transitionAndUpdateLevels() {
+
+
+        Log.d("CurrentLevel", "Current Level is: " + currentLevel);
+        SharedPreferences preferences =
+                GameMainActivity.getApplicationConext().getSharedPreferences(GameMainActivity.preferenceString,
+                        Context.MODE_PRIVATE);
+        SharedPreferences.Editor preferenceEditor = preferences.edit();
+
+
+
+        //if not equal, this means player is replaying a previous level, so just return
+        if(currentLevel != preferences.getInt(GameMainActivity.preferenceString, 1)) {
+            setCurrentState(new LevelState());
+            return;
+        }
+
+
+        //update to new level
+        currentLevel++;
+
+        preferenceEditor.putInt(GameMainActivity.preferenceString, currentLevel);
+        preferenceEditor.apply();
+
+
+
+
+
+        setCurrentState(new LevelState());
+
+
 
     }
 
@@ -678,16 +717,4 @@ public class PlayState extends State {
         return false;
     }
 
-    /*@Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        System.out.println("Key: " + keyCode + " pressed!");
-
-        if (keyCode == event.KEYCODE_J) {
-            mawi.jump();
-            System.out.println("J pressed!");
-        }
-
-        return true;
-    }*/
 }

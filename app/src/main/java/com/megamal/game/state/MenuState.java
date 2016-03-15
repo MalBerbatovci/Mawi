@@ -7,6 +7,7 @@ import android.view.View;
 import com.megamal.framework.util.Painter;
 import com.megamal.framework.util.UIButton;
 import com.megamal.mawi.Assets;
+import com.megamal.mawi.GameMainActivity;
 
 /**
  * Created by malberbatovci on 12/02/16.
@@ -57,12 +58,11 @@ public class MenuState extends State {
                     maskedAction == MotionEvent.ACTION_UP) {
 
                 if(playButton.isContained(scaledX, scaledY)) {
-                    setCurrentState(new PlayState(1));
+                    setCurrentState(new LevelState());
                 }
 
                 else if (exitButton.isContained(scaledX, scaledY)) {
-                    //setCurrentState(new PlayState());
-                    setCurrentState(new LevelState());
+                    System.exit(0);
                 }
 
                 else if (levelEditorButton.isContained(scaledX,scaledY)) {

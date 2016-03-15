@@ -43,7 +43,8 @@ public class GameMainActivity extends Activity {
         sGame = new GameView(this, GAME_WIDTH, GAME_HEIGHT);
         Log.d("GameMainActivity", "sGame created!");
 
-        preferences = getPreferences(Context.MODE_PRIVATE);
+        preferences = this.getSharedPreferences(getString(R.string.shared_pref),
+                Context.MODE_PRIVATE);
         preferenceEditor = preferences.edit();
 
         //if no prefeences is created, then create one with the default value of one.
@@ -54,7 +55,9 @@ public class GameMainActivity extends Activity {
         }
 
         else {
-            Log.d("Preferences", "Preferences Already Created!");
+            preferenceEditor.remove(getString(R.string.shared_pref));
+            preferenceEditor.apply();
+            Log.d("Preferences", "Preferences Cleared");
         }
 
 

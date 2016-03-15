@@ -3,6 +3,7 @@ package com.megamal.game.state;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -74,11 +75,12 @@ public class LevelState extends State {
         createAndPlacePlayer();
 
         backToMenuState = new UIButton(10, 10, 74, 74, Assets.backToLEButton, Assets.backToLEButton);
-        walkL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
-        walkR = new UIButton(225, 450, 325, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        walkU = new UIButton(350, 450, 450, 490, Assets.runButtonL, Assets.runButtonPressedL);
-        walkD = new UIButton(460, 450, 560, 490, Assets.runButtonR, Assets.runButtonPressedR);
+        walkL = new UIButton(10, 395, 90, 435, Assets.runButtonL, Assets.runButtonPressedL);
+        walkR = new UIButton(170, 395, 250, 435, Assets.runButtonR, Assets.runButtonPressedR);
+
+        walkU = new UIButton(100, 330, 150, 395, Assets.walkButtonU, Assets.walkButtonUPressed);
+        walkD = new UIButton(100, 435, 150, 495, Assets.walkButtonD, Assets.walkButtonDPressed);
 
         playButton = new UIButton(702, 364, 766, 428, Assets.playButton, Assets.playButton);
 
@@ -87,23 +89,27 @@ public class LevelState extends State {
     //method to place Mawi, respective of what level they is on
     private void createAndPlacePlayer() {
 
+        Log.d("CurrentLevel", "Current level is: " + currentLevel);
+
         if(currentLevel == 1) {
 
             tile.setLocation(2, 1, 0, 0);
-            mawi = new LevelEditorPlayer(tile.getX(), tile.getY(),
+            mawi = new LevelEditorPlayer(tile.getX(), tile.getY() + GameMainActivity.TILE_HEIGHT,
                     GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
         }
 
 
         else {
             for(int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[0].length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+
 
                     //found tile should be on before, i.e level 1 if just on level 2 now
-                    if((map[i][j] - LEVEL_CONSTANT - 1) == currentLevel) {
+                    if((map[i][j] - LEVEL_CONSTANT) == (currentLevel - 1)) {
                         tile.setLocation(i, j, 0, 0);
                         mawi = new LevelEditorPlayer(tile.getX(), tile.getY() - GameMainActivity.TILE_HEIGHT,
                                 GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+                        Log.d("CurrentLevel", "Entered if condition");
                         return;
                     }
                 }
