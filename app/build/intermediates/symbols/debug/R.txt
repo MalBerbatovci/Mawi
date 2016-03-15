@@ -573,6 +573,7 @@ int string abc_shareactionprovider_share_with 0x7f06000e
 int string abc_shareactionprovider_share_with_application 0x7f06000f
 int string abc_toolbar_collapse_description 0x7f060010
 int string app_name 0x7f060012
+int string shared_pref 0x7f060013
 int string status_bar_notification_info_overflow 0x7f060011
 int style AlertDialog_AppCompat 0x7f08007a
 int style AlertDialog_AppCompat_Light 0x7f08007b

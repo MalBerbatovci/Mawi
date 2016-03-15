@@ -93,6 +93,7 @@ public class Player {
     private long invincibleStart;
 
     private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
+    private boolean setNewLevel = false;
 
 
     public Player(double x, double y, int width, int height) {
@@ -317,15 +318,18 @@ public class Player {
 
                     map[yFloor][scanADown] = USED_BOX;
 
-                    //Log.d("Collectables", "collectable made!");
                     return;
+                }
+
+                else if (tileA.isEndOfLevel()) {
+                    setNewLevel = true;
                 }
 
                 if (tileB.isObstacle() && !tileB.hasCollectable()) {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
                     y = tileB.getY() + GameMainActivity.TILE_HEIGHT;
                     velY = Math.abs(velY) / 5;
-                    //Log.d("BoxCollision", "tileB is obstacle but not collectable");
+
 
                 } else if (tileB.hasCollectable()) {
                     tileB.setLocation(yFloor, scanBDown, cameraOffsetX, cameraOffsetY);
@@ -349,7 +353,9 @@ public class Player {
                     yCoinCollision(tileB, yFloor, scanBDown, cameraOffsetX, cameraOffsetY, map, false);
                 }
 
-                //NEED TO ADD CODE HERE TO CREATE COLLECTABLE HERE, SET HIT NEW BOX TO TRUE, AND THEN RETURN COLLECTABLE
+                else if (tileB.isEndOfLevel()) {
+                    setNewLevel = true;
+                }
 
 
                 return;
@@ -454,6 +460,10 @@ public class Player {
                     isGrounded = false;
 
                     return;
+                }
+
+                else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                    setNewLevel = true;
                 }
             }
         }
@@ -586,6 +596,10 @@ public class Player {
                             return;
 
                         }
+
+                        else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                            setNewLevel = true;
+                        }
                     }
 
                     //else if only endValid and aValid, check one tile
@@ -604,6 +618,10 @@ public class Player {
                             return;
 
                         }
+
+                        else if (tileA.isEndOfLevel()) {
+                            setNewLevel = true;
+                        }
                     }
 
                     //else if only endValid and bValid, only check one tile
@@ -621,6 +639,10 @@ public class Player {
                                     cameraOffsetX, cameraOffsetY, map);
                             return;
 
+                        }
+
+                        else if (tileA.isEndOfLevel()) {
+                            setNewLevel = true;
                         }
                     }
 
@@ -654,6 +676,10 @@ public class Player {
                                 cameraOffsetX, cameraOffsetY, map);
                         //return;
                     }
+
+                    else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                        setNewLevel = true;
+                    }
                 }
 
                 //if only aValid and startValid, check only apprpiate tile
@@ -670,6 +696,10 @@ public class Player {
                         xCoinCollision(tileA, scanAAcrossY, scanStartAcrossX,
                                 cameraOffsetX, cameraOffsetY, map);
                         return;
+                    }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
                     }
 
                 }
@@ -689,6 +719,10 @@ public class Player {
                         xCoinCollision(tileA, scanBAcrossY, scanStartAcrossX, cameraOffsetX,
                                 cameraOffsetY, map);
                         return;
+                    }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
                     }
 
                 }
@@ -711,6 +745,10 @@ public class Player {
                     } else if (tileA.isCollectable() || tileB.isCollectable()) {
                         xCoinCollision(tileA, scanAAcrossY, scanEndAcrossX, tileB, scanBAcrossY, scanEndAcrossX,
                                 cameraOffsetX, cameraOffsetY, map);
+
+
+                    } else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                        setNewLevel = true;
 
                     } else {
 
@@ -752,6 +790,10 @@ public class Player {
                                 cameraOffsetX, cameraOffsetY, map);
 
                     }
+
+                    else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                        setNewLevel = true;
+                    }
                 }
 
                 else if (aValid && startValid && bValid) {
@@ -772,6 +814,10 @@ public class Player {
                         return;
                     }
 
+                    else if (tileA.isEndOfLevel() || tileB.isEndOfLevel()) {
+                        setNewLevel = true;
+                    }
+
                 }
 
                 else if (aValid && startValid) {
@@ -787,6 +833,10 @@ public class Player {
                         xCoinCollision(tileA, scanAAcrossY, scanStartAcrossX,cameraOffsetX,
                                 cameraOffsetY, map);
                         return;
+                    }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
                     }
                 }
 
@@ -805,6 +855,10 @@ public class Player {
                         return;
 
                     }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
+                    }
                 }
 
                 else if (bValid && startValid) {
@@ -820,6 +874,10 @@ public class Player {
                         xCoinCollision(tileA, scanBAcrossY, scanStartAcrossX,
                                 cameraOffsetX, cameraOffsetY, map);
                         return;
+                    }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
                     }
                 }
 
@@ -837,6 +895,10 @@ public class Player {
                                 cameraOffsetX, cameraOffsetY, map);
                         return;
 
+                    }
+
+                    else if (tileA.isEndOfLevel()) {
+                        setNewLevel = true;
                     }
                 }
             }
@@ -1362,5 +1424,7 @@ public class Player {
     public boolean justHit() {
         return justHit;
     }
+
+    public boolean setNewLevel() { return setNewLevel; }
 
 }

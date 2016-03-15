@@ -17,7 +17,7 @@ public class Tile {
 
     private int ID;
     private double x, y;
-    private boolean isObstacle, isCollectable, hasCollectable, boxJustHit;
+    private boolean isObstacle, isCollectable, hasCollectable, boxJustHit, isEndOfLevel;
     private int collectableID;
     private Bitmap image;
     private Rect rect;
@@ -31,6 +31,7 @@ public class Tile {
 
     private void setVariables() {
         this.collectableID = 0;
+        this.isEndOfLevel = false;
 
         switch(ID) {
             case(0): {
@@ -98,6 +99,15 @@ public class Tile {
                 this.isObstacle = true;
                 this.isCollectable = false;
                 this.hasCollectable = false;
+                break;
+            }
+
+            case(8): {
+                this.image = Assets.earthImage;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                this.isEndOfLevel = true;
                 break;
             }
 
@@ -205,6 +215,8 @@ public class Tile {
     }
 
     public boolean isCollectable() { return isCollectable; }
+
+    public boolean isEndOfLevel() { return isEndOfLevel; }
 
     public boolean hasCollectable() { return hasCollectable; }
 

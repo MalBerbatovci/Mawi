@@ -1,5 +1,7 @@
 package com.megamal.game.state;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +15,7 @@ import com.megamal.game.model.LevelEditorPlayer;
 import com.megamal.game.model.Player;
 import com.megamal.mawi.Assets;
 import com.megamal.mawi.GameMainActivity;
+import com.megamal.mawi.R;
 
 import java.io.IOException;
 
@@ -24,7 +27,9 @@ public class LevelState extends State {
     private static final int RIGHT = 1;
     private static final int LEFT = -1;
 
-    private static UIButton walkR, walkL, walkU, walkD, backToMenuState;
+    private static final int LEVEL_CONSTANT = 20;
+
+    private static UIButton walkR, walkL, walkU, walkD, playButton, backToMenuState;
     private TileMapFactory tileFactory;
     private TileMapRenderer tileRenderer;
 
@@ -39,13 +44,25 @@ public class LevelState extends State {
     private boolean walkingRight = false;
     private boolean walkingLeft = false;
 
+    private boolean playLevel = false;
+    private int levelToPlay;
+    private SharedPreferences preferences;
+
+    private int currentLevel;
+
     @Override
     //needs to create map, get info from persistent storage about what levels are unlocked
     //
     public void init() {
 
+        //set up shared preferences and get the level that we are currently on
+        preferences = GameMainActivity.getApplicationConext().getSharedPreferences(GameMainActivity.preferenceString, Context.MODE_PRIVATE);
+        currentLevel = preferences.getInt(GameMainActivity.preferenceString, 1);
+
+
         tileFactory = new TileMapFactory();
         tile = new Tile(1);
+
 
         try {
             map = tileFactory.parseFileIntoMap(levelString);
@@ -54,11 +71,7 @@ public class LevelState extends State {
         }
 
         tileRenderer = new TileMapRenderer(map);
-
-        tile.setLocation(2, 1, 0, 0);
-
-        mawi = new LevelEditorPlayer(tile.getX(), tile.getY(),
-                GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+        createAndPlacePlayer();
 
         backToMenuState = new UIButton(10, 10, 74, 74, Assets.backToLEButton, Assets.backToLEButton);
         walkL = new UIButton(120, 450, 220, 490, Assets.runButtonL, Assets.runButtonPressedL);
@@ -67,9 +80,35 @@ public class LevelState extends State {
         walkU = new UIButton(350, 450, 450, 490, Assets.runButtonL, Assets.runButtonPressedL);
         walkD = new UIButton(460, 450, 560, 490, Assets.runButtonR, Assets.runButtonPressedR);
 
-        //create new Mawi, place on start
-        //create new tilemap (8x13)
-        //use persistent storage to establish what levels are unlocked
+        playButton = new UIButton(702, 364, 766, 428, Assets.playButton, Assets.playButton);
+
+    }
+
+    //method to place Mawi, respective of what level they is on
+    private void createAndPlacePlayer() {
+
+        if(currentLevel == 1) {
+
+            tile.setLocation(2, 1, 0, 0);
+            mawi = new LevelEditorPlayer(tile.getX(), tile.getY(),
+                    GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+        }
+
+
+        else {
+            for(int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; i++) {
+
+                    //found tile should be on before, i.e level 1 if just on level 2 now
+                    if((map[i][j] - LEVEL_CONSTANT - 1) == currentLevel) {
+                        tile.setLocation(i, j, 0, 0);
+                        mawi = new LevelEditorPlayer(tile.getX(), tile.getY() - GameMainActivity.TILE_HEIGHT,
+                                GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
 
@@ -93,8 +132,50 @@ public class LevelState extends State {
         walkL.render(g);
         walkU.render(g);
         walkD.render(g);
-        //if mawi has moved, render who map, render map
-        //if mawi hasnt move, no need to render anything
+
+        if(playerInBound(mawi)) {
+            playButton.render(g);
+        }
+    }
+
+    private boolean playerInBound(LevelEditorPlayer player) {
+
+        double x = player.getX();
+        double y = player.getY();
+
+        double midX = (x + (player.getWidth() / 2));
+        double midY = (y + (player.getHeight() / 2));
+
+        int tileX = (int) Math.floor(midX / GameMainActivity.TILE_WIDTH);
+        int tileY = (int) Math.floor(midY / GameMainActivity.TILE_HEIGHT);
+
+        int ID = map[tileY][tileX];
+
+
+
+        //Level tiles are 20 and above, therefore check this before proceeding to ensure we are on
+        //a level tile
+        if(ID > LEVEL_CONSTANT) {
+
+            //next, subtract ID from level Constant, this will give the level that we are stnding on
+            //If this is less than, or equal to the currentMaxLevel we are on, then we can play this level
+            //as it is either the current level to play, or a previous one.
+            if((ID - LEVEL_CONSTANT) <= currentLevel) {
+                playLevel = true;
+                levelToPlay = ID - LEVEL_CONSTANT;
+                return true;
+            }
+
+            else {
+                playLevel = false;
+                return false;
+            }
+        }
+
+        else {
+            playLevel = false;
+            return false;
+        }
 
     }
 
@@ -295,6 +376,10 @@ public class LevelState extends State {
                         return true;
                     }
 
+                    else if (playLevel && playButton.onTouchDown(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
                     //else, not of interest, event handled - return true
                     else {
                         return true;
@@ -327,6 +412,10 @@ public class LevelState extends State {
                     else if (walkD.onTouchDown(scaledX, scaledY, ID)) {
                         walkingDown = true;
                         mawi.walkDown();
+                        return true;
+                    }
+
+                    else if (playLevel && playButton.onTouchDown(scaledX, scaledY, ID)) {
                         return true;
                     }
 
@@ -400,6 +489,11 @@ public class LevelState extends State {
 
                     }
 
+                    else if (playLevel && playButton.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new PlayState(levelToPlay));
+
+                    }
+
                     else {
                         return true;
                     }
@@ -459,6 +553,11 @@ public class LevelState extends State {
                         }
 
                         return true;
+
+                    }
+
+                    else if (playLevel && playButton.onTouchUp(scaledX, scaledY, ID)) {
+                        setCurrentState(new PlayState(levelToPlay));
 
                     }
 

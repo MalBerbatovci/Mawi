@@ -57,7 +57,7 @@ public class MenuState extends State {
                     maskedAction == MotionEvent.ACTION_UP) {
 
                 if(playButton.isContained(scaledX, scaledY)) {
-                    setCurrentState(new PlayState());
+                    setCurrentState(new PlayState(1));
                 }
 
                 else if (exitButton.isContained(scaledX, scaledY)) {

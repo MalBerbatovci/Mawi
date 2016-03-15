@@ -1,5 +1,7 @@
 package com.megamal.game.state;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -42,7 +44,7 @@ public class PlayState extends State {
     private Mover hedge;
     //private Projectile testProjectile;
     private Tile tile;
-    private String levelString = "test.txt";
+    private String levelString = "level";
 
     private ArrayList<Collectable> collectables = new ArrayList<Collectable>();
 
@@ -63,8 +65,14 @@ public class PlayState extends State {
     private double cameraOffsetX, cameraOffsetY, previousOffsetX, previousOffsetY;
     private Camera camera;
 
+
+    public PlayState(int levelToPlay) {
+        levelString = levelString + levelToPlay + ".txt";
+    }
+
     @Override
     public void init() {
+
         tileFactory = new TileMapFactory();
         cameraOffsetX = 0;
         cameraOffsetY = 0;

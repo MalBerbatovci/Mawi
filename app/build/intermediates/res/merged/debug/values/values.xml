@@ -205,6 +205,7 @@
     <!-- From: file:/Users/malberbatovci/AndroidStudioProjects/Mawi/app/src/main/res/values/strings.xml -->
     <eat-comment/>
     <string name="app_name">Mawi</string>
+    <string name="shared_pref">levelProgress</string>
     <!-- From: file:/Users/malberbatovci/AndroidStudioProjects/Mawi/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.1/res/values/values.xml -->
     <eat-comment/>
     <string name="status_bar_notification_info_overflow">999+</string>

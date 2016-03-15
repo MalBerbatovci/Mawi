@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mawi</string>
+    <string name="shared_pref">levelProgress</string>
 </resources>
