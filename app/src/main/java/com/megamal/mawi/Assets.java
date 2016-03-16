@@ -39,7 +39,7 @@ public class Assets {
 
 
     public static Bitmap level1Tile, level2Tile, pathTile, pathTileB, pathTileC, treeTile, treeTileB,
-        treeTileC, portalBottomR, portalTopR, portalBottomL, portalTopL, level3Tile;
+        treeTileC, portalBottomR, portalTopR, portalBottomL, portalTopL, level3Tile, level4Tile;
 
     public static Animation walkAnimR, walkHitAnimR, walkAnimL, walkHitAnimL, runAnimR, runAnimL,
                 hedgeAnimR, hedgeAnimL;
@@ -143,6 +143,7 @@ public class Assets {
         level1Tile = loadBitmap("level1.png", true);
         level2Tile = loadBitmap("level2.png", true);
         level3Tile = loadBitmap("level3.png", true);
+        level4Tile = loadBitmap("level4.png", true);
 
 
         portalBottomR = loadBitmap("portalBottomR.png", true);

@@ -209,6 +209,14 @@ public class Tile {
                 break;
             }
 
+            case (24): {
+                this.image = Assets.level4Tile;
+                this.isObstacle = false;
+                this.isCollectable = false;
+                this.hasCollectable = false;
+                break;
+            }
+
             default:
                 this.image = null;
                 this.isObstacle = false;

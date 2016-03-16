@@ -79,8 +79,8 @@ public class LevelState extends State {
         walkL = new UIButton(10, 395, 90, 435, Assets.runButtonL, Assets.runButtonPressedL);
         walkR = new UIButton(170, 395, 250, 435, Assets.runButtonR, Assets.runButtonPressedR);
 
-        walkU = new UIButton(100, 330, 150, 395, Assets.walkButtonU, Assets.walkButtonUPressed);
-        walkD = new UIButton(100, 435, 150, 495, Assets.walkButtonD, Assets.walkButtonDPressed);
+        walkU = new UIButton(95, 330, 165, 395, Assets.walkButtonU, Assets.walkButtonUPressed);
+        walkD = new UIButton(95, 435, 165, 495, Assets.walkButtonD, Assets.walkButtonDPressed);
 
         playButton = new UIButton(702, 364, 766, 428, Assets.playButton, Assets.playButton);
 
