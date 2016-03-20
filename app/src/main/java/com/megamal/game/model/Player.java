@@ -253,7 +253,7 @@ public class Player {
         }
     }
 
-    private void updateRects() {
+    protected void updateRects() {
         playerRect.set((int) x + X_RECT_LEEWAY, (int) y + Y_RECT_LEEWAY,
                 (int) x + (width - X_RECT_LEEWAY), (int) y + (height - Y_RECT_LEEWAY));
     }
@@ -261,7 +261,7 @@ public class Player {
 
     //Uses two scanLines located at x + 15 & x + 49 to check what tile(s) are under mawi;
     //this is then used to establish whether mawi is grounded or not
-    private void checkYMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
+    protected void checkYMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
 
         if(justGrounded)
             justGrounded = false;
@@ -476,7 +476,7 @@ public class Player {
         velX = 0;
     }
 
-    private void yCoinCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX, double cameraOffsetY,
+    protected void yCoinCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX, double cameraOffsetY,
                                 int[][]map, boolean grounded) {
 
         tile.setRectCoin(yIndex, xIndex, cameraOffsetX, cameraOffsetY);
@@ -494,7 +494,7 @@ public class Player {
 
     //method to put mawi's y to be perfectly above tile after just being grounded
     //Render tiles below to avoid overlay
-    private void allignMawiY(double cameraOffsetX, double cameraOffsetY) {
+    protected void allignMawiY(double cameraOffsetX, double cameraOffsetY) {
         if ((int) (y + cameraOffsetY) % GameMainActivity.TILE_HEIGHT != 0) {
             if (tileA.isObstacle()) {
                 tileA.setLocation(yFloor, scanADown, cameraOffsetX, cameraOffsetY);
@@ -510,7 +510,7 @@ public class Player {
 
 
     //method to check mawi's closeness to an object, and pop out if relevant (using the scanLinesAcross)
-    private void checkXMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
+    protected void checkXMovement(int[][] map, double cameraOffsetX, double cameraOffsetY) {
 
         maxMapX = map[0].length;
         maxMapY = map.length;
@@ -909,7 +909,7 @@ public class Player {
         collisionWithObj = false;
     }
 
-    private void xObstacleCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX, double cameraOffsetY, int direction) {
+    protected void xObstacleCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX, double cameraOffsetY, int direction) {
         tile.setLocation(yIndex, xIndex, cameraOffsetX, cameraOffsetY);
 
 
@@ -928,7 +928,7 @@ public class Player {
 
     }
 
-    private void xCoinCollision(Tile tileA, int yIndexA, int xIndexA, Tile tileB, int yIndexB, int xIndexB,
+    protected void xCoinCollision(Tile tileA, int yIndexA, int xIndexA, Tile tileB, int yIndexB, int xIndexB,
                                 double cameraOffsetX, double cameraOffsetY, int[][] map) {
 
         if(tileA.isCollectable()) {
@@ -952,7 +952,7 @@ public class Player {
 
     }
 
-    private void xCoinCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX,
+    protected void xCoinCollision(Tile tile, int yIndex, int xIndex, double cameraOffsetX,
                                 double cameraOffsetY, int[][] map) {
 
         if(tile.isCollectable()) {
@@ -1426,5 +1426,13 @@ public class Player {
     }
 
     public boolean setNewLevel() { return setNewLevel; }
+
+    public double getVelX() {
+        return velX;
+    }
+
+    protected void forceX(double x) {
+        this.x = x;
+    }
 
 }

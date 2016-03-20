@@ -101,11 +101,11 @@ public class Projectile {
 
         switch(ID) {
             case(1): {
-                this.image = Assets.coinImage;
+                this.image = Assets.projectileImage;
                 break;
             }
             default: {
-                this.image = Assets.coinImage;
+                this.image = Assets.projectileImage;
                 break;
             }
         }
@@ -145,8 +145,15 @@ public class Projectile {
 
 
         switch(ID) {
-            case(1): this.image = Assets.coinImage;
+            case(1): {
+                this.image = Assets.projectileImage;
                 break;
+            }
+
+            default : {
+                this.image = Assets.projectileImage;
+                break;
+            }
         }
 
 

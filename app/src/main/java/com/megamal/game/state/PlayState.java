@@ -86,6 +86,7 @@ public class PlayState extends State {
         cameraOffsetY = 0;
 
         tile = new Tile(1);
+        tile.setLocation(0, 0, cameraOffsetX, cameraOffsetY);
 
         //parse txt file into appropriate tileMap
         try {
@@ -138,7 +139,7 @@ public class PlayState extends State {
     public void update(float delta, Painter g) {
 
         if (!mawi.isAlive()) {
-            setCurrentState(new LevelState());
+            setCurrentState(new LevelState(currentLevel));
         } else {
 
             if(mawi.setNewLevel()) {
@@ -201,7 +202,7 @@ public class PlayState extends State {
 
         //if not equal, this means player is replaying a previous level, so just return
         if(currentLevel != preferences.getInt(GameMainActivity.preferenceString, 1)) {
-            setCurrentState(new LevelState());
+            setCurrentState(new LevelState(currentLevel));
             return;
         }
 
@@ -214,9 +215,7 @@ public class PlayState extends State {
 
 
 
-
-
-        setCurrentState(new LevelState());
+        setCurrentState(new LevelState(--currentLevel));
 
 
 

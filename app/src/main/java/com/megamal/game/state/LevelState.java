@@ -49,7 +49,16 @@ public class LevelState extends State {
     private int levelToPlay;
     private SharedPreferences preferences;
 
-    private int currentLevel;
+    private int currentLevel, levelComingFrom;
+
+
+    public LevelState(int levelComingFrom) {
+
+        this.levelComingFrom = levelComingFrom;
+
+    }
+
+
 
     @Override
     //needs to create map, get info from persistent storage about what levels are unlocked
@@ -91,30 +100,30 @@ public class LevelState extends State {
 
         Log.d("CurrentLevel", "Current level is: " + currentLevel);
 
-        if(currentLevel == 1) {
 
+        if (levelComingFrom == 0) {
             tile.setLocation(2, 1, 0, 0);
             mawi = new LevelEditorPlayer(tile.getX(), tile.getY() + GameMainActivity.TILE_HEIGHT,
                     GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+            return;
         }
 
-
-        else {
-            for(int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[0].length; j++) {
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
 
 
-                    //found tile should be on before, i.e level 1 if just on level 2 now
-                    if((map[i][j] - LEVEL_CONSTANT) == (currentLevel - 1)) {
-                        tile.setLocation(i, j, 0, 0);
-                        mawi = new LevelEditorPlayer(tile.getX(), tile.getY() - GameMainActivity.TILE_HEIGHT,
-                                GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
-                        Log.d("CurrentLevel", "Entered if condition");
-                        return;
-                    }
+                //found tile should be on before, i.e level 1 if just on level 2 now
+                if ((map[i][j] - LEVEL_CONSTANT) == (levelComingFrom)) {
+                    tile.setLocation(i, j, 0, 0);
+                    mawi = new LevelEditorPlayer(tile.getX(), tile.getY() - GameMainActivity.TILE_HEIGHT,
+                            GameMainActivity.PLAYER_WIDTH, GameMainActivity.PLAYER_HEIGHT);
+                    Log.d("CurrentLevel", "Entered if condition");
+                    return;
                 }
             }
         }
+
+
     }
 
 
@@ -444,11 +453,21 @@ public class LevelState extends State {
                             mawi.walk(LEFT);
                         }
 
+                        else if (walkingUp) {
+                            mawi.walkUp();
+                        }
+
+                        else if (walkingDown) {
+                            mawi.walkDown();
+                        }
+
                         else {
                             mawi.stopWalking();
+                            mawi.stopWalkingVert();
                         }
 
                         return true;
+
 
                     } else if (walkL.onTouchUp(scaledX, scaledY, ID)) {
                         walkingLeft = false;
@@ -457,8 +476,17 @@ public class LevelState extends State {
                             mawi.walk(RIGHT);
                         }
 
+                        else if (walkingUp) {
+                            mawi.walkUp();
+                        }
+
+                        else if (walkingDown) {
+                            mawi.walkDown();
+                        }
+
                         else {
                             mawi.stopWalking();
+                            mawi.stopWalkingVert();
                         }
 
                         return true;
@@ -468,11 +496,20 @@ public class LevelState extends State {
                     else if (walkU.onTouchUp(scaledX, scaledY, ID)) {
                         walkingUp = false;
 
-                        if(walkingDown) {
+                        if (walkingLeft) {
+                            mawi.walk(LEFT);
+                        }
+
+                        else if (walkingRight) {
+                            mawi.walk(RIGHT);
+                        }
+
+                        else if (walkingDown) {
                             mawi.walkDown();
                         }
 
                         else {
+                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
@@ -483,13 +520,23 @@ public class LevelState extends State {
                     else if (walkD.onTouchUp(scaledX, scaledY, ID)) {
                         walkingDown = false;
 
-                        if(walkingUp) {
+                        if (walkingLeft) {
+                            mawi.walk(LEFT);
+                        }
+
+                        else if (walkingRight) {
+                            mawi.walk(RIGHT);
+                        }
+
+                        else if (walkingUp) {
                             mawi.walkUp();
                         }
 
                         else {
+                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
+
 
                         return true;
 
@@ -511,52 +558,74 @@ public class LevelState extends State {
 
                     if (backToMenuState.onTouchUp(scaledX, scaledY, ID)) {
                         setCurrentState(new MenuState());
-                    } else if (walkR.onTouchUp(scaledX, scaledY, ID)) {
+
+                    }
+                    else if (walkR.onTouchUp(scaledX, scaledY, ID)) {
                         walkingRight = false;
 
                         if (walkingLeft) {
                             mawi.walk(LEFT);
+                        } else if (walkingUp) {
+                            mawi.walkUp();
+                        } else if (walkingDown) {
+                            mawi.walkDown();
                         } else {
                             mawi.stopWalking();
+                            mawi.stopWalkingVert();
                         }
-                        return true;
 
-                    } else if (walkL.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+                    }
+
+
+                         else if (walkL.onTouchUp(scaledX, scaledY, ID)) {
                         walkingLeft = false;
 
                         if (walkingRight) {
                             mawi.walk(RIGHT);
+                        } else if (walkingUp) {
+                            mawi.walkUp();
+                        } else if (walkingDown) {
+                            mawi.walkDown();
                         } else {
                             mawi.stopWalking();
+                            mawi.stopWalkingVert();
                         }
-                        return true;
-                    }
 
-                    else if (walkU.onTouchUp(scaledX, scaledY, ID)) {
+                        return true;
+
+
+                    } else if (walkU.onTouchUp(scaledX, scaledY, ID)) {
                         walkingUp = false;
 
-                        if(walkingDown) {
+                        if (walkingLeft) {
+                            mawi.walk(LEFT);
+                        } else if (walkingRight) {
+                            mawi.walk(RIGHT);
+                        } else if (walkingDown) {
                             mawi.walkDown();
-                        }
-
-                        else {
+                        } else {
+                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
 
                         return true;
-                    }
 
 
-                    else if (walkD.onTouchUp(scaledX, scaledY, ID)) {
+                    } else if (walkD.onTouchUp(scaledX, scaledY, ID)) {
                         walkingDown = false;
 
-                        if(walkingUp) {
+                        if (walkingLeft) {
+                            mawi.walk(LEFT);
+                        } else if (walkingRight) {
+                            mawi.walk(RIGHT);
+                        } else if (walkingUp) {
                             mawi.walkUp();
-                        }
-
-                        else {
+                        } else {
+                            mawi.stopWalking();
                             mawi.stopWalkingVert();
                         }
+
 
                         return true;
 

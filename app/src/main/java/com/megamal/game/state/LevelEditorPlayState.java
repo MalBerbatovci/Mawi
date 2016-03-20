@@ -80,6 +80,7 @@ public class LevelEditorPlayState extends State {
         tile = new Tile(1);
 
         tileRenderer = new TileMapRenderer(map);
+        tile.setLocation(0, 0, cameraOffsetX, cameraOffsetY);
 
         //loop to find first tile to place mawi on
         loop:

@@ -27,7 +27,7 @@ public class Assets {
             mawiJumpingR, mawiJumpingL, boxImage, boxUsedImage, startScreen, exitButton, exitButtonPressed,
             movingTool, movingToolUsed, wrenchTool, wrenchToolInUse, eraserTool, eraserToolInUse,
             pencilTool, pencilToolInUse, leftID, leftIDUsed, rightID, rightIDUsed, saveButton,
-            playButton, backToLEButton;
+            playButton, backToLEButton, projectileImage;
 
     public static Bitmap walkButtonU, walkButtonUPressed, walkButtonD, walkButtonDPressed;
 
@@ -49,6 +49,7 @@ public class Assets {
         grassImage = loadBitmap("grass.png", false);
         earthImage = loadBitmap("earth.png", false);
         coinImage = loadBitmap("coin.png", false);
+        projectileImage = loadBitmap("projectile.png", true);
         coinBigImage = loadBitmap("coinBig.png", false);
         boxImage = loadBitmap("box.png", false);
         boxUsedImage = loadBitmap("boxUsed.png", false);
